@@ -18,10 +18,14 @@ subplot(2, 1, 1)
 hold on
 plot(Synth_time, Synth_signal, '-b')
 plot(T_arr, ym, '--r', 'LineWidth', 2)
+plot(T_arr, BG, '--k', 'LineWidth', 1)
+plot(T_arr, BG+Amp, '--k', 'LineWidth', 1)
+plot(T_arr, BG-Amp, '--k', 'LineWidth', 1)
 title('Signal')
 
 subplot(2, 1, 2)
 plot(T_arr, Residuals, '-b')
+yline(std(Residuals)*2)
 title('Residuals')
 
 
@@ -39,6 +43,11 @@ hold on
 plot(Synth_time, Props.phi, '-b')
 plot(T_arr, Phi, '--r', 'LineWidth', 2)
 title('Phi, deg')
+Max = max([Props.phi Phi]);
+Min = min([Props.phi Phi]);
+Max = Max + abs(Max-Min)*1.1;
+Min = Min - abs(Max-Min)*1.1;
+ylim([Min Max])
 
 subplot(2, 2, 3)
 hold on

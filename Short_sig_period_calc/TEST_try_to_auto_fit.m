@@ -6,19 +6,21 @@ addpath("Short_sig_period_calc\")
 
 clc
 
-freq = 0.4;
+freq = 1;
 Freq_dev = 0;
-Duration = 12;
-Profile = 'const';
-% Traits = ["nobg", "zerophi", 'nonoise'];
-Traits = ["", ""];
-Seed = 'VHJLJS';
+Duration = 1;
+Profile = 'weak';
+% Traits = ["nobg", "zerophi", 'nonoise', "lownoise"];
+Traits = ["lownoise", "constphi"];
+Seed = '';
 Filter_ON = false;
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
 % VHJLJS (O_O)
 % HDNPYV
 % QDQFFM
+% CUSAIQ ???
+% AQIOEZ overload test
 
 Fs = 10e3;
 % Fs = 10e3/Duration;
@@ -33,13 +35,13 @@ if Filter_ON
     Synth_signal = filter(Hd, Synth_signal-Synth_signal(1))+Synth_signal(1);
 end
 
-figure('position', [562 434 560 420])
-plot(Synth_time, Synth_signal)
-
 % y = 0.01*sin(2*pi*2*freq*Synth_time);
-% FRA_dev = FRA_dummy_dev(Synth_time, Synth_signal+y);
+% Synth_signal = Synth_signal+y;
 
 FRA_dev = FRA_dummy_dev(Synth_time, Synth_signal);
+
+figure('position', [562 434 560 420])
+plot(Synth_time, Synth_signal)
 
 %%
 
@@ -66,8 +68,14 @@ V_arr = [];
 
 clearvars Estimations
 Properties = struct(...
-    'const_bg', 1, ...
-    'linear_bg', 0);
+    'const_bg', 11, ...
+    'linear_bg', 0, ...
+    'const_phase', 11, ...
+    'linear_phase', 0, ...
+    'const_amp', 0, ...
+    'linear_amp', 0);
+
+MAX_LIMIT = 5;
 
 figure('position', [564 433 560 420])
 stop = false;
@@ -88,6 +96,13 @@ while ~stop
     Time_passed = T_arr(end);
     Periods_counter = Time_passed/Period;
     
+    Overload_range = abs(V_arr) > MAX_LIMIT*0.98; % FIXME: magic constant
+    Overload_count = numel(find(Overload_range));
+    Overload_volume = Overload_count/numel(V_arr);
+    if Overload_count > 0
+        disp(['Overload: ' num2str(Overload_volume*100, '%0.2f') ' %'])
+    end
+
     if Time_settings.max > Time_passed
         % FIXME: how to exit?
     end
@@ -107,6 +122,8 @@ while ~stop
     % FIXME: what if we miss some early parts
     % FIXME: phase around -180[deg] problem
     % FIXME: add harmonics detection
+    % FIXME: extract background and refit
+    % FIXME: use Estimations for Properties
 
     if exist("Estimations", "var") ~= 1 && Periods_counter > 1
         Init_values = do_initial_estimation(T_arr, V_arr, Period);
@@ -184,6 +201,10 @@ FRA_dev.stop();
 %
 disp('Start final fit:')
 
+% FIXME: experimental
+T_arr = T_arr(~Overload_range);
+V_arr = V_arr(~Overload_range);
+
 tic
 if numel(T_arr) > 200e3
     disp('Nyan!')
@@ -201,9 +222,13 @@ end
 %     disp('line fit')
 %     Result = line_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations);
 % else
-    disp('poly2 fit')
-    Result = full_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations);
+%     disp('poly2 fit')
+%     Result = full_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations);
 % end
+
+Properties.const_bg = 0;
+Properties.linear_bg = 0;
+Result = any_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations, Properties);
 
 disp(['Time to fit: ' num2str(toc, '%0.2f') ' s'])
 
@@ -460,16 +485,16 @@ Est_phi = [Estimations.phi];
 Est_bg = [Estimations.bg];
 
 amp_poly.p1 = 0;
-phi_poly.p1 = 0;
-bg_poly.p1 = 0;
 amp_poly.p2 = 0;
-phi_poly.p2 = 0;
-bg_poly.p2 = 0;
-
 amp_poly.p3 = mean(Est_amp);
-phi_poly.p3 = mean(Est_phi);
-bg_poly.p3 = mean(Est_bg);
 
+phi_poly.p1 = 0;
+phi_poly.p2 = 0;
+phi_poly.p3 = mean(Est_phi);
+
+bg_poly.p1 = 0;
+bg_poly.p2 = 0;
+bg_poly.p3 = mean(Est_bg);
 
 end
 
@@ -499,8 +524,8 @@ a1 = amp_poly.p1;
 a2 = amp_poly.p2;
 a3 = amp_poly.p3;
 c1 = bg_poly.p1;
-c2 = bg_poly.p1;
-c3 = bg_poly.p1;
+c2 = bg_poly.p2;
+c3 = bg_poly.p3;
 p1 = phi_poly.p1;
 p2 = phi_poly.p2;
 p3 = phi_poly.p3;
@@ -582,8 +607,8 @@ D = 0;
 a2 = amp_poly.p2;
 a3 = amp_poly.p3;
 
-c2 = bg_poly.p1;
-c3 = bg_poly.p1;
+c2 = bg_poly.p2;
+c3 = bg_poly.p3;
 
 p2 = phi_poly.p2;
 p3 = phi_poly.p3;

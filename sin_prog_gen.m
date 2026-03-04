@@ -5,7 +5,7 @@ arguments
     Profile {mustBeMember(Profile, ...
         ["strong", "mid", "weak", "const"])} = "const"
     Traits {mustBeMember(Traits, ...
-        ["", "nobg", "zerophi", "nonoise"])} = ""
+        ["", "nobg", "zerophi", "nonoise", "lownoise", "constphi"])} = ""
 end
 
 
@@ -66,7 +66,12 @@ end
 
 [Bg_value, bv] = poly3_gen(Time_arr, Background, Bg_rdiv_pmin, Bg_adiv_pmin);
 [Amp_value, av] = poly3_gen(Time_arr, Amp, Amp_rdiv_pmin, 0);
-[Phi_value, pv] = poly3_gen(Time_arr, Phi, 1, Phi_adiv_pmin);
+if any(Traits == "constphi")
+    [Phi_value, ~] = poly3_gen(Time_arr, Phi, 1, 0);
+else
+    [Phi_value, ~] = poly3_gen(Time_arr, Phi, 1, Phi_adiv_pmin);
+end
+
 % bv
 % av
 % pv

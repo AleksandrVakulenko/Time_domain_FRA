@@ -9,7 +9,7 @@ arguments
     Profile {mustBeMember(Profile, ...
         ["strong", "mid", "weak", "const", "nobg"])} = "const"
     Traits {mustBeMember(Traits, ...
-        ["", "nobg", "zerophi", "nonoise"])} = ""
+        ["", "nobg", "zerophi", "nonoise", "lownoise", "constphi"])} = ""
     Seed string = ""
     Fs double = 10e3
 end
@@ -45,8 +45,15 @@ Synth_signal = Amp.*sin(2*pi*F.*Synth_time + Phi/180*pi) + Background;
 
 if ~any(Traits == "nonoise")
     Noise_gen = current_noise_gen(Synth_time);
-    Synth_signal = Synth_signal + Noise_gen/Scale*0.4;
+    
+    if ~any(Traits == "lownoise")
+        Synth_signal = Synth_signal + Noise_gen/Scale*0.1;
+    else
+        Synth_signal = Synth_signal + Noise_gen/Scale*0.4;
+    end
+
 end
+
 
 Synth_signal = signal_saturation(Synth_signal, -5, 5);
 
