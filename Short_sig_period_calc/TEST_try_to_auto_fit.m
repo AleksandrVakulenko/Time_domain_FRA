@@ -6,13 +6,14 @@ addpath("Short_sig_period_calc\")
 
 clc
 
-freq = 0.1;
+freq = 0.4;
 Freq_dev = 0;
-Duration = 21;
+Duration = 12;
 Profile = 'const';
 % Traits = ["nobg", "zerophi", 'nonoise'];
 Traits = ["", ""];
-Seed = 'FKIFJA';
+Seed = 'VHJLJS';
+Filter_ON = false;
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
 % VHJLJS (O_O)
@@ -26,6 +27,11 @@ Fs = 10e3;
     Profile, Traits, Seed, Fs);
 
 disp(['Seed: ' char(Props.seed)]);
+
+if Filter_ON
+    load('Filter_LF_FIR_2_30.mat')
+    Synth_signal = filter(Hd, Synth_signal-Synth_signal(1))+Synth_signal(1);
+end
 
 figure('position', [562 434 560 420])
 plot(Synth_time, Synth_signal)
@@ -59,8 +65,11 @@ T_arr = [];
 V_arr = [];
 
 clearvars Estimations
+Properties = struct(...
+    'const_bg', 1, ...
+    'linear_bg', 0);
 
-figure
+figure('position', [564 433 560 420])
 stop = false;
 while ~stop
     [T_part, V_part] = FRA_dev.get_data_ch1();
@@ -129,16 +138,33 @@ while ~stop
                 Freq, Estimations);
             Estimations = [Estimations Result];
 
+            BG_diff = Result.z;
+            Amp_mean = Result.amp;
+            Properties = update_props(Properties, Amp_mean, BG_diff);
+            
+
         case "long" % 2 : 10
             % FIXME: UNDONE (DEBUG VERSION)
-            [out_time, out_sig] = get_last_period(T_arr, V_arr, Period);
-            Result = simple_sin_fit_f(out_time, out_sig, ...
+            [out_time1, out_sig1] = get_first_period(T_arr, V_arr, Period);
+            Result1 = simple_sin_fit_f(out_time1, out_sig1, ...
                 Freq, Estimations);
-            Estimations = [Estimations Result];
+    
+            Scale = Periods_counter/2; % FXIME: magic constant
+            [out_time2, out_sig2] = get_last_period(T_arr, V_arr, Period, Scale);
+            Result2 = simple_sin_fit_f(out_time2, out_sig2, ...
+                Freq, Estimations);
+
+            Estimations = [Estimations Result2];
+
+            BG_diff = Result2.bg - Result1.bg;
+            Amp_mean = mean([Result2.amp Result1.amp]);
+            Properties = update_props(Properties, Amp_mean, BG_diff);
+
 
         case "max" % 10 : inf
             % FIXME: UNDONE (DEBUG VERSION)
-            [out_time, out_sig] = get_last_period(T_arr, V_arr, Period);
+            Scale = 5; % FIXME: magic constant
+            [out_time, out_sig] = get_last_period(T_arr, V_arr, Period, Scale);
             Result = simple_sin_fit_f(out_time, out_sig, ...
                 Freq, Estimations);
             Estimations = [Estimations Result];
@@ -178,7 +204,6 @@ end
     disp('poly2 fit')
     Result = full_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations);
 % end
-
 
 disp(['Time to fit: ' num2str(toc, '%0.2f') ' s'])
 
@@ -224,7 +249,29 @@ plot(T_arr, ym, '-r', 'LineWidth', 2)
 
 %%
 
+function Properties = update_props(Properties, Amp_mean, BG_diff)
 
+Value = abs(BG_diff/Amp_mean);
+% disp([num2str(BG_diff) '    ' num2str(Amp_mean)])
+% disp([num2str(Value*100, '%0.2f') ' %'])
+if Value > 0.2
+    Properties.linear_bg = 0;
+    Properties.const_bg = 0;
+end
+if Value < 0.2 && Value > 0.05
+    Properties.linear_bg = Properties.linear_bg + 2;
+    Properties.const_bg = 0;
+end
+if Value < 0.1
+    Properties.linear_bg = Properties.linear_bg + 1;
+    Properties.const_bg = Properties.const_bg + 1;
+end
+if Value < 0.001
+    Properties.linear_bg = Properties.linear_bg - 1;
+    Properties.const_bg = Properties.const_bg + 2;
+end
+
+end
 
 function Result = ...
     do_initial_estimation(T_arr, V_arr, Period)
@@ -254,18 +301,38 @@ end
 function Result = combining_estimations(Estimations)
     N = numel(Estimations);
     % FIXME: UNDONE
-    Result = Estimations(end);
+    Result.amp = mean([Estimations.amp]);
+    Result.bg = mean([Estimations.bg]);
+    Result.phi = mean([Estimations.phi]);
+    
 end
 
 
-function [out_time, out_sig] = get_last_period(Time, Signal, Period)
-Scale = 1.3;
+function [out_time, out_sig] = get_last_period(Time, Signal, Period, Scale)
+% Scale = 1.3;
+if Scale > 2
+    Scale = 2;
+end
+Length = Time(end) - Time(1);
+if Length <= Period*Scale
+    out_time = Time;
+    out_sig = Signal;
+else
+    range = Time >= Time(end) - Period*Scale;
+    out_time = Time(range);
+    out_sig = Signal(range);
+end
+end
+
+
+function [out_time, out_sig] = get_first_period(Time, Signal, Period)
+Scale = 1.1;
     Length = Time(end) - Time(1);
     if Length <= Period*Scale
         out_time = Time;
         out_sig = Signal;
     else
-        range = Time >= Time(end) - Period*Scale;
+        range = Time <= Time(1) + Period*Scale;
         out_time = Time(range);
         out_sig = Signal(range);
     end
@@ -330,7 +397,8 @@ function Result = ...
         'amp', A, 'phi', P, 'bg', C, 'f_dev', NaN, ...
         'a_err', A_err, 'p_err', P_err, 'c_err', C_err, 'fd_err', NaN, ...
         'fitres', fitresult, ...
-        't_min', Start_time, 't_max', End_time);
+        't_min', Start_time, 't_max', End_time, ...
+        'z', Z);
 
 end
 
@@ -601,3 +669,9 @@ Result = struct(...
     'f_div_ppm', D);
 
 end
+
+
+
+
+
+

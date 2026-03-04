@@ -25,23 +25,23 @@ figure('position', [360 205 882 784])
 
 subplot(2, 2, 1)
 hold on
-plot(Est_time, Props_amp, '-b')
-plot(Est_time, Est_amp, '-r')
+plot(Est_time, Props_amp, '.b')
+plot(Est_time, Est_amp, '.r')
 % errorbar(Est_time, Est_amp, Est_amperr, '.')
 ylabel('Amp')
 legend({'Props', 'Est'}, 'Location', 'best')
 
 subplot(2, 2, 2)
 hold on
-plot(Est_time, Props_phi, '-b')
-plot(Est_time, Est_phi, '-r')
+plot(Est_time, Props_phi, '.b')
+plot(Est_time, Est_phi, '.r')
 % errorbar(Est_time, Est_phi, Est_phierr, '.')
 ylabel('Phi, [deg]')
 
 subplot(2, 2, 3)
 hold on
-plot(Est_time, Props_bg, '-b')
-plot(Est_time, Est_bg, '-r')
+plot(Est_time, Props_bg, '.b')
+plot(Est_time, Est_bg, '.r')
 % errorbar(Est_time, Est_bg, Est_bgerr, '.')
 ylabel('bg')
 
@@ -57,7 +57,7 @@ plot(Est_time, Est_bg, '.')
 %%
 
 hold on
-plot(Synth_time, Synth_signal, '-b')
+
 
 for i = 1:numel(Estimations)
     
@@ -72,10 +72,12 @@ for i = 1:numel(Estimations)
     T_arr_part = T_arr(range);
 
     ym = feval(fit_res, T_arr_part);
+    cla
+    plot(Synth_time, Synth_signal, '-b')
     plot(T_arr_part, ym, '-r', 'LineWidth', 2)
     drawnow
 
-    pause(0.1)
+    pause(0.02)
 
     disp(['A: ' num2str(A) ' P: ' num2str(P) ' C: ' num2str(C)])
 
