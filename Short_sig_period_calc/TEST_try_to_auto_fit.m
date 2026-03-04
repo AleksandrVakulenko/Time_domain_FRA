@@ -6,16 +6,18 @@ addpath("Short_sig_period_calc\")
 
 clc
 
-freq = 0.2;
+freq = 0.1;
 Freq_dev = 0;
-Duration = 40;
-Profile = 'strong';
+Duration = 21;
+Profile = 'const';
 % Traits = ["nobg", "zerophi", 'nonoise'];
 Traits = ["", ""];
-Seed = '';
-% LLGUHH (small signal), QDQFFM, IOTSCV (Phase test)
+Seed = 'FKIFJA';
+% LLGUHH (small signal)
+% IOTSCV (Phase test)
 % VHJLJS (O_O)
 % HDNPYV
+% QDQFFM
 
 Fs = 10e3;
 % Fs = 10e3/Duration;
@@ -28,6 +30,8 @@ disp(['Seed: ' char(Props.seed)]);
 figure('position', [562 434 560 420])
 plot(Synth_time, Synth_signal)
 
+% y = 0.01*sin(2*pi*2*freq*Synth_time);
+% FRA_dev = FRA_dummy_dev(Synth_time, Synth_signal+y);
 
 FRA_dev = FRA_dummy_dev(Synth_time, Synth_signal);
 
@@ -83,12 +87,17 @@ while ~stop
         % FXIME: how to exit?
     end
 
+    if Periods_counter > 1.1
+%         stop = true;
+    end
+
     % FIXME: use incoming estimations
-    % FIXME: create prview with less points
+    % FIXME: create preview with less points
     % FIXME: Check overrange
     % FIXME: Check underrange
     % FIXME: what if we miss some early parts
     % FIXME: phase around -180[deg] problem
+    % FIXME: add harmonics detection
 
     if exist("Estimations", "var") ~= 1 && Periods_counter > 1
         Init_values = do_initial_estimation(T_arr, V_arr, Period);
@@ -99,7 +108,7 @@ while ~stop
 
     switch signal_per_duration(Periods_counter)
         case "invalid" % 0 : 0.5
-            continue
+            % DO SOMETHING
 
         case "min" % 0.5 : 1.2
             if exist("Estimations", "var") ~= 1
@@ -115,8 +124,8 @@ while ~stop
             
         case "single" % 1.2 : 2
             % FIXME: UNDONE (DEBUG VERSION)
-            [out_time, out_sig] = get_last_period(T_arr, V_arr, Period);
-            Result = simple_sin_fit_f(out_time, out_sig, ...
+%             [out_time, out_sig] = get_last_period(T_arr, V_arr, Period);
+            Result = simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Estimations);
             Estimations = [Estimations Result];
 
@@ -150,10 +159,34 @@ FRA_dev.stop();
 disp('Start final fit:')
 
 tic
-Result = full_sin_fit_f(T_arr, V_arr, Freq, Estimations);
+if numel(T_arr) > 200e3
+    disp('Nyan!')
+    T_arr_fit = interp1(1:numel(T_arr), T_arr, linspace(1, numel(T_arr), 200000));
+    V_arr_fit = interp1(T_arr, V_arr, T_arr_fit);
+else
+    T_arr_fit = T_arr;
+    V_arr_fit = V_arr;
+end
+
+% if Periods_counter < 2
+%     disp('const fit')
+%     Result = const_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations);
+% elseif Periods_counter < 5
+%     disp('line fit')
+%     Result = line_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations);
+% else
+    disp('poly2 fit')
+    Result = full_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations);
+% end
+
+
 disp(['Time to fit: ' num2str(toc, '%0.2f') ' s'])
 
 disp('Finish')
+
+
+
+
 
 
 
@@ -219,7 +252,7 @@ function Result = fit_mimic(Start_Amp, Start_Phi, Start_BG)
 end
 
 function Result = combining_estimations(Estimations)
-    N = numel(Estimations)
+    N = numel(Estimations);
     % FIXME: UNDONE
     Result = Estimations(end);
 end
@@ -349,9 +382,28 @@ amp_poly = fit(Est_time_norm', Est_amp', 'poly2');
 phi_poly = fit(Est_time_norm', Est_phi', 'poly2');
 bg_poly = fit(Est_time_norm', Est_bg', 'poly2');
 
-
 end
 
+
+function [amp_poly, phi_poly, bg_poly] = estimations_const_fit(Estimations, Period)
+
+Est_amp = [Estimations.amp];
+Est_phi = [Estimations.phi];
+Est_bg = [Estimations.bg];
+
+amp_poly.p1 = 0;
+phi_poly.p1 = 0;
+bg_poly.p1 = 0;
+amp_poly.p2 = 0;
+phi_poly.p2 = 0;
+bg_poly.p2 = 0;
+
+amp_poly.p3 = mean(Est_amp);
+phi_poly.p3 = mean(Est_phi);
+bg_poly.p3 = mean(Est_bg);
+
+
+end
 
 
 function Result = ...
@@ -370,7 +422,7 @@ opts = fitoptions('Method', 'NonlinearLeastSquares');
 opts.Display = 'Off';
 opts.TolX = 1e-6; % FIXME: default
 opts.TolFun = 1e-6; % default
-opts.Display = 'Iter';
+opts.Display = 'Off';
 
 [amp_poly, phi_poly, bg_poly] = estimations_poly2_fit(Estimations, P);
 
@@ -391,7 +443,7 @@ opts.StartPoint = [    D    a1    a2    a3    c1    c2    c3    p1    p2    p3 ]
 opts.Upper      = [ +300  +inf  +inf  +inf  +inf  +inf  +inf  +inf  +inf  +inf ];
 
 
-[fitresult, gof] = fit(Time', Signal', ft, opts)
+[fitresult, gof] = fit(Time', Signal', ft, opts);
     
 % FIXME: check quality (use gof somehow)
     
@@ -433,3 +485,119 @@ Result = struct(...
 
 end
 
+
+
+
+
+function Result = ...
+    line_sin_fit_f(Time, Signal, Freq, Estimations)
+    
+F = Freq;
+P = 1/F;
+
+Eq = ['(a2*(x/' num2str(P) ') + a3) * sin(' ...
+      '2*pi*' num2str(F) '*(1+D/1e6)*x + ' ...
+      '(p2*(x/' num2str(P) ') + p3)/180*pi ' ...
+      ' ) + c2*(x/' num2str(P) ') + c3'];
+
+ft = fittype(Eq, 'independent', 'x', 'dependent', 'y');
+opts = fitoptions('Method', 'NonlinearLeastSquares');
+opts.Display = 'Off';
+opts.TolX = 1e-6; % FIXME: default
+opts.TolFun = 1e-6; % default
+opts.Display = 'Off';
+
+[amp_poly, phi_poly, bg_poly] = estimations_poly2_fit(Estimations, P);
+
+D = 0;
+
+a2 = amp_poly.p2;
+a3 = amp_poly.p3;
+
+c2 = bg_poly.p1;
+c3 = bg_poly.p1;
+
+p2 = phi_poly.p2;
+p3 = phi_poly.p3;
+
+%                      D    a2    a3    c2    c3    p2    p3
+opts.Lower      = [ -300  -inf  -inf  -inf  -inf  -inf  -inf ];
+opts.StartPoint = [    D    a2    a3    c2    c3    p2    p3 ];
+opts.Upper      = [ +300  +inf  +inf  +inf  +inf  +inf  +inf ];
+
+
+[fitresult, gof] = fit(Time', Signal', ft, opts);
+    
+% FIXME: check quality (use gof somehow)
+    
+D = fitresult.D;
+amp_poly_out.p1 = 0;
+amp_poly_out.p2 = fitresult.a2;
+amp_poly_out.p3 = fitresult.a3;
+bg_poly_out.p1 = 0;
+bg_poly_out.p2 = fitresult.c2;
+bg_poly_out.p3 = fitresult.c3;
+phi_poly_out.p1 = 0;
+phi_poly_out.p2 = fitresult.p2;
+phi_poly_out.p3 = fitresult.p3;
+
+Result = struct(...
+    'amp_poly', amp_poly_out, ...
+    'phi_poly', phi_poly_out, ...
+    'bg_poly', bg_poly_out, ...
+    'f_div_ppm', D);
+
+end
+
+
+function Result = ...
+    const_sin_fit_f(Time, Signal, Freq, Estimations)
+    
+F = Freq;
+P = 1/F;
+
+Eq = ['(a3) * sin(2*pi*' num2str(F) '*(1+D/1e6)*x + (p3)/180*pi  ) + c3'];
+
+ft = fittype(Eq, 'independent', 'x', 'dependent', 'y');
+opts = fitoptions('Method', 'NonlinearLeastSquares');
+opts.Display = 'Off';
+opts.TolX = 1e-6; % FIXME: default
+opts.TolFun = 1e-6; % default
+opts.Display = 'Off';
+
+[amp_poly, phi_poly, bg_poly] = estimations_const_fit(Estimations, P);
+
+D = 0;
+
+a3 = amp_poly.p3;
+c3 = bg_poly.p1;
+p3 = phi_poly.p3;
+
+%                      D    a3    c3    p3
+opts.Lower      = [ -300  -inf  -inf  -inf ];
+opts.StartPoint = [    D    a3    c3    p3 ];
+opts.Upper      = [ +300  +inf  +inf  +inf ];
+
+
+[fitresult, gof] = fit(Time', Signal', ft, opts);
+    
+% FIXME: check quality (use gof somehow)
+    
+D = fitresult.D;
+amp_poly_out.p1 = 0;
+amp_poly_out.p2 = 0;
+amp_poly_out.p3 = fitresult.a3;
+bg_poly_out.p1 = 0;
+bg_poly_out.p2 = 0;
+bg_poly_out.p3 = fitresult.c3;
+phi_poly_out.p1 = 0;
+phi_poly_out.p2 = 0;
+phi_poly_out.p3 = fitresult.p3;
+
+Result = struct(...
+    'amp_poly', amp_poly_out, ...
+    'phi_poly', phi_poly_out, ...
+    'bg_poly', bg_poly_out, ...
+    'f_div_ppm', D);
+
+end

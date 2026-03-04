@@ -16,7 +16,7 @@ Residuals = V_arr-ym;
 figure('position', [98 155 742 874])
 subplot(2, 1, 1)
 hold on
-plot(T_arr, V_arr, '-b')
+plot(Synth_time, Synth_signal, '-b')
 plot(T_arr, ym, '--r', 'LineWidth', 2)
 title('Signal')
 
@@ -29,19 +29,20 @@ figure('position', [871 333 746 696])
 
 subplot(2, 2, 1)
 hold on
-plot(T_arr, Props.amp, '-b')
+plot(Synth_time, Props.amp, '-b')
 plot(T_arr, Amp, '--r', 'LineWidth', 2)
 title('Amp')
+legend({'Props', 'Est'}, 'Location', 'best')
 
 subplot(2, 2, 2)
 hold on
-plot(T_arr, Props.phi, '-b')
+plot(Synth_time, Props.phi, '-b')
 plot(T_arr, Phi, '--r', 'LineWidth', 2)
 title('Phi, deg')
 
 subplot(2, 2, 3)
 hold on
-plot(T_arr, Props.bg, '-b')
+plot(Synth_time, Props.bg, '-b')
 plot(T_arr, BG, '--r', 'LineWidth', 2)
 title('background')
 

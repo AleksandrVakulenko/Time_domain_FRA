@@ -15,9 +15,9 @@ Props_amp = Props.amp;
 Props_phi = Props.phi;
 Props_bg = Props.bg;
 
-Props_amp = interp1(T_arr, Props_amp, Est_time);
-Props_phi = interp1(T_arr, Props_phi, Est_time);
-Props_bg = interp1(T_arr, Props_bg, Est_time);
+Props_amp = interp1(Synth_time, Props_amp, Est_time);
+Props_phi = interp1(Synth_time, Props_phi, Est_time);
+Props_bg = interp1(Synth_time, Props_bg, Est_time);
 
 
 
@@ -25,22 +25,23 @@ figure('position', [360 205 882 784])
 
 subplot(2, 2, 1)
 hold on
-plot(Est_time, Props_amp, '-r')
-plot(Est_time, Est_amp, '--b')
+plot(Est_time, Props_amp, '-b')
+plot(Est_time, Est_amp, '-r')
 % errorbar(Est_time, Est_amp, Est_amperr, '.')
 ylabel('Amp')
+legend({'Props', 'Est'}, 'Location', 'best')
 
 subplot(2, 2, 2)
 hold on
-plot(Est_time, Props_phi, '-r')
-plot(Est_time, Est_phi, '--b')
+plot(Est_time, Props_phi, '-b')
+plot(Est_time, Est_phi, '-r')
 % errorbar(Est_time, Est_phi, Est_phierr, '.')
 ylabel('Phi, [deg]')
 
 subplot(2, 2, 3)
 hold on
-plot(Est_time, Props_bg, '-r')
-plot(Est_time, Est_bg, '--b')
+plot(Est_time, Props_bg, '-b')
+plot(Est_time, Est_bg, '-r')
 % errorbar(Est_time, Est_bg, Est_bgerr, '.')
 ylabel('bg')
 
