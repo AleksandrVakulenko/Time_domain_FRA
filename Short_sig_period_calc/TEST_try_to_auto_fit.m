@@ -6,13 +6,13 @@ addpath("Short_sig_period_calc\")
 
 clc
 
-freq = 0.4;
+freq = 0.3;
 Freq_dev = 0;
-Duration = 12;
-Profile = 'weak';
+Duration = 7;
+Profile = 'strong';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise"];
-Traits = ["lownoise", "constphi", ""];
-Seed = 'VHJLJS';
+Traits = ["lownoise", "", ""];
+Seed = '';
 Filter_ON = false;
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -75,7 +75,7 @@ Estimations = empty_estimation();
 Properties = struct(...
     'const_bg', 11, ...
     'linear_bg', 0, ...
-    'const_phase', 11, ...
+    'const_phase', 0, ...
     'linear_phase', 0, ...
     'const_amp', 0, ...
     'linear_amp', 0);
@@ -226,7 +226,8 @@ while ~stop
 %     pause(0.5)
 end
 FRA_dev.stop();
-%
+
+%%
 if ~no_estimations(Estimations)
     %
     disp('Start final fit:')
@@ -258,9 +259,12 @@ if ~no_estimations(Estimations)
     %     Result = full_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations);
     % end
     
-    Properties.const_bg = 0;
-    Properties.linear_bg = 0;
-    Result = any_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations, Properties);
+%     Properties.const_bg = 0;
+%     Properties.linear_bg = 0;
+    Properties.linear_amp = 1e6;
+    Properties.linear_bg = 1e6;
+    Properties.linear_phase = 1e6;
+    Result = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, Estimations, Properties);
     
     disp(['Time to fit: ' num2str(toc, '%0.2f') ' s'])
     
