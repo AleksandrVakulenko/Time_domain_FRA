@@ -46,8 +46,8 @@ Synth_signal = Amp.*sin(2*pi*F.*Synth_time + Phi/180*pi) + Background;
 if ~any(Traits == "nonoise")
     Noise_gen = current_noise_gen(Synth_time);
     
-    if ~any(Traits == "lownoise")
-        Synth_signal = Synth_signal + Noise_gen/Scale*0.1;
+    if any(Traits == "lownoise")
+        Synth_signal = Synth_signal + Noise_gen/Scale*0.08;
     else
         Synth_signal = Synth_signal + Noise_gen/Scale*0.4;
     end

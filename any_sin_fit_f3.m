@@ -1,17 +1,27 @@
 
+% Result = struct(...
+%     'amp_poly', amp_poly_out, ...
+%     'phi_poly', phi_poly_out, ...
+%     'bg_poly', bg_poly_out, ...
+%     'amp_poly_err', amp_poly_err, ...
+%     'phi_poly_err', phi_poly_err, ...
+%     'bg_poly_err', bg_poly_err, ...
+%     'f_div_ppm', D, ...
+%     'f_dev_ppm_err', D_err, ...
+%     'fit_function', 'any_sin_fit_f2' ...
+%     );
 
 function Result = ...
-    any_sin_fit_f2(Time, Signal, Freq, Estimations, Properties)
+    any_sin_fit_f3(Time, Signal, Freq, Estimations, Properties)
 
 F = Freq;
 P = 1/F;
 Period = P;
 
-Est_time = ([Estimations.t_max] + [Estimations.t_min])/2;
-Est_amp = [Estimations.amp];
-Est_phi = [Estimations.phi];
-Est_bg = [Estimations.bg];
-Est_time_norm = Est_time/Period;
+Est_time = [Time(1) Time(round(end/2)) Time(end)];
+Est_amp = poly3calc(Estimations.amp_poly, Est_time, Period);
+Est_phi = poly3calc(Estimations.phi_poly, Est_time, Period);
+Est_bg = poly3calc(Estimations.bg_poly, Est_time, Period);
 
 
 [Amp_type, BG_type, Phi_type] = prop_parser(Properties);
@@ -32,24 +42,22 @@ X_arr = [Time(1), Time(round(end/2)), Time(end)];
 switch Amp_type
     case "const"
         Amp_str = func_constructor([], 'a');
-        a3 = mean(Est_amp);
+        a3 = Est_amp(3);
         Lower = [Lower -inf];
         StartPoint = [StartPoint a3];
         Upper = [Upper inf];
     case "linear"
         Amp_str = func_constructor([X_arr(1) X_arr(3)], 'a');
-        amp_poly = fit(Est_time_norm', Est_amp', 'poly2');
-        a2 = feval(amp_poly, X_arr(1)/Period);
-        a3 = feval(amp_poly, X_arr(3)/Period);
+        a2 = Est_amp(1);
+        a3 = Est_amp(3);
         Lower = [Lower -inf -inf];
         StartPoint = [StartPoint a2 a3];
         Upper = [Upper +inf +inf];
     case "poly2"
         Amp_str = func_constructor(X_arr, 'a');
-        amp_poly = fit(Est_time_norm', Est_amp', 'poly2');
-        a1 = feval(amp_poly, X_arr(1)/Period); % FIXME: use feval once for all
-        a2 = feval(amp_poly, X_arr(2)/Period);
-        a3 = feval(amp_poly, X_arr(3)/Period);
+        a1 = Est_amp(1); % FIXME: use feval once for all
+        a2 = Est_amp(2);
+        a3 = Est_amp(3);
         Lower = [Lower -inf -inf -inf];
         StartPoint = [StartPoint a1 a2 a3];
         Upper = [Upper +inf +inf +inf];
@@ -61,24 +69,22 @@ end
 switch BG_type
     case "const"
         BG_str = func_constructor([], 'c');
-        c3 = mean(Est_bg);
+        c3 = Est_bg(3);
         Lower = [Lower -inf];
         StartPoint = [StartPoint c3];
         Upper = [Upper inf];
     case "linear"
         BG_str = func_constructor([X_arr(1) X_arr(3)], 'c');
-        bg_poly = fit(Est_time_norm', Est_bg', 'poly2');
-        c2 = feval(bg_poly, X_arr(1)/Period);
-        c3 = feval(bg_poly, X_arr(3)/Period);
+        c2 = Est_bg(1);
+        c3 = Est_bg(3);
         Lower = [Lower -inf -inf];
         StartPoint = [StartPoint c2 c3];
         Upper = [Upper +inf +inf];
     case "poly2"
         BG_str = func_constructor(X_arr, 'c');
-        bg_poly = fit(Est_time_norm', Est_bg', 'poly2');
-        c1 = feval(bg_poly, X_arr(1)/Period); % FIXME: use feval once for all
-        c2 = feval(bg_poly, X_arr(2)/Period);
-        c3 = feval(bg_poly, X_arr(3)/Period);
+        c1 = Est_bg(1);
+        c2 = Est_bg(2);
+        c3 = Est_bg(3);
         Lower = [Lower -inf -inf -inf];
         StartPoint = [StartPoint c1 c2 c3];
         Upper = [Upper +inf +inf +inf];
@@ -90,25 +96,23 @@ end
 switch Phi_type
     case "const"
         Phi_str = func_constructor([], 'p');
-        p3 = mean(Est_phi);
+        p3 = Est_phi(3);
         Lower = [Lower -inf];
         StartPoint = [StartPoint p3];
         Upper = [Upper +inf];
     case "linear"
         Phi_str = func_constructor([X_arr(1) X_arr(3)], 'p');
-        phi_poly = fit(Est_time_norm', Est_phi', 'poly2');
-        p2 = feval(phi_poly, X_arr(1)/Period);
-        p3 = feval(phi_poly, X_arr(3)/Period);
+        p2 = Est_phi(1);
+        p3 = Est_phi(3);
         Lower = [Lower -inf -inf];
         StartPoint = [StartPoint p2 p3];
         Upper = [Upper +inf +inf];
 
     case "poly2"
         Phi_str = func_constructor(X_arr, 'p');
-        phi_poly = fit(Est_time_norm', Est_phi', 'poly2');
-        p1 = feval(phi_poly, X_arr(1)/Period); % FIXME: use feval once for all
-        p2 = feval(phi_poly, X_arr(2)/Period);
-        p3 = feval(phi_poly, X_arr(3)/Period);
+        p1 = Est_phi(1);
+        p2 = Est_phi(2);
+        p3 = Est_phi(3);
         Lower = [Lower -inf -inf -inf];
         StartPoint = [StartPoint p1 p2 p3];
         Upper = [Upper +inf +inf +inf];
@@ -257,6 +261,7 @@ Value = round(Value./10.^(Nv)).*10.^(Nv);
 Str = [num2str(Value) ' ± ' num2str(Err)];
 end
 
+
 function [Value, Err] = get_value(fitresult, Name)
     CI = confint(fitresult);
     CI = (CI(2, :) - CI(1, :))/2;
@@ -275,6 +280,7 @@ function [Value, Err] = get_value(fitresult, Name)
     end
 end
 
+
 function Err = get_error(fitresult, Name)
     CI = confint(fitresult);
     CI = (CI(2, :) - CI(1, :))/2;
@@ -291,5 +297,36 @@ function Err = get_error(fitresult, Name)
     end
 end
 
+
+function y = poly3calc2(poly, x)
+    y1 = poly.p1;
+    y2 = poly.p2;
+    y3 = poly.p3;
+
+    if ~isnan(y1) && ~isnan(y2)
+        xf = poly.x;
+        yf = [y1 y2 y3];
+        fitres = fit(xf', yf', 'poly2');
+        y = feval(fitres, x);
+    elseif ~isnan(y2)
+        xf = [poly.x(1) poly.x(3)];
+        yf = [y2 y3];
+        fitres = fit(xf', yf', 'poly1');
+        y = feval(fitres, x);
+    else
+        y = repmat(y3, 1, numel(x));
+    end
+
+    y = reshape(y, 1, numel(y));
+end
+
+
+function y = poly3calc(poly, x, Period)
+    p1 = poly.p1;
+    p2 = poly.p2;
+    p3 = poly.p3;
+    
+    y = p1*(x/Period).^2 + p2*(x/Period) + p3;
+end
 
 

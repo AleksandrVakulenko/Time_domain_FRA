@@ -6,13 +6,13 @@ addpath("Short_sig_period_calc\")
 
 clc
 
-freq = 0.3;
+freq = 20;
 Freq_dev = 0;
-Duration = 7;
+Duration = 10;
 Profile = 'strong';
-% Traits = ["nobg", "zerophi", 'nonoise', "lownoise"];
+% Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["lownoise", "", ""];
-Seed = '';
+Seed = 'OAJDAJ';
 Filter_ON = false;
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -114,11 +114,11 @@ while ~stop
     if Underrange
         [Mean, Span, Min, Max] = singal_stats(V_arr);
         if Underrange_force
-            Underrange_level = 0.01*5; % FIXME: magic constant
-        else
             Underrange_level = 0.001*5; % FIXME: magic constant
+        else
+            Underrange_level = 0.0001*5; % FIXME: magic constant
         end
-        Cond1 = Mean < Underrange_level;
+        Cond1 = abs(Mean) < Underrange_level;
         Cond2 = Span < Underrange_level;
         if ~Cond1 && ~Cond2
             Underrange = false;
@@ -227,7 +227,18 @@ while ~stop
 end
 FRA_dev.stop();
 
-%%
+if Periods_counter < 2
+    Properties.const_amp = 11;
+    Properties.const_bg = 11;
+    Properties.const_phase = 11;
+    Properties.linear_amp = 0;
+    Properties.linear_bg = 0;
+    Properties.linear_phase = 0;
+end
+
+Properties
+
+%
 if ~no_estimations(Estimations)
     %
     disp('Start final fit:')
@@ -261,11 +272,13 @@ if ~no_estimations(Estimations)
     
 %     Properties.const_bg = 0;
 %     Properties.linear_bg = 0;
-    Properties.linear_amp = 1e6;
-    Properties.linear_bg = 1e6;
-    Properties.linear_phase = 1e6;
-    Result = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, Estimations, Properties);
-    
+%     Properties.linear_amp = 1e6;
+%     Properties.linear_bg = 1e6;
+%     Properties.linear_phase = 1e6;
+%     Result = any_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations, Properties);
+    Result2 = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, Estimations, Properties);
+%     Result3 = any_sin_fit_f3(T_arr_fit, V_arr_fit, Freq, Result, Properties);
+
     disp(['Time to fit: ' num2str(toc, '%0.2f') ' s'])
     
     disp('Finish')
@@ -511,7 +524,7 @@ function [Mean, Span, Min, Max] = singal_stats(Signal)
     Min = min(Signal);
     Max = max(Signal);
     Mean = mean(Signal);
-    Span = Max-Min;
+    Span = abs(Max-Min);
 end
 
 

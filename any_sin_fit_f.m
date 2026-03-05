@@ -15,12 +15,10 @@ Est_time_norm = Est_time/Period;
 
 
 [Amp_type, BG_type, Phi_type] = prop_parser(Properties);
-% Amp_type = "poly2"; % "poly2", "const", "linear"
-% BG_type = "poly2"; % "poly2", "const", "linear"
-% Phi_type = "poly2"; % "poly2", "const", "linear"
-disp(['Amp type: ' char(Amp_type)])
-disp(['Phi type: ' char(Phi_type)])
-disp(['BG type: ' char(BG_type)])
+% "poly2", "const", "linear"
+disp(['Amp type: ' char(Amp_type)]);  % FIXME: debug
+disp(['Phi type: ' char(Phi_type)]);
+disp(['BG type: ' char(BG_type)]);
 
 D = 0; % FIXME: freq div start value
 Lower = [-300];
@@ -182,7 +180,8 @@ Result = struct(...
     'phi_poly_err', phi_poly_err, ...
     'bg_poly_err', bg_poly_err, ...
     'f_div_ppm', D, ...
-    'f_dev_ppm_err', D_err ...
+    'f_dev_ppm_err', D_err, ...
+    'fit_function', 'any_sin_fit_f' ...
     );
 
 
