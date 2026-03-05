@@ -8,11 +8,11 @@ clc
 
 freq = 0.4;
 Freq_dev = 0;
-Duration = 120;
-Profile = 'strong';
+Duration = 12;
+Profile = 'weak';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise"];
 Traits = ["lownoise", "constphi", ""];
-Seed = '';
+Seed = 'VHJLJS';
 Filter_ON = false;
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -226,7 +226,7 @@ while ~stop
 %     pause(0.5)
 end
 FRA_dev.stop();
-%%
+%
 if ~no_estimations(Estimations)
     %
     disp('Start final fit:')

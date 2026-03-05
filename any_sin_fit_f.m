@@ -116,15 +116,7 @@ switch Phi_type
 end
 
 
-% disp(Amp_str)
-% disp(Phi_str)
-% disp(BG_str)
-
 Eq = [Amp_str ' * sin(2*pi*' num2str(F) '*(1+D/1e6)*x + ' Phi_str ') + ' BG_str];
-
-% disp(Eq)
-% disp(' ')
-% disp([Lower', StartPoint', Upper'])
 
 
 ft = fittype(Eq, 'independent', 'x', 'dependent', 'y');
@@ -141,72 +133,44 @@ opts.Upper = Upper;
 
 [fitresult, gof] = fit(Time', Signal', ft, opts);
 
-CI = confint(fitresult);
-CI = (CI(2, :) - CI(1, :))/2;
-Names = coeffnames(fitresult);
-for i = 1:numel(Names)
-    Value = fitresult.(Names{i});
-    Err = CI(i);
-    Str= err_str(Value, Err);
-    disp([char(Names{i}) ' = ' Str])
-end
+% CI = confint(fitresult);
+% CI = (CI(2, :) - CI(1, :))/2;
+% Names = coeffnames(fitresult);
+% for i = 1:numel(Names)
+%     Value = fitresult.(Names{i});
+%     Err = CI(i);
+%     Str= err_str(Value, Err);
+%     disp([char(Names{i}) ' = ' Str])
+% end
 
-% FIXME: add errors
 
 D = fitresult.D;
+D_err = get_error(fitresult, 'D');
 
-switch Amp_type
-    case "const"
-        amp_poly_out.p1 = 0;
-        amp_poly_out.p2 = 0;
-        amp_poly_out.p3 = fitresult.a3;
-    case "linear"
-        amp_poly_out.p1 = 0;
-        amp_poly_out.p2 = fitresult.a2;
-        amp_poly_out.p3 = fitresult.a3;
-    case "poly2"
-        amp_poly_out.p1 = fitresult.a1;
-        amp_poly_out.p2 = fitresult.a2;
-        amp_poly_out.p3 = fitresult.a3;
-    otherwise
-        error('unreachable')
-end
+amp_poly_out.p1 = get_value(fitresult, 'a1');
+amp_poly_out.p2 = get_value(fitresult, 'a2');
+amp_poly_out.p3 = get_value(fitresult, 'a3');
+
+bg_poly_out.p1 = get_value(fitresult, 'c1');
+bg_poly_out.p2 = get_value(fitresult, 'c2');
+bg_poly_out.p3 = get_value(fitresult, 'c3');
+
+phi_poly_out.p1 = get_value(fitresult, 'p1');
+phi_poly_out.p2 = get_value(fitresult, 'p2');
+phi_poly_out.p3 = get_value(fitresult, 'p3');
 
 
-switch BG_type
-    case "const"
-        bg_poly_out.p1 = 0;
-        bg_poly_out.p2 = 0;
-        bg_poly_out.p3 = fitresult.c3;
-    case "linear"
-        bg_poly_out.p1 = 0;
-        bg_poly_out.p2 = fitresult.c2;
-        bg_poly_out.p3 = fitresult.c3;
-    case "poly2"
-        bg_poly_out.p1 = fitresult.c1;
-        bg_poly_out.p2 = fitresult.c2;
-        bg_poly_out.p3 = fitresult.c3;
-    otherwise
-        error('unreachable')
-end
+amp_poly_err.p1 = get_error(fitresult, 'a1');
+amp_poly_err.p2 = get_error(fitresult, 'a2');
+amp_poly_err.p3 = get_error(fitresult, 'a3');
 
+bg_poly_err.p1 = get_error(fitresult, 'c1');
+bg_poly_err.p2 = get_error(fitresult, 'c2');
+bg_poly_err.p3 = get_error(fitresult, 'c3');
 
-switch Phi_type
-    case "const"
-        phi_poly_out.p1 = 0;
-        phi_poly_out.p2 = 0;
-        phi_poly_out.p3 = fitresult.p3;
-    case "linear"
-        phi_poly_out.p1 = 0;
-        phi_poly_out.p2 = fitresult.p2;
-        phi_poly_out.p3 = fitresult.p3;
-    case "poly2"
-        phi_poly_out.p1 = fitresult.p1;
-        phi_poly_out.p2 = fitresult.p2;
-        phi_poly_out.p3 = fitresult.p3;
-    otherwise
-        error('unreachable')
-end
+phi_poly_err.p1 = get_error(fitresult, 'p1');
+phi_poly_err.p2 = get_error(fitresult, 'p2');
+phi_poly_err.p3 = get_error(fitresult, 'p3');
 
 
 
@@ -214,7 +178,12 @@ Result = struct(...
     'amp_poly', amp_poly_out, ...
     'phi_poly', phi_poly_out, ...
     'bg_poly', bg_poly_out, ...
-    'f_div_ppm', D);
+    'amp_poly_err', amp_poly_err, ...
+    'phi_poly_err', phi_poly_err, ...
+    'bg_poly_err', bg_poly_err, ...
+    'f_div_ppm', D, ...
+    'f_dev_ppm_err', D_err ...
+    );
 
 
 end
@@ -277,9 +246,39 @@ Value = round(Value./10.^(Nv)).*10.^(Nv);
 Str = [num2str(Value) ' ± ' num2str(Err)];
 end
 
+function [Value, Err] = get_value(fitresult, Name)
+    CI = confint(fitresult);
+    CI = (CI(2, :) - CI(1, :))/2;
+    Names = coeffnames(fitresult);
+    Names_str = "";
+    for i = 1:numel(Names)
+        Names_str(i) = string(Names{i});
+    end
+    ind = find(Names_str == Name);
+    if ~isempty(ind)
+        Value = fitresult.(Names{ind});
+        Err = CI(ind);
+    else
+        Value = 0;
+        Err = 0;
+    end
+end
 
-
-
+function Err = get_error(fitresult, Name)
+    CI = confint(fitresult);
+    CI = (CI(2, :) - CI(1, :))/2;
+    Names = coeffnames(fitresult);
+    Names_str = "";
+    for i = 1:numel(Names)
+        Names_str(i) = string(Names{i});
+    end
+    ind = find(Names_str == Name);
+    if ~isempty(ind)
+        Err = CI(ind);
+    else
+        Err = 0;
+    end
+end
 
 
 
