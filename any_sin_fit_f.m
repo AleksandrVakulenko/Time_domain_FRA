@@ -141,6 +141,15 @@ opts.Upper = Upper;
 
 [fitresult, gof] = fit(Time', Signal', ft, opts);
 
+CI = confint(fitresult);
+CI = (CI(2, :) - CI(1, :))/2;
+Names = coeffnames(fitresult);
+for i = 1:numel(Names)
+    Value = fitresult.(Names{i});
+    Err = CI(i);
+    Str= err_str(Value, Err);
+    disp([char(Names{i}) ' = ' Str])
+end
 
 % FIXME: add errors
 
@@ -240,3 +249,37 @@ function [Amp_type, BG_type, Phi_type] = prop_parser(Properties)
     end
 
 end
+
+
+
+
+
+
+% FIXME: debug zone (put in Fern module)
+function [Str, Value, Err] = err_str(Value, Err)
+if Err == 0
+    Ne = 0;
+else
+    Ne = floor(log10(abs(Err)));
+end
+if Value == 0
+    Nv = 0;
+else
+    Nv = floor(log10(abs(Value)));
+end
+if Nv <= Ne
+    Nv = Nv-1;
+else
+    Nv = Ne;
+end
+Err = round(Err./10.^(Ne-1)).*10.^(Ne-1);
+Value = round(Value./10.^(Nv)).*10.^(Nv);
+Str = [num2str(Value) ' ± ' num2str(Err)];
+end
+
+
+
+
+
+
+
