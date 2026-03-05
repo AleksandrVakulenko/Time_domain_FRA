@@ -6,13 +6,13 @@ addpath("Short_sig_period_calc\")
 
 clc
 
-freq = 20;
+freq = 0.4;
 Freq_dev = 0;
 Duration = 10;
 Profile = 'strong';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
-Traits = ["lownoise", "", ""];
-Seed = 'OAJDAJ';
+Traits = ["", "", ""];
+Seed = '';
 Filter_ON = false;
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
