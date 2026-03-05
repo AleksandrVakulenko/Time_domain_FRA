@@ -6,12 +6,12 @@ addpath("Short_sig_period_calc\")
 
 clc
 
-freq = 0.4;
+freq = 0.5;
 Freq_dev = 0;
-Duration = 10;
+Duration = 20;
 Profile = 'strong';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
-Traits = ["", "", ""];
+Traits = ["lownoise", "", ""];
 Seed = '';
 Filter_ON = false;
 % LLGUHH (small signal)
@@ -103,7 +103,7 @@ while ~stop
     Periods_counter = Time_passed/Period;
     
     % FIXME: How to exit if overrange?
-    Overload_range = abs(V_arr) > MAX_LIMIT*0.98; % FIXME: magic constant
+    Overload_range = abs(V_arr) > MAX_LIMIT*0.999; % FIXME: magic constant
     Overload_count = numel(find(Overload_range));
     Overload_volume = Overload_count/numel(V_arr);
     if Overload_count > 0
@@ -143,9 +143,12 @@ while ~stop
 %         stop = true;
     end
 
+    % FIMME: move files to folders
     % FIXME: use incoming estimations
+    % FIXME: update sig_gen
     % FIXME: add harmonics detection
     % FIXME: extract background and refit
+    % FIXME: analize residuals
     % FIXME: use Estimations for Properties
     % FIXME: phase around -180[deg] problem
     % FIXME: what if we miss some early parts
@@ -229,10 +232,10 @@ FRA_dev.stop();
 
 if Periods_counter < 2
     Properties.const_amp = 11;
-    Properties.const_bg = 11;
+    Properties.const_bg = 0;
     Properties.const_phase = 11;
     Properties.linear_amp = 0;
-    Properties.linear_bg = 0;
+    Properties.linear_bg = 11;
     Properties.linear_phase = 0;
 end
 
