@@ -7,7 +7,7 @@ Freq_dev = 0;
 Duration = 10;
 Profile = 'strong';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
-Traits = ["lownoise", "", ""];
+Traits = ["", "", ""];
 Seed = '';
 Filter_ON = false;
 % LLGUHH (small signal)
@@ -53,8 +53,10 @@ Period = 1/Freq;
 %--------------------------------
 Time_settings = struct(...
     'max', 5*Period, ...
-    'fairly', 2*Period);
+    'fairly', 2*Period ...
+    );
 Accuracy_settings = struct(...
+    ...
     );
 %--------------------------------
 
@@ -236,7 +238,7 @@ end
 
 Properties
 
-%
+%%
 if ~no_estimations(Estimations)
     %
     disp('Start final fit:')

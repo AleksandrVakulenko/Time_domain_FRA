@@ -40,7 +40,7 @@ else
 end
 
 D = Result_in.f_div_ppm;
-Freq2 = Freq*(1+D/1e6);
+Freq2 = Result_in.freq*(1+D/1e6);
 ym = Amp_full.*sin(2*pi*Freq2*T_arr + Phi_full/180*pi) + BG_full;
 
 Residuals = V_arr-ym;
