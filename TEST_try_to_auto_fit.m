@@ -1,14 +1,10 @@
 
 
-addpath("Short_sig_period_calc\")
-
-%%
-
 clc
 
 freq = 0.5;
 Freq_dev = 0;
-Duration = 20;
+Duration = 10;
 Profile = 'strong';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["lownoise", "", ""];

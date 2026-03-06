@@ -2,7 +2,7 @@
 
 function Signal_Noise = current_noise_gen(Time_data)
 
-load('Data_for_noise_gen.mat', 'Peak_amp', 'Peak_freq')
+load('+test_gen/Data_for_noise_gen.mat', 'Peak_amp', 'Peak_freq')
 
 Signal_Noise = zeros(size(Time_data));
 for i = 1:numel(Peak_freq)

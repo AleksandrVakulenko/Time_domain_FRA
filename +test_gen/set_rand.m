@@ -20,6 +20,6 @@ function String = set_rand(String)
         ind = round(rand(1, 6)*1000);
         ind = mod(ind, numel(array_c))+1;
         Word = array_c(ind);
-        String = set_rand(Word);
+        String = test_gen.set_rand(Word);
     end
 end

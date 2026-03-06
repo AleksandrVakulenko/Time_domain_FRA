@@ -1,4 +1,6 @@
 
+% FIXME: put in Fern module
+
 function [Amp, freq] = fft_calc(x, fs)
 L = numel(x);
 if mod(L, 2) == 1

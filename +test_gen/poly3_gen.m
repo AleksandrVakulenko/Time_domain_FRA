@@ -23,7 +23,7 @@ Value_finish = Init_value*Value_rel_div + Value_abs_dev;
 
 Value = [Value_start Value_finish];
 Value(3) = Value(2);
-Value(2) = rand_range(Value(1), Value(3));
+Value(2) = test_gen.rand_range(Value(1), Value(3));
 
 
 fitobj = fit([0 0.5 1]', Value', 'poly2');

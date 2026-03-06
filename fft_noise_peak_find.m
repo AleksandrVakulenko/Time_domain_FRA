@@ -1,4 +1,6 @@
 
+% FIXME: put in Fern module
+
 function [Peak_freq, Peak_amp] = fft_noise_peak_find(fft_amp, fft_freq)
 
 

@@ -1,11 +1,15 @@
 
 addpath('..\')
 
-load('..\LCR_setup\Results\test_results_2026_01_22_03\0001.mat')
+% load('..\..\..\Results\test_results_2026_01_22_03\0001.mat')
 
 load('Filter_LF_FIR_2_30.mat')
 
 % plot(Time_data, Current)
+
+error('OLD VERSION CODE; unable to run')
+[Time_data, Current] = test_gen.gen_synth_sig(1, 8);
+
 
 Time_data = Time_data - Time_data(1);
 
@@ -31,10 +35,10 @@ figure
 hold on
 % plot(Time_data, Noise_sig*1e12)
 % plot(Time_data, Noise_sig_f*1e12)
-% plot(Time_data, Sig_model)
-% plot(Time_data, Signal)
-plot(Time_data, Sig_model*Scale + Noise_gen)
-plot(Time_data, Current)
+plot(Time_data, Sig_model)
+plot(Time_data, Signal)
+% plot(Time_data, Sig_model*Scale + Noise_gen)
+% plot(Time_data, Current)
 
 
 %%

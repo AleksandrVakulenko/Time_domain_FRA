@@ -1,14 +1,11 @@
 
 addpath('..\')
 
-% load('..\..\..\Results\test_results_2026_01_22_03\0001.mat')
+load('..\LCR_setup\Results\test_results_2026_01_22_03\0001.mat')
 
 load('Filter_LF_FIR_2_30.mat')
 
 % plot(Time_data, Current)
-
-[Time_data, Current] = gen_synth_sig(1, 8);
-
 
 Time_data = Time_data - Time_data(1);
 
@@ -28,16 +25,16 @@ Noise_sig = Noise_sig*Scale;
 Noise_sig_f = filter(Hd, Noise_sig);
 
 
-Noise_gen = current_noise_gen(Time_data);
+Noise_gen = test_gen.current_noise_gen(Time_data);
 
 figure
 hold on
 % plot(Time_data, Noise_sig*1e12)
 % plot(Time_data, Noise_sig_f*1e12)
-plot(Time_data, Sig_model)
-plot(Time_data, Signal)
-% plot(Time_data, Sig_model*Scale + Noise_gen)
-% plot(Time_data, Current)
+% plot(Time_data, Sig_model)
+% plot(Time_data, Signal)
+plot(Time_data, Sig_model*Scale + Noise_gen)
+plot(Time_data, Current)
 
 
 %%
@@ -63,7 +60,7 @@ plot(Peak_freq, Peak_amp, 'rx')
 
 
 
-Signal_Noise = current_noise_gen(Time_data);
+Signal_Noise = test_gen.current_noise_gen(Time_data);
 
 figure
 hold on
