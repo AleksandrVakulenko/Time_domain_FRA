@@ -139,7 +139,6 @@ while ~stop
 %         stop = true;
     end
 
-    % FIMME: move files to folders
     % FIXME: use incoming estimations
     % FIXME: update sig_gen
     % FIXME: add harmonics detection
@@ -148,7 +147,6 @@ while ~stop
     % FIXME: analize residuals
     % FIXME: use Estimations for Properties
     % FIXME: phase around -180[deg] problem
-    % FIXME: what if we miss some early parts
     % FIXME: add savedata format
     % FIMXE: add data viewer
 
@@ -325,28 +323,27 @@ plot(T_arr, ym, '-r', 'LineWidth', 2)
 %%
 
 function Properties = update_props(Properties, Amp_mean, BG_diff)
+    Value = abs(BG_diff/Amp_mean);
+    % disp([num2str(BG_diff) '    ' num2str(Amp_mean)])
+    % disp([num2str(Value*100, '%0.2f') ' %'])
+    if Value > 0.2
+        Properties.linear_bg = 0;
+        Properties.const_bg = 0;
+    end
+    if Value < 0.2 && Value > 0.05
+        Properties.linear_bg = Properties.linear_bg + 2;
+        Properties.const_bg = 0;
+    end
+    if Value < 0.1
+        Properties.linear_bg = Properties.linear_bg + 1;
+        Properties.const_bg = Properties.const_bg + 1;
+    end
+    if Value < 0.001
+        Properties.linear_bg = Properties.linear_bg - 1;
+        Properties.const_bg = Properties.const_bg + 2;
+    end
+end
 
-Value = abs(BG_diff/Amp_mean);
-% disp([num2str(BG_diff) '    ' num2str(Amp_mean)])
-% disp([num2str(Value*100, '%0.2f') ' %'])
-if Value > 0.2
-    Properties.linear_bg = 0;
-    Properties.const_bg = 0;
-end
-if Value < 0.2 && Value > 0.05
-    Properties.linear_bg = Properties.linear_bg + 2;
-    Properties.const_bg = 0;
-end
-if Value < 0.1
-    Properties.linear_bg = Properties.linear_bg + 1;
-    Properties.const_bg = Properties.const_bg + 1;
-end
-if Value < 0.001
-    Properties.linear_bg = Properties.linear_bg - 1;
-    Properties.const_bg = Properties.const_bg + 2;
-end
-
-end
 
 function Result = ... % do_initial_estimation
     do_initial_estimation(T_arr, V_arr, Period)
@@ -359,8 +356,19 @@ function Result = ... % do_initial_estimation
     end
     
     Result = fit_mimic(Span, Start_Phi, Mean);
-
 end
+
+
+function Result = fit_mimic(Start_Amp, Start_Phi, Start_BG)
+    Result = struct(... % FIXME: magic constant at f_dev
+        'amp', Start_Amp, 'phi', Start_Phi, 'bg', Start_BG, 'f_dev', 0, ...
+        'a_err', NaN, 'p_err', NaN, 'c_err', NaN, 'fd_err', NaN, ...
+        'fitres', NaN, ...
+        't_min', NaN, 't_max', NaN, ...
+        'z', NaN, ...
+        'status', "mimic");
+end
+
 
 function Result = empty_estimation()
     Result = struct(... % FIXME: magic constant at f_dev
@@ -372,23 +380,15 @@ function Result = empty_estimation()
         'status', "empty");
 end
 
+
 function status = no_estimations(Estimations)
-if numel(Estimations) == 1 && Estimations(1).status == "empty"
-    status = true;
-else
-    status = false;
-end
+    if numel(Estimations) == 1 && Estimations(1).status == "empty"
+        status = true;
+    else
+        status = false;
+    end
 end
 
-function Result = fit_mimic(Start_Amp, Start_Phi, Start_BG)
-    Result = struct(... % FIXME: magic constant at f_dev
-        'amp', Start_Amp, 'phi', Start_Phi, 'bg', Start_BG, 'f_dev', 0, ...
-        'a_err', NaN, 'p_err', NaN, 'c_err', NaN, 'fd_err', NaN, ...
-        'fitres', NaN, ...
-        't_min', NaN, 't_max', NaN, ...
-        'z', NaN, ...
-        'status', "mimic");
-end
 
 function Result = combining_estimations(Estimations)
     N = numel(Estimations);
@@ -401,24 +401,24 @@ end
 
 
 function [out_time, out_sig] = get_last_period(Time, Signal, Period, Scale)
-% Scale = 1.3;
-if Scale > 2
-    Scale = 2;
-end
-Length = Time(end) - Time(1);
-if Length <= Period*Scale
-    out_time = Time;
-    out_sig = Signal;
-else
-    range = Time >= Time(end) - Period*Scale;
-    out_time = Time(range);
-    out_sig = Signal(range);
-end
+    % Scale = 1.3;
+    if Scale > 2
+        Scale = 2;
+    end
+    Length = Time(end) - Time(1);
+    if Length <= Period*Scale
+        out_time = Time;
+        out_sig = Signal;
+    else
+        range = Time >= Time(end) - Period*Scale;
+        out_time = Time(range);
+        out_sig = Signal(range);
+    end
 end
 
 
 function [out_time, out_sig] = get_first_period(Time, Signal, Period)
-Scale = 1.1;
+    Scale = 1.1;
     Length = Time(end) - Time(1);
     if Length <= Period*Scale
         out_time = Time;
@@ -437,11 +437,6 @@ function Result = ... % simple_sin_fit_f
     Start_time = Time(1);
     End_time = Time(end);
     Mid_time = (End_time + Start_time)/2;
-    
-    % FIXME: do npt do it here (phase mismatch)
-%     if Time(1) ~= 0
-%         Time = Time - Time(1);
-%     end
     
     if numel(Estimations) ~= 1
         Estimations = combining_estimations(Estimations);
@@ -476,8 +471,7 @@ function Result = ... % simple_sin_fit_f
     Z = fitresult.Z;
 
     C = C + Z*Mid_time;
-    
-    % coeffnames(fitresult)
+
     CI = confint(fitresult);
     CI = (CI(2, :) - CI(1, :))/2;
     
@@ -529,40 +523,22 @@ end
 
 
 
-function [amp_poly, phi_poly, bg_poly] = estimations_poly2_fit(Estimations, Period)
-
-Est_time = ([Estimations.t_max] + [Estimations.t_min])/2;
-Est_amp = [Estimations.amp];
-Est_phi = [Estimations.phi];
-Est_bg = [Estimations.bg];
-
-Est_time_norm = Est_time/Period;
-
-amp_poly = fit(Est_time_norm', Est_amp', 'poly2');
-phi_poly = fit(Est_time_norm', Est_phi', 'poly2');
-bg_poly = fit(Est_time_norm', Est_bg', 'poly2');
-
-end
-
-
 function [amp_poly, phi_poly, bg_poly] = estimations_const_fit(Estimations, Period)
-
-Est_amp = [Estimations.amp];
-Est_phi = [Estimations.phi];
-Est_bg = [Estimations.bg];
-
-amp_poly.p1 = 0;
-amp_poly.p2 = 0;
-amp_poly.p3 = mean(Est_amp);
-
-phi_poly.p1 = 0;
-phi_poly.p2 = 0;
-phi_poly.p3 = mean(Est_phi);
-
-bg_poly.p1 = 0;
-bg_poly.p2 = 0;
-bg_poly.p3 = mean(Est_bg);
-
+    Est_amp = [Estimations.amp];
+    Est_phi = [Estimations.phi];
+    Est_bg = [Estimations.bg];
+    
+    amp_poly.p1 = 0;
+    amp_poly.p2 = 0;
+    amp_poly.p3 = mean(Est_amp);
+    
+    phi_poly.p1 = 0;
+    phi_poly.p2 = 0;
+    phi_poly.p3 = mean(Est_phi);
+    
+    bg_poly.p1 = 0;
+    bg_poly.p2 = 0;
+    bg_poly.p3 = mean(Est_bg);
 end
 
 

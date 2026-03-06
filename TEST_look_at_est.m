@@ -62,12 +62,9 @@ ylabel('bg')
 
 
 
-%%
-
-plot(Est_time, Est_bg, '.')
 
 
-%%
+%% Live view of estimation fit
 
 hold on
 

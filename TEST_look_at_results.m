@@ -129,37 +129,24 @@ end
 
 
 function y_err = poly3calc_err2(poly_err, x)
-
-y_err = poly3calc2(poly_err, x);
-
+    y_err = poly3calc2(poly_err, x);
 end
-
-
-
-
-
 
 
 function y = poly3calc(poly, x, Period)
     p1 = poly.p1;
     p2 = poly.p2;
     p3 = poly.p3;
-    
     y = p1*(x/Period).^2 + p2*(x/Period) + p3;
 end
 
-% function y_err = poly3calc_err(poly, poly_err, x, Period)
-function y_err = poly3calc_err(poly_err, x, Period)
-%     p1 = poly.p1;
-%     p2 = poly.p2;
-%     p3 = poly.p3;
 
+function y_err = poly3calc_err(poly_err, x, Period)
+    %  y = p1*(x/Period).^2 + p2*(x/Period) + p3;
     p1e = poly_err.p1;
     p2e = poly_err.p2;
     p3e = poly_err.p3;
-    
-%     y = p1*(x/Period).^2 + p2*(x/Period) + p3;
-    
+   
     dy_dp1 = (x/Period).^2;
     dy_dp2 = (x/Period);
     dy_dp3 = 1;
@@ -169,10 +156,7 @@ function y_err = poly3calc_err(poly_err, x, Period)
     y_err3 = dy_dp3*p3e;
 
     y_err = sqrt(y_err1.^2 + y_err2.^2 + y_err3.^2);
-%     y_err = sqrt(y_err2.^2 + y_err3.^2);
-%     y_err = y_err3.^2;
-%     y_err = y_err1+ y_err2+ y_err3;
-    
+
 end
 
 
