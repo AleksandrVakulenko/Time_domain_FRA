@@ -1,11 +1,23 @@
 
 
+% FIXME: use incoming estimations
+% FIXME: update sig_gen
+% FIXME: add harmonics detection
+% FIXME: add underrange (span and mean) test signals
+% FIXME: extract background and refit
+% FIXME: analize residuals
+% FIXME: use Estimations for Properties
+% FIXME: phase around -180[deg] problem
+% FIXME: add savedata format
+% FIMXE: add data viewer
+
+
 clc
 
-freq = 0.2;
+freq = 0.5;
 Freq_dev = 0;
-Duration = 10.1;
-Profile = 'weak';
+Duration = 10.0;
+Profile = 'strong';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["", "", ""];
 Seed = '';
@@ -19,7 +31,6 @@ Filter_ON = false;
 % AQIOEZ overload test
 
 Fs = 10e3;
-% Fs = 10e3/Duration;
 
 [Synth_time, Synth_signal, Props] = test_gen.gen_synth_sig(freq, Freq_dev, ...
     Duration, Profile, Traits, Seed, Fs);
@@ -62,8 +73,7 @@ Accuracy_settings = struct(...
 
 clc
 
-FRA_dev.run();
-
+% Shared data -------------------------
 T_arr = [];
 V_arr = [];
 
@@ -80,7 +90,9 @@ Properties = struct(...
 
 MAX_LIMIT = 5;
 Underrange = true;
+% -------------------------------------
 
+FRA_dev.run();
 figure('position', [564 433 560 420])
 stop = false;
 while ~stop
@@ -140,17 +152,6 @@ while ~stop
     if Periods_counter > 1.1
 %         stop = true;
     end
-
-    % FIXME: use incoming estimations
-    % FIXME: update sig_gen
-    % FIXME: add harmonics detection
-    % FIXME: add underrange (span and mean) test signals
-    % FIXME: extract background and refit
-    % FIXME: analize residuals
-    % FIXME: use Estimations for Properties
-    % FIXME: phase around -180[deg] problem
-    % FIXME: add savedata format
-    % FIMXE: add data viewer
 
     % FIXME: do we need this?
     if no_estimations(Estimations) && Periods_counter > 1
@@ -492,6 +493,18 @@ function Result = ... % simple_sin_fit_f
 
 end
 
+% Result = struct(...
+%     'amp_poly', amp_poly_out, ...
+%     'phi_poly', phi_poly_out, ...
+%     'bg_poly', bg_poly_out, ...
+%     'amp_poly_err', amp_poly_err, ...
+%     'phi_poly_err', phi_poly_err, ...
+%     'bg_poly_err', bg_poly_err, ...
+%     'f_div_ppm', D, ...
+%     'f_dev_ppm_err', D_err, ...
+%     'fit_function', 'any_sin_fit_f2', ...
+%     'freq', Freq ...
+%     );
 
 function state = signal_per_duration(Periods_counter)
     if Periods_counter > 0 && Periods_counter <= 0.5

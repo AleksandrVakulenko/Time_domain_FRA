@@ -15,7 +15,7 @@ end
 if Nv <= Ne
     Nv = Nv-1;
 else
-    Nv = Ne;
+    Nv = Ne-1;
 end
 Err = round(Err./10.^(Ne-1)).*10.^(Ne-1);
 Value = round(Value./10.^(Nv)).*10.^(Nv);
