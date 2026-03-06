@@ -7,37 +7,18 @@ Result_in = Result2;
 
 T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
-if Result_in.fit_function == "any_sin_fit_f2"
-    disp('2')
-    Amp_full = poly3calc2(Result_in.amp_poly, T_arr);
-    Phi_full = poly3calc2(Result_in.phi_poly, T_arr);
-    BG_full = poly3calc2(Result_in.bg_poly, T_arr);
-    
-    Amp = poly3calc2(Result_in.amp_poly, T_arr_min);
-    Phi = poly3calc2(Result_in.phi_poly, T_arr_min);
-    BG = poly3calc2(Result_in.bg_poly, T_arr_min);
-    
-    Amp_err = poly3calc_err2(Result_in.amp_poly_err, T_arr_min);
-    Phi_err = poly3calc_err2(Result_in.phi_poly_err, T_arr_min);
-    BG_err = poly3calc_err2(Result_in.bg_poly_err, T_arr_min);
+Amp_full = poly3calc(Result_in.amp_poly, T_arr);
+Phi_full = poly3calc(Result_in.phi_poly, T_arr);
+BG_full = poly3calc(Result_in.bg_poly, T_arr);
 
-elseif Result_in.fit_function == "any_sin_fit_f"
-    disp('1')
-    Amp_full = poly3calc(Result_in.amp_poly, T_arr, Period);
-    Phi_full = poly3calc(Result_in.phi_poly, T_arr, Period);
-    BG_full = poly3calc(Result_in.bg_poly, T_arr, Period);
-    
-    Amp = poly3calc(Result_in.amp_poly, T_arr_min, Period);
-    Phi = poly3calc(Result_in.phi_poly, T_arr_min, Period);
-    BG = poly3calc(Result_in.bg_poly, T_arr_min, Period);
-    
-    Amp_err = poly3calc_err(Result_in.amp_poly_err, T_arr_min, Period);
-    Phi_err = poly3calc_err(Result_in.phi_poly_err, T_arr_min, Period);
-    BG_err = poly3calc_err(Result_in.bg_poly_err, T_arr_min, Period);
+Amp = poly3calc(Result_in.amp_poly, T_arr_min);
+Phi = poly3calc(Result_in.phi_poly, T_arr_min);
+BG = poly3calc(Result_in.bg_poly, T_arr_min);
 
-else
-    error('Wrong fit_function type (int Result struct)')
-end
+Amp_err = poly3calc(Result_in.amp_poly_err, T_arr_min);
+Phi_err = poly3calc(Result_in.phi_poly_err, T_arr_min);
+BG_err = poly3calc(Result_in.bg_poly_err, T_arr_min);
+
 
 D = Result_in.f_div_ppm;
 Freq2 = Result_in.freq*(1+D/1e6);
@@ -105,7 +86,7 @@ title('Residuals histogram')
 
 
 
-function y = poly3calc2(poly, x)
+function y = poly3calc(poly, x)
     y1 = poly.p1;
     y2 = poly.p2;
     y3 = poly.p3;
@@ -128,36 +109,8 @@ function y = poly3calc2(poly, x)
 end
 
 
-function y_err = poly3calc_err2(poly_err, x)
-    y_err = poly3calc2(poly_err, x);
-end
 
 
-function y = poly3calc(poly, x, Period)
-    p1 = poly.p1;
-    p2 = poly.p2;
-    p3 = poly.p3;
-    y = p1*(x/Period).^2 + p2*(x/Period) + p3;
-end
-
-
-function y_err = poly3calc_err(poly_err, x, Period)
-    %  y = p1*(x/Period).^2 + p2*(x/Period) + p3;
-    p1e = poly_err.p1;
-    p2e = poly_err.p2;
-    p3e = poly_err.p3;
-   
-    dy_dp1 = (x/Period).^2;
-    dy_dp2 = (x/Period);
-    dy_dp3 = 1;
-    
-    y_err1 = dy_dp1*p1e;
-    y_err2 = dy_dp2*p2e;
-    y_err3 = dy_dp3*p3e;
-
-    y_err = sqrt(y_err1.^2 + y_err2.^2 + y_err3.^2);
-
-end
 
 
 
