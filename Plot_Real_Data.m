@@ -1,7 +1,7 @@
 
 addpath('..\')
 
-load('..\..\..\Results\test_results_2026_01_22_03\0001.mat')
+load('..\LCR_setup\Results\test_results_2026_01_22_03\0001.mat')
 
 load('Filter_LF_FIR_2_30.mat')
 

@@ -14,7 +14,7 @@ arguments
     Fs double = 10e3
 end
 
-Seed = set_rand(Seed);
+Seed = test_gen.set_rand(Seed);
 
 % FIXME: ADD THIS
 % Time_shift = rand_range(0, 10e3); % [s]
@@ -28,7 +28,7 @@ Scale = 3e-10;
 
 Synth_time = (0:1/Fs:Duration);
 
-[Amp, Phi, Background] = sin_prog_gen(Synth_time, Profile, Traits);
+[Amp, Phi, Background] = test_gen.sin_prog_gen(Synth_time, Profile, Traits);
 F = freq*(1+Freq_dev_ppm/1e6);
 
 Props.freq = F;
@@ -44,7 +44,7 @@ Props.fs = Fs;
 Synth_signal = Amp.*sin(2*pi*F.*Synth_time + Phi/180*pi) + Background;
 
 if ~any(Traits == "nonoise")
-    Noise_gen = current_noise_gen(Synth_time);
+    Noise_gen = test_gen.current_noise_gen(Synth_time);
     
     if any(Traits == "lownoise")
         Synth_signal = Synth_signal + Noise_gen/Scale*0.08;
@@ -55,7 +55,7 @@ if ~any(Traits == "nonoise")
 end
 
 
-Synth_signal = signal_saturation(Synth_signal, -5, 5);
+Synth_signal = test_gen.signal_saturation(Synth_signal, -5, 5);
 
 end
 

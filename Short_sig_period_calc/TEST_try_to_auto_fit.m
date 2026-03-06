@@ -25,8 +25,8 @@ Filter_ON = false;
 Fs = 10e3;
 % Fs = 10e3/Duration;
 
-[Synth_time, Synth_signal, Props] = gen_synth_sig(freq, Freq_dev, Duration, ...
-    Profile, Traits, Seed, Fs);
+[Synth_time, Synth_signal, Props] = test_gen.gen_synth_sig(freq, Freq_dev, ...
+    Duration, Profile, Traits, Seed, Fs);
 
 % Synth_signal = Synth_signal/100;
 
@@ -147,6 +147,7 @@ while ~stop
     % FIXME: use incoming estimations
     % FIXME: update sig_gen
     % FIXME: add harmonics detection
+    % FIXME: add underrange (span and mean) test signals
     % FIXME: extract background and refit
     % FIXME: analize residuals
     % FIXME: use Estimations for Properties
