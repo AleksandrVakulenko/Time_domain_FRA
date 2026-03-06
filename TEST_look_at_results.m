@@ -20,7 +20,7 @@ BG_err = poly3calc(Result_in.bg_poly_err, T_arr_min);
 
 % Calc output values and errors ------------------------------------
 % FIXME: use residual analysis here
-pps = [];
+pps = [2];
 Output = calc_output(Result_in, pps);
 Amp_out = Output.amp;
 Phi_out = Output.phi;
@@ -39,8 +39,8 @@ if Output.single_flag
     disp(['P div : ' num2str(P_div, '%0.3f') ' deg'])
     disp(['C div : ' num2str(C_div, '%0.2f') ' %'])
 
-    disp(' ')
 
+    disp([newline 'Calc values: '])
     Str = err_str(Amp_out, Amp_err_out);
     disp(['A = ' Str ' [V]'])
     Str = err_str(Phi_out, Phi_err_out);
@@ -48,8 +48,7 @@ if Output.single_flag
     Str = err_str(BG_out, BG_err_out);
     disp(['C = ' Str ' [V]'])
 
-    disp(' ')
-
+    disp([newline 'Real values: '])
     disp(['A = ' num2str(mean(Props.amp)) ' [V]']);
     disp(['P = ' num2str(mean(Props.phi)) ' [deg]']);
     disp(['C = ' num2str(mean(Props.bg)) ' [V]']);

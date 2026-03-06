@@ -2,13 +2,14 @@
 
 % FIXME: use incoming estimations
 % FIXME: update sig_gen
+% FIXME: use FFT or DFT for estimation
+% FIXME: use FFT or DFT for 50 Hz rejection
 % FIXME: add harmonics detection
 % FIXME: add underrange (span and mean) test signals
 % FIXME: extract background and refit
 % FIXME: analize residuals
 % FIXME: use Estimations for Properties
 % FIXME: phase around -180[deg] problem
-% FIXME: add savedata format
 % FIMXE: add data viewer
 
 
@@ -44,8 +45,8 @@ if Filter_ON
     Synth_signal = filter(Hd, Synth_signal-Synth_signal(1))+Synth_signal(1);
 end
 
-% y = 0.01*sin(2*pi*2*freq*Synth_time);
-% Synth_signal = Synth_signal+y;
+y = 0.01*sin(2*pi*2*freq*Synth_time);
+Synth_signal = Synth_signal+y;
 
 FRA_dev = FRA_dummy_dev(Synth_time, Synth_signal);
 
@@ -228,7 +229,7 @@ while ~stop
 end
 FRA_dev.stop();
 
-%
+%%
 if Periods_counter < 2
     Properties.const_amp = 11;
     Properties.const_bg = 0;
