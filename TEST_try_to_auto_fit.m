@@ -2,10 +2,10 @@
 
 clc
 
-freq = 0.5;
+freq = 0.2;
 Freq_dev = 0;
-Duration = 10;
-Profile = 'strong';
+Duration = 10.1;
+Profile = 'weak';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["", "", ""];
 Seed = '';
@@ -227,6 +227,7 @@ while ~stop
 end
 FRA_dev.stop();
 
+%
 if Periods_counter < 2
     Properties.const_amp = 11;
     Properties.const_bg = 0;
@@ -235,12 +236,10 @@ if Periods_counter < 2
     Properties.linear_bg = 11;
     Properties.linear_phase = 0;
 end
-
 Properties
 
-%%
+
 if ~no_estimations(Estimations)
-    %
     disp('Start final fit:')
     
     % FIXME: experimental
@@ -258,26 +257,13 @@ if ~no_estimations(Estimations)
         V_arr_fit = V_arr;
     end
     
-    % FIXME: old code
-    % if Periods_counter < 2
-    %     disp('const fit')
-    %     Result = const_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations);
-    % elseif Periods_counter < 5
-    %     disp('line fit')
-    %     Result = line_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations);
-    % else
-    %     disp('poly2 fit')
-    %     Result = full_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations);
-    % end
-    
 %     Properties.const_bg = 0;
 %     Properties.linear_bg = 0;
 %     Properties.linear_amp = 1e6;
 %     Properties.linear_bg = 1e6;
 %     Properties.linear_phase = 1e6;
-%     Result = any_sin_fit_f(T_arr_fit, V_arr_fit, Freq, Estimations, Properties);
+
     Result2 = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, Estimations, Properties);
-%     Result3 = any_sin_fit_f3(T_arr_fit, V_arr_fit, Freq, Result, Properties);
 
     disp(['Time to fit: ' num2str(toc, '%0.2f') ' s'])
     
@@ -286,8 +272,24 @@ else
     disp('No estimations')
 end
 
+Savedata = struct( ...
+    'time', T_arr, ...
+    'ch1', V_arr, ...
+    'estimations', Estimations, ...
+    'result', Result2, ...
+    'freq', Freq, ...
+    'Synth_time', Synth_time, ... % FIXME: debug
+    'Synth_signal', Synth_signal, ... % FIXME: debug
+    'Props', Props ... % FIXME: debug
+    );
 
-
+Info = whos('Savedata');
+Size = Info.bytes/1024;
+if Size < 10e3
+    disp(['File size: ' num2str(Size, '%.1f') ' kB']);
+else
+    disp(['File size: ' num2str(Size/1024, '%.1f') ' MB']);
+end
 
 
 %%

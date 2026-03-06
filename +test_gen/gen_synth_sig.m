@@ -37,6 +37,7 @@ Props.amp = Amp;
 Props.phi = Phi;
 Props.bg = Background;
 Props.seed = Seed;
+Props.duration = Duration;
 Props.profile = Profile;
 Props.traits = Traits;
 Props.fs = Fs;
