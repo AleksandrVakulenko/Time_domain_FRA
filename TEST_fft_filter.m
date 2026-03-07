@@ -64,6 +64,20 @@ fft_plot(Signal_filt, Fs);
 
 %%
 
+
+
+
+function FFT = FFT_erase_freq(FFT, FFT_freq, Freq_filt)
+    [~, ind1] = min(abs(FFT_freq - Freq_filt));
+    ind2 = 2 + numel(FFT) - ind1;
+    FFT(ind1) = 0;
+    FFT(ind2) = 0;
+end
+
+
+
+
+
 function Signal_filt = fft_brf(Signal, Fs, ValueDB, Freq_min, Freq_max)
     if mod(numel(Signal), 2) == 1
         Signal(end) = [];
@@ -88,14 +102,6 @@ function Signal_filt = fft_brf(Signal, Fs, ValueDB, Freq_min, Freq_max)
     if flag
         Signal_filt(end+1) = Signal_filt(end);
     end
-end
-
-
-function FFT = FFT_erase_freq(FFT, FFT_freq, Freq_filt)
-    [~, ind1] = min(abs(FFT_freq - Freq_filt));
-    ind2 = 2 + numel(FFT) - ind1;
-    FFT(ind1) = 0;
-    FFT(ind2) = 0;
 end
 
 
@@ -126,10 +132,6 @@ end
     FFT(ind22:ind12) = FFT(ind22:ind12)*10^(ValueDB/20);
 
 end
-
-
-
-
 
 
 

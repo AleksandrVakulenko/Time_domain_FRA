@@ -8,14 +8,15 @@
 % FIXME: use FFT or DFT for 50 Hz rejection
 % FIXME: use Estimations for Properties
 % FIMXE: add new data viewer
+% FIXME: add errors must be 3*std
 % FIXME: phase around -180[deg] problem
 
 clc
 
-freq = 0.05;
+freq = 10;
 Freq_dev = 0;
-Duration = 80;
-Profile = 'const';
+Duration = 1.0;
+Profile = 'mid';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["", "", ""];
 Seed = '';
@@ -78,6 +79,7 @@ V_arr = [];
 
 % clearvars Estimations
 Estimations = empty_estimation();
+Estimations_extra = empty_estimation();
 
 Properties = struct(...
     'const_bg', 11, ...
@@ -164,6 +166,18 @@ while ~stop
         case "invalid" % 0 : 0.5
             % DO SOMETHING
 
+        case "get_lucky" % 0.45 : 0.5
+            if no_estimations(Estimations_extra)
+                Init_values = do_initial_estimation(T_arr, V_arr, Period);
+                Result = simple_sin_fit_f(T_arr, V_arr, ...
+                    Freq, Init_values);
+                Estimations_extra = Result;
+            else
+                Result = simple_sin_fit_f(T_arr, V_arr, ...
+                    Freq, Estimations_extra);
+                Estimations_extra = [Estimations_extra Result];
+            end
+
         case "min" % 0.5 : 1.2
 %             if exist("Estimations", "var") ~= 1
             if no_estimations(Estimations)
@@ -194,16 +208,17 @@ while ~stop
             [out_time1, out_sig1] = get_first_period(T_arr, V_arr, Period);
             Result1 = simple_sin_fit_f(out_time1, out_sig1, ...
                 Freq, Estimations);
-    
+            
             Scale = Periods_counter/2; % FXIME: magic constant
             [out_time2, out_sig2] = get_last_period(T_arr, V_arr, Period, Scale);
-            Result = simple_sin_fit_f(out_time2, out_sig2, ...
+            Result2 = simple_sin_fit_f(out_time2, out_sig2, ...
                 Freq, Estimations);
 
-            Estimations = [Estimations Result];
+%             Result = DFT_estimation(T_arr, V_arr, Period);
+            Estimations = [Estimations Result2];
 
-            BG_diff = Result.bg - Result1.bg;
-            Amp_mean = mean([Result.amp Result1.amp]);
+            BG_diff = Result2.bg - Result1.bg;
+            Amp_mean = mean([Result2.amp Result1.amp]);
             Properties = update_props(Properties, Amp_mean, BG_diff);
 
 
@@ -211,8 +226,9 @@ while ~stop
             % FIXME: UNDONE (DEBUG VERSION)
             Scale = 5; % FIXME: magic constant
             [out_time, out_sig] = get_last_period(T_arr, V_arr, Period, Scale);
-            Result = simple_sin_fit_f(out_time, out_sig, ...
-                Freq, Estimations);
+%             Result = simple_sin_fit_f(out_time, out_sig, ...
+%                 Freq, Estimations);
+            Result = DFT_estimation(out_time, out_sig, Period);
             Estimations = [Estimations Result];
 
     end
@@ -238,12 +254,26 @@ if Periods_counter < 2
 end
 Properties
 
+
 %FIXME: DEBUG ZONE
-if numel(Estimations) > 10
-    Estimations = Estimations(floor(end/2):end);
+if Periods_counter > 2
+    Est_time_min = [Estimations.t_max];
+    Est_time_max = [Estimations.t_max];
+    range = Est_time_min < Period & Est_time_max < Period;
+    Estimations(range) = [];
 end
+% if numel(Estimations) > 10
+%     Estimations = Estimations(floor(end/2):end);
+% end
+
 
 %
+
+if no_estimations(Estimations) && ~no_estimations(Estimations_extra)
+    disp([newline '! YOLO FIT ! (˶ᵔ ᵕ ᵔ˶) ‹𝟹' newline])
+    Estimations = Estimations_extra;
+end
+
 if ~no_estimations(Estimations)
     disp('Start final fit:')
     
@@ -293,12 +323,12 @@ if ~no_estimations(Estimations)
     Harm2_sig = calc_fitted_signal(Result2, T_arr_fit);
     Harm3_sig = calc_fitted_signal(Result3, T_arr_fit);
     V_arr_fit_new = V_arr_fit - Harm2_sig - Harm3_sig;
-    Properties.const_amp = 0;
-    Properties.const_bg = 0;
-    Properties.const_phase = 0;
-    Properties.linear_amp = 11;
-    Properties.linear_bg = 0;
-    Properties.linear_phase = 11;
+%     Properties.const_amp = 0;
+%     Properties.const_bg = 0;
+%     Properties.const_phase = 0;
+%     Properties.linear_amp = 11;
+%     Properties.linear_bg = 0;
+%     Properties.linear_phase = 11;
     [Result4, Residuals4] = any_sin_fit_f2(T_arr_fit, V_arr_fit_new, Freq, Estimations, Properties);
 
     
@@ -306,7 +336,7 @@ if ~no_estimations(Estimations)
 
     disp(['Time to fit: ' num2str(toc, '%0.2f') ' s'])
     
-    disp('Finish')
+    disp([newline 'Finish'])
 else
     disp('No estimations')
 end
@@ -532,6 +562,23 @@ function Result = ... % simple_sin_fit_f
 
 end
 
+
+function Result = DFT_estimation(Time, Signal, Period)
+    Start_time = Time(1);
+    End_time = Time(end);
+    Freq = 1/Period;
+
+    [Amp_DFT, Phi_DFT, Mean] = DFT_single_freq(Time, Signal, Freq);
+
+    Result = struct(...
+        'amp', Amp_DFT, 'phi', Phi_DFT, 'bg', Mean, 'f_dev', NaN, ...
+        'a_err', NaN, 'p_err', NaN, 'c_err', NaN, 'fd_err', NaN, ...
+        'fitres', NaN, ...
+        't_min', Start_time, 't_max', End_time, ...
+        'z', 0, 'status', 'ok');
+end
+
+
 % Result = struct(...
 %     'amp_poly', amp_poly_out, ...
 %     'phi_poly', phi_poly_out, ...
@@ -546,10 +593,14 @@ end
 %     );
 
 function state = signal_per_duration(Periods_counter)
-    if Periods_counter > 0 && Periods_counter <= 0.5
+    if Periods_counter > 0 && Periods_counter <= 0.45
         state = "invalid";
     end
     
+    if Periods_counter > 0.45 && Periods_counter <= 0.5
+        state = "get_lucky";
+    end
+
     if Periods_counter > 0.5 && Periods_counter <= 1.2
         state = "min";
     end

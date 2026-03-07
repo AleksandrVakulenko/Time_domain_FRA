@@ -1,4 +1,4 @@
-function [Amp, Phi] = DFT_single_freq(T_arr, V_arr, Freq)
+function [Amp, Phi, Mean] = DFT_single_freq(T_arr, V_arr, Freq)
     Period = 1./Freq;
     Length = T_arr(end) - T_arr(1);
     
@@ -10,6 +10,7 @@ function [Amp, Phi] = DFT_single_freq(T_arr, V_arr, Freq)
     if Periods_counter < 1
         Amp = NaN;
         Phi = NaN;
+        Mean = NaN;
     else
         Periods_counter = floor(Periods_counter);
         Length_max = Periods_counter*Period;
@@ -36,5 +37,6 @@ function [Amp, Phi] = DFT_single_freq(T_arr, V_arr, Freq)
         
         Amp = abs(Cplx)*2;
         Phi = angle(Cplx)/pi*180;
+        Mean = mean(V_arr);
     end
 end
