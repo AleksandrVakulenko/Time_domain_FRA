@@ -1,11 +1,11 @@
 
 clc
 
-% Data_time = Synth_time;
-% V_arr_in = V_arr;
-% Data_signal = Synth_signal;
-% Result_in = Result;
-% Residuals_in = Residuals;
+Data_time = Synth_time;
+V_arr_in = V_arr;
+Data_signal = Synth_signal;
+Result_in = Result;
+Residuals_in = Residuals;
 
 % Data_time = Synth_time;
 % V_arr_in = Residuals;
@@ -19,19 +19,21 @@ clc
 % Result_in = Result3;
 % Residuals_in = Residuals3;
 
+Harm2_sig = calc_fitted_signal(Result2, Synth_time);
+Harm3_sig = calc_fitted_signal(Result3, Synth_time);
+Data_time = Synth_time;
+V_arr_in = V_arr;
+Data_signal = Synth_signal - Harm2_sig - Harm3_sig;
+Result_in = Result4;
+Residuals_in = Residuals4;
+
 T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
-Amp_full = poly3calc(Result_in.amp_poly, T_arr);
-Phi_full = poly3calc(Result_in.phi_poly, T_arr);
-BG_full = poly3calc(Result_in.bg_poly, T_arr);
 
-Amp = poly3calc(Result_in.amp_poly, T_arr_min);
-Phi = poly3calc(Result_in.phi_poly, T_arr_min);
-BG = poly3calc(Result_in.bg_poly, T_arr_min);
+[ym, Amp_full, Phi_full, BG_full] = calc_fitted_signal(Result_in, T_arr);
 
-Amp_err = poly3calc(Result_in.amp_poly_err, T_arr_min);
-Phi_err = poly3calc(Result_in.phi_poly_err, T_arr_min);
-BG_err = poly3calc(Result_in.bg_poly_err, T_arr_min);
+[~, Amp, Phi, BG, Amp_err, Phi_err, BG_err] = ...
+    calc_fitted_signal(Result_in, T_arr_min);
 
 
 % Calc output values and errors ------------------------------------
@@ -72,9 +74,7 @@ end
 %-------------------------------------------------------------------
 
 
-D = Result_in.f_div_ppm;
-Freq2 = Result_in.freq*(1+D/1e6);
-ym = Amp_full.*sin(2*pi*Freq2*T_arr + Phi_full/180*pi) + BG_full;
+
 
 % Residuals = V_arr-ym;
 
@@ -141,27 +141,7 @@ title('Residuals histogram')
 
 
 
-function y = poly3calc(poly, x)
-    y1 = poly.p1;
-    y2 = poly.p2;
-    y3 = poly.p3;
 
-    if ~isnan(y1) && ~isnan(y2)
-        xf = poly.x;
-        yf = [y1 y2 y3];
-        fitres = fit(xf', yf', 'poly2');
-        y = feval(fitres, x);
-    elseif ~isnan(y2)
-        xf = [poly.x(1) poly.x(3)];
-        yf = [y2 y3];
-        fitres = fit(xf', yf', 'poly1');
-        y = feval(fitres, x);
-    else
-        y = repmat(y3, 1, numel(x));
-    end
-
-    y = reshape(y, 1, numel(y));
-end
 
 
 function Output = calc_output(Result_in, pps)

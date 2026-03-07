@@ -14,11 +14,11 @@ clc
 
 freq = 0.5;
 Freq_dev = 0;
-Duration = 11.0;
+Duration = 5.0;
 Profile = 'strong';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["", "", ""];
-Seed = '';
+Seed = 'VHJLJS';
 Filter_ON = false;
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -282,6 +282,10 @@ if ~no_estimations(Estimations)
     Estimations_H3.bg = 0;
     [Result3, Residuals3] = any_sin_fit_f2(T_arr_fit, Residuals2, 3*Freq, Estimations_H3, []);
     
+    Harm2_sig = calc_fitted_signal(Result2, T_arr_fit);
+    Harm3_sig = calc_fitted_signal(Result3, T_arr_fit);
+    V_arr_fit_new = V_arr_fit - Harm2_sig - Harm3_sig;
+    [Result4, Residuals4] = any_sin_fit_f2(T_arr_fit, V_arr_fit_new, Freq, Estimations, Properties);
     % FIXME: extract harms and refit
     
 
