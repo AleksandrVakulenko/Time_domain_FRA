@@ -12,13 +12,13 @@
 
 clc
 
-freq = 0.5;
+freq = 0.05;
 Freq_dev = 0;
-Duration = 5.0;
-Profile = 'strong';
+Duration = 80;
+Profile = 'const';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["", "", ""];
-Seed = 'VHJLJS';
+Seed = '';
 Filter_ON = false;
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -238,7 +238,12 @@ if Periods_counter < 2
 end
 Properties
 
+%FIXME: DEBUG ZONE
+if numel(Estimations) > 10
+    Estimations = Estimations(floor(end/2):end);
+end
 
+%
 if ~no_estimations(Estimations)
     disp('Start final fit:')
     
@@ -269,24 +274,34 @@ if ~no_estimations(Estimations)
     [Result, Residuals] = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, Estimations, Properties);
     
     % NOTE: fit Harm 2
-    [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr, Residuals, 2*Freq);
+    [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr_fit, Residuals, 2*Freq);
+    disp(['Amp_H2 = ' num2str(Amp_DFT) ' V  |  Phi_H2 = ' num2str(Phi_DFT) ' deg'])
     Estimations_H2.amp = Amp_DFT;
     Estimations_H2.phi = Phi_DFT;
     Estimations_H2.bg = 0;
     [Result2, Residuals2] = any_sin_fit_f2(T_arr_fit, Residuals, 2*Freq, Estimations_H2, []);
 
     % NOTE: fit Harm 3
-    [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr, Residuals2, 3*Freq);
+    [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr_fit, Residuals2, 3*Freq);
+    disp(['Amp_H3 = ' num2str(Amp_DFT) ' V  |  Phi_H3 = ' num2str(Phi_DFT) ' deg'])
     Estimations_H3.amp = Amp_DFT;
     Estimations_H3.phi = Phi_DFT;
     Estimations_H3.bg = 0;
     [Result3, Residuals3] = any_sin_fit_f2(T_arr_fit, Residuals2, 3*Freq, Estimations_H3, []);
     
+    % NOTE: extract harms and refit
     Harm2_sig = calc_fitted_signal(Result2, T_arr_fit);
     Harm3_sig = calc_fitted_signal(Result3, T_arr_fit);
     V_arr_fit_new = V_arr_fit - Harm2_sig - Harm3_sig;
+    Properties.const_amp = 0;
+    Properties.const_bg = 0;
+    Properties.const_phase = 0;
+    Properties.linear_amp = 11;
+    Properties.linear_bg = 0;
+    Properties.linear_phase = 11;
     [Result4, Residuals4] = any_sin_fit_f2(T_arr_fit, V_arr_fit_new, Freq, Estimations, Properties);
-    % FIXME: extract harms and refit
+
+    
     
 
     disp(['Time to fit: ' num2str(toc, '%0.2f') ' s'])

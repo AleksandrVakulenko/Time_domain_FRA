@@ -5,7 +5,7 @@ Data_time = Synth_time;
 V_arr_in = V_arr;
 Data_signal = Synth_signal;
 Result_in = Result;
-Residuals_in = Residuals;
+% Residuals_in = Residuals;
 
 % Data_time = Synth_time;
 % V_arr_in = Residuals;
@@ -29,8 +29,10 @@ Residuals_in = Residuals4;
 
 T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
-
 [ym, Amp_full, Phi_full, BG_full] = calc_fitted_signal(Result_in, T_arr);
+
+Residuals_in = Data_signal - ym;
+
 
 [~, Amp, Phi, BG, Amp_err, Phi_err, BG_err] = ...
     calc_fitted_signal(Result_in, T_arr_min);
