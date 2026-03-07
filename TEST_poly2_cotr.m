@@ -1,6 +1,20 @@
 
 clc
 
+
+figure('position', [44 506 560 420])
+RUN_TEST(1)
+
+figure('position', [636 501 560 420])
+RUN_TEST(2)
+
+figure('position', [1236 500 560 420])
+RUN_TEST(3)
+
+
+
+function RUN_TEST(Value)
+
 x1 = 0;
 x3 = 6;
 x2 = (x1 + x3)/2;
@@ -11,13 +25,20 @@ y3 = 3;
 
 x = linspace(x1 - 2, x3 + 2, 1000);
 
-% y = y1*(x-x2).*(x-x3)/(x1-x2)/(x1-x3) + y2*(x-x1).*(x-x3)/(x2-x1)/(x2-x3) + y3*(x-x1).*(x-x2)/(x3-x1)/(x3-x2);
+switch Value
+    case 1
+        [Eq1, Type] = func_constructor([x1], 'a');
+        title('no params')
+    case 2
+        [Eq1, Type] = func_constructor([x1 x2], 'a');
+        title('2 point line')
+    case 3
+        [Eq1, Type] = func_constructor([x1 x2 x3], 'a');
+        title('3 point ploy2')
+    otherwise
+        error('Wrong Value')
+end
 
-
-Period = 1;
-
-
-[Eq1, Type] = func_constructor([x1 x2], 'a', Period)
 
 
 switch Type
@@ -34,15 +55,11 @@ switch Type
         error('unreachable')
 end
 
-
-figure
 hold on
 plot(x, y)
 plot([x1 x2 x3], [y1 y2 y3], '.r', 'MarkerSize', 12)
 
-
-
-%%
+end
 
 
 

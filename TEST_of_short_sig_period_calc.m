@@ -2,11 +2,11 @@
 
 
 
-Phi_arr = -180:1:180;
+Phi_arr = -190:1:190;
 Phi_calc = nan(size(Phi_arr));
 Sec_num_arr = zeros(size(Phi_arr));
 
-figure
+
 
 % NOTE: do not use this function if Fraction of Period
 % is less than 0.35 OR more than 0.7
@@ -20,7 +20,7 @@ Freq = 1;
 Period = 1/Freq;
 Phi = Phi_arr(k);
 % Phi = -100;
-Fraction = 0.6;
+Fraction = 0.5;
 
 x = 0:Period/1000:Period*Fraction;
 % y = sin(2*pi*x + Phi/180*pi) + 1 + x;
@@ -44,7 +44,7 @@ end
 % Sec_num_arr(k) = Sec_num;
 
 
-x_m = linspace(x(1)-Period, x(end)+Period, 100);
+x_m = linspace(x(1), x(end), 100);
 y_m = feval(fitresult, x_m);
 
 
@@ -52,20 +52,6 @@ y_m = feval(fitresult, x_m);
 end
 
 
-hold on
-cla
-plot(x, y, '-b')
-plot(x_m, y_m, '-g', 'LineWidth', 3)
-plot(xp, yp, 'or', 'MarkerFaceColor', 'r')
-% xline(0)
-% yline(0)
-grid on
-
-xline(Zeros_close, 'r')
-
-xlim([-0.1 Period*Fraction+0.1])
-Max = max(abs([max(y) min(y)]));
-ylim([-Max*1.5 Max*1.5])
 
 %%
 
