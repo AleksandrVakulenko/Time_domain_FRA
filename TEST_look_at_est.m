@@ -1,14 +1,17 @@
 
+Estimations_in = Estimations;
+% Estimations_in = Estimations_extra;
+% Estimations_in = Estimations_low;
 
-Est_time = ([Estimations.t_max] + [Estimations.t_min])/2;
-Est_amp = [Estimations.amp];
-Est_amperr = [Estimations.a_err];
+Est_time = ([Estimations_in.t_max] + [Estimations_in.t_min])/2;
+Est_amp = [Estimations_in.amp];
+Est_amperr = [Estimations_in.a_err];
 
-Est_phi = [Estimations.phi];
-Est_phierr = [Estimations.p_err];
+Est_phi = [Estimations_in.phi];
+Est_phierr = [Estimations_in.p_err];
 
-Est_bg = [Estimations.bg];
-Est_bgerr = [Estimations.c_err];
+Est_bg = [Estimations_in.bg];
+Est_bgerr = [Estimations_in.c_err];
 
 
 Props_amp = Props.amp;
@@ -27,11 +30,11 @@ Amp_fit = feval(amp_poly, Est_time_norm);
 phi_poly = fit(Est_time_norm', Est_phi', 'poly1');
 Phi_fit = feval(phi_poly, Est_time_norm);
 
-bg_poly = fit(Est_time_norm', Est_bg', 'poly1');
+bg_poly = fit(Est_time_norm', Est_bg', 'poly2');
 BG_fit = feval(bg_poly, Est_time_norm);
 
 
-figure('position', [360 205 882 784])
+% figure('position', [360 205 882 784])
 
 subplot(2, 2, 1)
 hold on
@@ -69,15 +72,15 @@ ylabel('bg')
 hold on
 
 
-for i = 1:numel(Estimations)
+for i = 1:numel(Estimations_in)
     
-    A = Estimations(i).amp;
-    P = Estimations(i).phi;
-    C = Estimations(i).bg;
-    fit_res = Estimations(i).fitres;
+    A = Estimations_in(i).amp;
+    P = Estimations_in(i).phi;
+    C = Estimations_in(i).bg;
+    fit_res = Estimations_in(i).fitres;
 
-    T_min = Estimations(i).t_min;
-    T_max = Estimations(i).t_max;
+    T_min = Estimations_in(i).t_min;
+    T_max = Estimations_in(i).t_max;
     range = T_arr >= T_min & T_arr <= T_max;
     T_arr_part = T_arr(range);
 
@@ -104,8 +107,8 @@ disp(['A: ' num2str(Props.amp(1)) ...
 
 % plot(T_arr, ym, '-r', 'LineWidth', 2)
 
-xline(Estimations(1).t_min)
-xline(Estimations(1).t_max)
+xline(Estimations_in(1).t_min)
+xline(Estimations_in(1).t_max)
 
 
 

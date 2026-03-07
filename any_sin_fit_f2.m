@@ -1,15 +1,12 @@
 
 
-function [Result, Residuals] = ...
+function [Result, Residuals, DEBUG] = ...
     any_sin_fit_f2(Time, Signal, Freq, Estimations, Properties)
 
 Period = 1/Freq;
 
 if ~isempty(Properties)
     [Amp_type, BG_type, Phi_type] = prop_parser(Properties);
-    disp(['Amp type: ' char(Amp_type)]); % FIXME: debug
-    disp(['Phi type: ' char(Phi_type)]);
-    disp(['BG type: ' char(BG_type)]);
 else
     Amp_type = "const";
     Phi_type = "const";
@@ -38,6 +35,12 @@ else
     Phi_type = "const";
     BG_type = "const";
 end
+
+% FIXME: debug print
+disp(['Amp type: ' char(Amp_type)]);
+disp(['Phi type: ' char(Phi_type)]);
+disp(['BG type: ' char(BG_type)]);
+
 Est_time_norm = Est_time/Period;
 
 
@@ -154,13 +157,15 @@ opts.Lower = Lower;
 opts.StartPoint = StartPoint;
 opts.Upper = Upper;
 
+DEBUG.StartPoint = StartPoint;
+DEBUG.X_arr = X_arr;
 
 [fitresult, gof, output] = fit(Time', Signal', ft, opts);
 
 Residuals = output.residuals';
 
 
-try % FIXME: debug
+try % FIXME: D now unused, we need it back
     D = fitresult.D;
     D_err = get_error(fitresult, 'D');
 catch

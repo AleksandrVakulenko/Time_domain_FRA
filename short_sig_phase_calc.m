@@ -1,4 +1,5 @@
 
+% NOTE: could return Phase = []
 % NOTE: do not use this function if Fraction of Period
 % is less than 0.35 OR more than 0.7
 
@@ -7,14 +8,15 @@ Time_len = Time(end) - Time(1);
 Fraction = Time_len/Period;
 
 if Fraction < 0.3 || Fraction > 0.75
-    % FIXME: or just return []?
-    error('Wrong fraction of period')
+    Phase = [];
+    return;
 end
 
 x = Time;
 y = Signal;
 
-if numel(x) > 65 % FIXME: magic numbers
+% NOTE: magic numbers, but it works
+if numel(x) > 65
     N = 65;
 elseif numel(x) > 25
     N = 25;
@@ -113,7 +115,7 @@ case 2
 
 end
 
-% FIXME: one more time
+% NOTE: Do we need one more time?
 Phase = phase_correction(Phase);
 
 end
@@ -126,6 +128,7 @@ function Phase = phase_correction(Phase)
     Phase(Phase > 180) = Phase(Phase > 180) - 360;
     Phase(Phase < -180) = Phase(Phase < -180) + 360;
 end
+
 
 function Zeros = calc_zeros(a, b, c)
     D = b^2 - 4*a*c;

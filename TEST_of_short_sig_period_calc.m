@@ -28,7 +28,6 @@ y = sin(2*pi*x + Phi/180*pi) + 1;
 Noise = 2*(rand(size(x))-0.5)*0.07;
 y = y + Noise;
 
-% Phase = short_sig_phase_calc(x, y, Period);
 [Phase, Status] = estimate_phi_part_sin(x, y, Period);
 
 disp(' ')

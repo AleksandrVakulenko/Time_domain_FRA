@@ -21,7 +21,6 @@ freq = fs*(0:(L/2))/L;
 Amp = P1;
 
 if ~isempty(phi_limit)
-%     phi_limit = 90e-6; % FIXME: magic constant
     range = abs(Amp) < phi_limit;
     Y(range) = 0;
 end

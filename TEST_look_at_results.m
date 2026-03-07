@@ -19,13 +19,13 @@ Result_in = Result;
 % Result_in = Result3;
 % Residuals_in = Residuals3;
 
-Harm2_sig = calc_fitted_signal(Result2, Synth_time);
-Harm3_sig = calc_fitted_signal(Result3, Synth_time);
-Data_time = Synth_time;
-V_arr_in = V_arr;
-Data_signal = Synth_signal - Harm2_sig - Harm3_sig;
-Result_in = Result4;
-Residuals_in = Residuals4;
+% Harm2_sig = calc_fitted_signal(Result2, Synth_time);
+% Harm3_sig = calc_fitted_signal(Result3, Synth_time);
+% Data_time = Synth_time;
+% V_arr_in = V_arr;
+% Data_signal = Synth_signal - Harm2_sig - Harm3_sig;
+% Result_in = Result4;
+% Residuals_in = Residuals4;
 
 T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
@@ -39,7 +39,6 @@ Residuals_in = Data_signal - ym;
 
 
 % Calc output values and errors ------------------------------------
-% FIXME: use residual analysis here
 pps = [];
 Output = calc_output(Result_in, pps);
 Amp_out = Output.amp;

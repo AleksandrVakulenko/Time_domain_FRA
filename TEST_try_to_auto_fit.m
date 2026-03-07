@@ -2,24 +2,25 @@
 
 % FIXME: use incoming estimations
 % FIXME: update sig_gen (harm gen)
-% FIXME: add underrange (span and mean) test signals
+% FIXME: [update sig_gen:] add underrange (span and mean) test signals
 % FIXME: analize residuals more (for what?)
-% FIXME: use FFT or DFT for estimation
-% FIXME: use FFT or DFT for 50 Hz rejection
 % FIXME: use Estimations for Properties
+% FIXME: use FFT or DFT for Harm estimation
+% FIXME: use FFT or DFT for 50 Hz rejection (neh)
 % FIMXE: add new data viewer
 % FIXME: add errors must be 3*std
 % FIXME: phase around -180[deg] problem
+% FIXME: place fft functions to its own lib
 
 clc
 
-freq = 10;
+freq = 1;
 Freq_dev = 0;
-Duration = 1.0;
+Duration = 2.2;
 Profile = 'mid';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["", "", ""];
-Seed = '';
+Seed = 'YYSRCS';
 Filter_ON = false;
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -28,7 +29,7 @@ Filter_ON = false;
 % QDQFFM
 % CUSAIQ ???
 % AQIOEZ overload test
-
+% YYSRCS
 Fs = 10e3;
 
 [Synth_time, Synth_signal, Props] = test_gen.gen_synth_sig(freq, Freq_dev, ...
@@ -52,7 +53,7 @@ FRA_dev = FRA_dummy_dev(Synth_time, Synth_signal);
 figure('position', [562 434 560 420])
 plot(Synth_time, Synth_signal)
 
-%%
+%% Main part
 
 %--------------------------------
 Freq = freq;
@@ -80,6 +81,7 @@ V_arr = [];
 % clearvars Estimations
 Estimations = empty_estimation();
 Estimations_extra = empty_estimation();
+Estimations_low = empty_estimation();
 
 Properties = struct(...
     'const_bg', 11, ...
@@ -179,16 +181,15 @@ while ~stop
             end
 
         case "min" % 0.5 : 1.2
-%             if exist("Estimations", "var") ~= 1
-            if no_estimations(Estimations)
+            if no_estimations(Estimations_low)
                 Init_values = do_initial_estimation(T_arr, V_arr, Period);
                 Result = simple_sin_fit_f(T_arr, V_arr, ...
                     Freq, Init_values);
-                Estimations = Result;
+                Estimations_low = Result;
             else
                 Result = simple_sin_fit_f(T_arr, V_arr, ...
-                    Freq, Estimations);
-                Estimations = [Estimations Result];
+                    Freq, Estimations_low);
+                Estimations_low = [Estimations_low Result];
             end
             
         case "single" % 1.2 : 2
@@ -252,7 +253,7 @@ if Periods_counter < 2
     Properties.linear_bg = 11;
     Properties.linear_phase = 0;
 end
-Properties
+Properties.linear_bg = 0;
 
 
 %FIXME: DEBUG ZONE
@@ -260,6 +261,11 @@ if Periods_counter > 2
     Est_time_min = [Estimations.t_max];
     Est_time_max = [Estimations.t_max];
     range = Est_time_min < Period & Est_time_max < Period;
+    Estimations(range) = [];
+else
+    Est_time_min = [Estimations.t_max];
+    Est_time_max = [Estimations.t_max];
+    range = Est_time_max < Period*0.5;
     Estimations(range) = [];
 end
 % if numel(Estimations) > 10
@@ -269,11 +275,22 @@ end
 
 %
 
-if no_estimations(Estimations) && ~no_estimations(Estimations_extra)
+if no_estimations(Estimations) && no_estimations(Estimations_low) && ...
+        ~no_estimations(Estimations_extra)
     disp([newline '! YOLO FIT ! (˶ᵔ ᵕ ᵔ˶) ‹𝟹' newline])
     Estimations = Estimations_extra;
+elseif no_estimations(Estimations) && ~no_estimations(Estimations_low)
+    disp([newline '! FIT by bad estimations ! ⸜(｡˃ ᵕ ˂ )⸝♡' newline])
+    Estimations = Estimations_low;
+else
+    disp([newline '! OK, we have something ! („• ֊ •„)੭' newline])
 end
 
+% if no_estimations(Estimations) && ~no_estimations(Estimations_extra)
+%     disp([newline '! YOLO FIT ! (˶ᵔ ᵕ ᵔ˶) ‹𝟹' newline])
+%     Estimations = Estimations_extra;
+% end
+%
 if ~no_estimations(Estimations)
     disp('Start final fit:')
     
@@ -329,7 +346,7 @@ if ~no_estimations(Estimations)
 %     Properties.linear_amp = 11;
 %     Properties.linear_bg = 0;
 %     Properties.linear_phase = 11;
-    [Result4, Residuals4] = any_sin_fit_f2(T_arr_fit, V_arr_fit_new, Freq, Estimations, Properties);
+    [Result4, Residuals4, DEBUG] = any_sin_fit_f2(T_arr_fit, V_arr_fit_new, Freq, Estimations, Properties);
 
     
     
@@ -348,9 +365,9 @@ Savedata = struct( ...
     'estimations', Estimations, ...
     'result', Result, ...
     'freq', Freq, ...
-    'Synth_time', Synth_time, ... % FIXME: debug
-    'Synth_signal', Synth_signal, ... % FIXME: debug
-    'Props', Props ... % FIXME: debug
+    'Synth_time', Synth_time, ... % FIXME: debug (must be replaced)
+    'Synth_signal', Synth_signal, ... % FIXME: debug (must be replaced)
+    'Props', Props ... % FIXME: debug (must be replaced)
     );
 
 Info = whos('Savedata');
@@ -362,7 +379,7 @@ else
 end
 
 
-%%
+%% Old code // shows Estimation places
 
 clc
 
@@ -537,7 +554,7 @@ function Result = ... % simple_sin_fit_f
     
     [fitresult, gof] = fit(Time', Signal', ft, opts);
     
-    % FIXME: check quality (use gof somehow)
+    % FIXME: do we need to check quality? (use gof somehow)
     
     A = fitresult.A;
     P = fitresult.P;

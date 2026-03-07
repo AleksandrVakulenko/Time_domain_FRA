@@ -1,6 +1,6 @@
 
 
-
+% FIXME: short_sig_phase_calc could return []
 
 function [Phase, Status] = estimate_phi_part_sin(Time, Signal, Period)
 
