@@ -1,7 +1,13 @@
 
 % FIXME: put in Fern module
 
-function [Amp, freq, Phi, Limit] = fft_calc(x, fs)
+function [Amp, freq, Phi, phi_limit] = fft_calc(x, fs, phi_limit)
+arguments
+    x
+    fs
+    phi_limit = [];
+end
+
 L = numel(x);
 if mod(L, 2) == 1
     L = L - 1;
@@ -14,9 +20,13 @@ P1(2:end-1) = 2*P1(2:end-1);
 freq = fs*(0:(L/2))/L;
 Amp = P1;
 
-Limit = 90e-6; % FIXME: magic constant
-range = abs(Amp) < Limit;
-Y(range) = 0;
+if ~isempty(phi_limit)
+%     phi_limit = 90e-6; % FIXME: magic constant
+    range = abs(Amp) < phi_limit;
+    Y(range) = 0;
+end
+
 Phi = angle((Y*1i))/pi*180;
 Phi = Phi(1:L/2+1);
+
 end

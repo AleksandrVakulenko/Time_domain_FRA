@@ -6,7 +6,6 @@
 % FIXME: use FFT or DFT for 50 Hz rejection
 % FIXME: add harmonics detection
 % FIXME: add underrange (span and mean) test signals
-% FIXME: extract background and refit
 % FIXME: analize residuals
 % FIXME: use Estimations for Properties
 % FIXME: phase around -180[deg] problem
@@ -17,7 +16,7 @@ clc
 
 freq = 0.5;
 Freq_dev = 0;
-Duration = 10.0;
+Duration = 11.0;
 Profile = 'strong';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["", "", ""];
@@ -45,8 +44,9 @@ if Filter_ON
     Synth_signal = filter(Hd, Synth_signal-Synth_signal(1))+Synth_signal(1);
 end
 
-y = 0.01*sin(2*pi*2*freq*Synth_time);
-Synth_signal = Synth_signal+y;
+y_harm2 = 0.01*sin(2*pi*2*freq*Synth_time + 42/180*pi);
+y_harm3 = 0.005*sin(2*pi*3*freq*Synth_time + 52/180*pi);
+Synth_signal = Synth_signal + y_harm2 + y_harm3;
 
 FRA_dev = FRA_dummy_dev(Synth_time, Synth_signal);
 
@@ -199,13 +199,13 @@ while ~stop
     
             Scale = Periods_counter/2; % FXIME: magic constant
             [out_time2, out_sig2] = get_last_period(T_arr, V_arr, Period, Scale);
-            Result2 = simple_sin_fit_f(out_time2, out_sig2, ...
+            Result = simple_sin_fit_f(out_time2, out_sig2, ...
                 Freq, Estimations);
 
-            Estimations = [Estimations Result2];
+            Estimations = [Estimations Result];
 
-            BG_diff = Result2.bg - Result1.bg;
-            Amp_mean = mean([Result2.amp Result1.amp]);
+            BG_diff = Result.bg - Result1.bg;
+            Amp_mean = mean([Result.amp Result1.amp]);
             Properties = update_props(Properties, Amp_mean, BG_diff);
 
 
@@ -229,7 +229,7 @@ while ~stop
 end
 FRA_dev.stop();
 
-%%
+%
 if Periods_counter < 2
     Properties.const_amp = 11;
     Properties.const_bg = 0;
@@ -265,7 +265,13 @@ if ~no_estimations(Estimations)
 %     Properties.linear_bg = 1e6;
 %     Properties.linear_phase = 1e6;
 
-    Result2 = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, Estimations, Properties);
+    [Result, Residuals] = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, Estimations, Properties);
+    % FIXME: do DFT estimation here
+    [Result2, Residuals2] = any_sin_fit_f2(T_arr_fit, Residuals, 2*Freq, [], []);
+    % FIXME: do DFT estimation here
+    [Result3, Residuals3] = any_sin_fit_f2(T_arr_fit, Residuals2, 3*Freq, [], []);
+    % FIXME: extract harms and refit
+    
 
     disp(['Time to fit: ' num2str(toc, '%0.2f') ' s'])
     
@@ -278,7 +284,7 @@ Savedata = struct( ...
     'time', T_arr, ...
     'ch1', V_arr, ...
     'estimations', Estimations, ...
-    'result', Result2, ...
+    'result', Result, ...
     'freq', Freq, ...
     'Synth_time', Synth_time, ... % FIXME: debug
     'Synth_signal', Synth_signal, ... % FIXME: debug

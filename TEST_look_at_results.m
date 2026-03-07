@@ -1,7 +1,23 @@
 
 clc
 
-Result_in = Result2;
+% Data_time = Synth_time;
+% V_arr_in = V_arr;
+% Data_signal = Synth_signal;
+% Result_in = Result;
+% Residuals_in = Residuals;
+
+% Data_time = Synth_time;
+% V_arr_in = Residuals;
+% Data_signal = Residuals;
+% Result_in = Result2;
+% Residuals_in = Residuals2;
+
+% Data_time = Synth_time;
+% V_arr_in = Residuals2;
+% Data_signal = Residuals2;
+% Result_in = Result3;
+% Residuals_in = Residuals3;
 
 T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
@@ -20,7 +36,7 @@ BG_err = poly3calc(Result_in.bg_poly_err, T_arr_min);
 
 % Calc output values and errors ------------------------------------
 % FIXME: use residual analysis here
-pps = [2];
+pps = [];
 Output = calc_output(Result_in, pps);
 Amp_out = Output.amp;
 Phi_out = Output.phi;
@@ -60,13 +76,13 @@ D = Result_in.f_div_ppm;
 Freq2 = Result_in.freq*(1+D/1e6);
 ym = Amp_full.*sin(2*pi*Freq2*T_arr + Phi_full/180*pi) + BG_full;
 
-Residuals = V_arr-ym;
+% Residuals = V_arr-ym;
 
 
 figure('position', [98 155 742 874])
 subplot(2, 1, 1)
 hold on
-plot(Synth_time, Synth_signal, '-b')
+plot(Data_time, Data_signal, '-b')
 plot(T_arr, ym, '--r', 'LineWidth', 2)
 plot(T_arr, BG_full, '--k', 'LineWidth', 1)
 plot(T_arr, BG_full+Amp_full, '--k', 'LineWidth', 1)
@@ -74,8 +90,8 @@ plot(T_arr, BG_full-Amp_full, '--k', 'LineWidth', 1)
 title('Signal')
 
 subplot(2, 1, 2)
-plot(T_arr, Residuals, '-b')
-yline(std(Residuals)*2)
+plot(T_arr, Residuals_in, '-b')
+yline(std(Residuals_in)*2)
 title('Residuals')
 
 
@@ -83,7 +99,7 @@ figure('position', [871 333 746 696])
 
 subplot(2, 2, 1)
 hold on
-plot(Synth_time, Props.amp, '-b', 'LineWidth', 2)
+plot(Data_time, Props.amp, '-b', 'LineWidth', 2)
 plot(T_arr_min, Amp, '--r', 'LineWidth', 2)
 plot(T_arr_min, Amp+Amp_err, '-k', 'LineWidth', 0.5)
 plot(T_arr_min, Amp-Amp_err, '-k', 'LineWidth', 0.5)
@@ -93,7 +109,7 @@ legend({'Props', 'Est'}, 'Location', 'best')
 
 subplot(2, 2, 2)
 hold on
-plot(Synth_time, Props.phi, '-b', 'LineWidth', 2)
+plot(Data_time, Props.phi, '-b', 'LineWidth', 2)
 plot(T_arr_min, Phi, '--r', 'LineWidth', 2)
 plot(T_arr_min, Phi+Phi_err, '-k', 'LineWidth', 0.5)
 plot(T_arr_min, Phi-Phi_err, '-k', 'LineWidth', 0.5)
@@ -107,7 +123,7 @@ title('Phi, deg')
 
 subplot(2, 2, 3)
 hold on
-plot(Synth_time, Props.bg, '-b', 'LineWidth', 2)
+plot(Data_time, Props.bg, '-b', 'LineWidth', 2)
 plot(T_arr_min, BG, '--r', 'LineWidth', 2)
 plot(T_arr_min, BG+BG_err, '-k', 'LineWidth', 0.5)
 plot(T_arr_min, BG-BG_err, '-k', 'LineWidth', 0.5)
@@ -115,7 +131,7 @@ errorbar(T_out, BG_out, BG_err_out, '.m', 'MarkerSize', 12);
 title('background')
 
 subplot(2, 2, 4)
-histogram(Residuals, 'Normalization', 'pdf')
+histogram(Residuals_in, 'Normalization', 'pdf')
 title('Residuals histogram')
 
 
