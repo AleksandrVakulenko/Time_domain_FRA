@@ -1,16 +1,14 @@
 
 
 % FIXME: use incoming estimations
-% FIXME: update sig_gen
+% FIXME: update sig_gen (harm gen)
+% FIXME: add underrange (span and mean) test signals
+% FIXME: analize residuals more (for what?)
 % FIXME: use FFT or DFT for estimation
 % FIXME: use FFT or DFT for 50 Hz rejection
-% FIXME: add harmonics detection
-% FIXME: add underrange (span and mean) test signals
-% FIXME: analize residuals
 % FIXME: use Estimations for Properties
+% FIMXE: add new data viewer
 % FIXME: phase around -180[deg] problem
-% FIMXE: add data viewer
-
 
 clc
 
@@ -265,11 +263,25 @@ if ~no_estimations(Estimations)
 %     Properties.linear_bg = 1e6;
 %     Properties.linear_phase = 1e6;
 
+    % FIXME: put results in cell array (or simple array)
+
+    % NOTE: first try to fit Fundamental
     [Result, Residuals] = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, Estimations, Properties);
-    % FIXME: do DFT estimation here
-    [Result2, Residuals2] = any_sin_fit_f2(T_arr_fit, Residuals, 2*Freq, [], []);
-    % FIXME: do DFT estimation here
-    [Result3, Residuals3] = any_sin_fit_f2(T_arr_fit, Residuals2, 3*Freq, [], []);
+    
+    % NOTE: fit Harm 2
+    [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr, Residuals, 2*Freq);
+    Estimations_H2.amp = Amp_DFT;
+    Estimations_H2.phi = Phi_DFT;
+    Estimations_H2.bg = 0;
+    [Result2, Residuals2] = any_sin_fit_f2(T_arr_fit, Residuals, 2*Freq, Estimations_H2, []);
+
+    % NOTE: fit Harm 3
+    [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr, Residuals2, 3*Freq);
+    Estimations_H3.amp = Amp_DFT;
+    Estimations_H3.phi = Phi_DFT;
+    Estimations_H3.bg = 0;
+    [Result3, Residuals3] = any_sin_fit_f2(T_arr_fit, Residuals2, 3*Freq, Estimations_H3, []);
+    
     % FIXME: extract harms and refit
     
 
@@ -280,6 +292,7 @@ else
     disp('No estimations')
 end
 
+% FIXME: put harms to savedata
 Savedata = struct( ...
     'time', T_arr, ...
     'ch1', V_arr, ...
