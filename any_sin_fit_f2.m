@@ -1,7 +1,7 @@
 
 
 function [Result, Residuals, DEBUG] = ...
-    any_sin_fit_f2(Time, Signal, Freq, Estimations, Properties)
+    any_sin_fit_f2(Time, Signal, Freq, Estimations, Properties, Harm_est)
 
 Period = 1/Freq;
 
@@ -142,9 +142,25 @@ switch Phi_type
         error('unreachable')
 end
 
+Freq_div_flag = false; % FIXME: debug
+if Freq_div_flag
+    F_div_str = '*(1+0/1e6)'; % FIXME: add D
+else
+    F_div_str = '';
+end
 
-Eq = [Amp_str ' * sin(2*pi*' num2str(Freq) '*(1+0/1e6)*x + ' Phi_str '/180*pi) + ' BG_str];
+Eq = [Amp_str ' * sin(2*pi*' num2str(Freq) F_div_str '*x + ' Phi_str '/180*pi) + ' BG_str];
 
+if ~isempty(Harm_est)
+    for i = 1:numel(Harm_est)
+        Hn = Harm_est(i).num;
+        HarmN_eq = ['q' num2str(Hn) 'a' '*sin(2*pi*' num2str(Hn*Freq) F_div_str '*x + q' num2str(Hn) 'p' '/180*pi)'];
+        Eq = [Eq ' + ' HarmN_eq];
+        Lower = [Lower Harm_est(i).amp*0.1 Harm_est(i).phi-45];
+        StartPoint = [StartPoint Harm_est(i).amp Harm_est(i).phi];
+        Upper = [Upper Harm_est(i).amp*10 Harm_est(i).phi+45];
+    end
+end
 
 ft = fittype(Eq, 'independent', 'x', 'dependent', 'y');
 opts = fitoptions('Method', 'NonlinearLeastSquares');
@@ -203,6 +219,23 @@ phi_poly_err.p2 = get_error(fitresult, 'p2');
 phi_poly_err.p3 = get_error(fitresult, 'p3');
 phi_poly_err.x = X_arr;
 
+if ~isempty(Harm_est)
+    harm_out = struct('n', [], 'amp', [], 'phi', []);
+    harm_err = struct('n', [], 'amp', [], 'phi', []);
+    for i = 1:numel(Harm_est.num)
+        hn = Harm_est.num(i);
+        harm_out(i).n = hn;
+        harm_out(i).amp = get_value(fitresult, ['q' num2str(hn) 'a']);
+        harm_out(i).phi = get_value(fitresult, ['q' num2str(hn) 'p']);
+        harm_err(i).n = hn;
+        harm_err(i).amp = get_error(fitresult, ['q' num2str(hn) 'a']);
+        harm_err(i).phi = get_error(fitresult, ['q' num2str(hn) 'p']);
+    end
+else
+    harm_out = [];
+    harm_err = [];
+end
+
 Result = struct(...
     'amp_poly', amp_poly_out, ...
     'phi_poly', phi_poly_out, ...
@@ -213,9 +246,9 @@ Result = struct(...
     'f_div_ppm', D, ...
     'f_dev_ppm_err', D_err, ...
     'fit_function', 'any_sin_fit_f2', ...
-    'freq', Freq ...
-    );
-
+    'freq', Freq, ...
+    'harm', harm_out, ...
+    'harm_err', harm_err);
 end
 
 

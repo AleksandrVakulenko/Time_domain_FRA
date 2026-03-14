@@ -16,7 +16,7 @@ clc
 
 freq = 1;
 Freq_dev = 0;
-Duration = 2.2;
+Duration = 2.0;
 Profile = 'mid';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["", "", ""];
@@ -318,7 +318,7 @@ if ~no_estimations(Estimations)
     % FIXME: put results in cell array (or simple array)
 
     % NOTE: first try to fit Fundamental
-    [Result, Residuals] = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, Estimations, Properties);
+    [Result, Residuals] = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, Estimations, Properties, []);
     
     % NOTE: fit Harm 2
     [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr_fit, Residuals, 2*Freq);
@@ -326,7 +326,7 @@ if ~no_estimations(Estimations)
     Estimations_H2.amp = Amp_DFT;
     Estimations_H2.phi = Phi_DFT;
     Estimations_H2.bg = 0;
-    [Result2, Residuals2] = any_sin_fit_f2(T_arr_fit, Residuals, 2*Freq, Estimations_H2, []);
+    [Result2, Residuals2] = any_sin_fit_f2(T_arr_fit, Residuals, 2*Freq, Estimations_H2, [], []);
 
     % NOTE: fit Harm 3
     [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr_fit, Residuals2, 3*Freq);
@@ -334,7 +334,7 @@ if ~no_estimations(Estimations)
     Estimations_H3.amp = Amp_DFT;
     Estimations_H3.phi = Phi_DFT;
     Estimations_H3.bg = 0;
-    [Result3, Residuals3] = any_sin_fit_f2(T_arr_fit, Residuals2, 3*Freq, Estimations_H3, []);
+    [Result3, Residuals3] = any_sin_fit_f2(T_arr_fit, Residuals2, 3*Freq, Estimations_H3, [], []);
     
     % NOTE: extract harms and refit
     Harm2_sig = calc_fitted_signal(Result2, T_arr_fit);
@@ -346,7 +346,7 @@ if ~no_estimations(Estimations)
 %     Properties.linear_amp = 11;
 %     Properties.linear_bg = 0;
 %     Properties.linear_phase = 11;
-    [Result4, Residuals4, DEBUG] = any_sin_fit_f2(T_arr_fit, V_arr_fit_new, Freq, Estimations, Properties);
+    [Result4, Residuals4, DEBUG] = any_sin_fit_f2(T_arr_fit, V_arr_fit_new, Freq, Estimations, Properties, []);
 
     
     
