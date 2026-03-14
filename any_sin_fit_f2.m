@@ -153,7 +153,7 @@ Eq = [Amp_str ' * sin(2*pi*' num2str(Freq) F_div_str '*x + ' Phi_str '/180*pi) +
 
 if ~isempty(Harm_est)
     for i = 1:numel(Harm_est)
-        Hn = Harm_est(i).num;
+        Hn = Harm_est(i).n;
         HarmN_eq = ['q' num2str(Hn) 'a' '*sin(2*pi*' num2str(Hn*Freq) F_div_str '*x + q' num2str(Hn) 'p' '/180*pi)'];
         Eq = [Eq ' + ' HarmN_eq];
         Lower = [Lower Harm_est(i).amp*0.1 Harm_est(i).phi-45];
@@ -222,8 +222,8 @@ phi_poly_err.x = X_arr;
 if ~isempty(Harm_est)
     harm_out = struct('n', [], 'amp', [], 'phi', []);
     harm_err = struct('n', [], 'amp', [], 'phi', []);
-    for i = 1:numel(Harm_est.num)
-        hn = Harm_est.num(i);
+    for i = 1:numel(Harm_est)
+        hn = Harm_est(i).n;
         harm_out(i).n = hn;
         harm_out(i).amp = get_value(fitresult, ['q' num2str(hn) 'a']);
         harm_out(i).phi = get_value(fitresult, ['q' num2str(hn) 'p']);

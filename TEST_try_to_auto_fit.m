@@ -5,7 +5,6 @@
 % FIXME: [update sig_gen:] add underrange (span and mean) test signals
 % FIXME: analize residuals more (for what?)
 % FIXME: use Estimations for Properties
-% FIXME: use FFT or DFT for Harm estimation
 % FIXME: use FFT or DFT for 50 Hz rejection (neh)
 % FIMXE: add new data viewer
 % FIXME: add errors must be 3*std
@@ -14,13 +13,13 @@
 
 clc
 
-freq = 1;
+freq = 20;
 Freq_dev = 0;
-Duration = 2.0;
-Profile = 'mid';
+Duration = 1.0;
+Profile = 'weak';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["", "", ""];
-Seed = 'YYSRCS';
+Seed = 'XFKJVW';
 Filter_ON = false;
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -46,7 +45,8 @@ end
 
 y_harm2 = 0.01*sin(2*pi*2*freq*Synth_time + 42/180*pi);
 y_harm3 = 0.005*sin(2*pi*3*freq*Synth_time + 52/180*pi);
-Synth_signal = Synth_signal + y_harm2 + y_harm3;
+y_harm4 = 0.008*sin(2*pi*4*freq*Synth_time + 135/180*pi);
+Synth_signal = Synth_signal + y_harm2 + y_harm3 + y_harm4;
 
 FRA_dev = FRA_dummy_dev(Synth_time, Synth_signal);
 
@@ -273,7 +273,9 @@ end
 % end
 
 
-%
+
+%%
+clc
 
 if no_estimations(Estimations) && no_estimations(Estimations_low) && ...
         ~no_estimations(Estimations_extra)
@@ -309,47 +311,43 @@ if ~no_estimations(Estimations)
         V_arr_fit = V_arr;
     end
     
-%     Properties.const_bg = 0;
-%     Properties.linear_bg = 0;
-%     Properties.linear_amp = 1e6;
-%     Properties.linear_bg = 1e6;
-%     Properties.linear_phase = 1e6;
+    Properties.const_bg = 0;
+    Properties.linear_bg = 0;
+
+    Properties.const_amp = 0;
+    Properties.linear_amp = 0;
+
+    Properties.const_phase = 0;
+    Properties.linear_phase = 0;
 
     % FIXME: put results in cell array (or simple array)
 
-    % NOTE: first try to fit Fundamental
-    [Result, Residuals] = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, Estimations, Properties, []);
-    
-    % NOTE: fit Harm 2
-    [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr_fit, Residuals, 2*Freq);
-    disp(['Amp_H2 = ' num2str(Amp_DFT) ' V  |  Phi_H2 = ' num2str(Phi_DFT) ' deg'])
-    Estimations_H2.amp = Amp_DFT;
-    Estimations_H2.phi = Phi_DFT;
-    Estimations_H2.bg = 0;
-    [Result2, Residuals2] = any_sin_fit_f2(T_arr_fit, Residuals, 2*Freq, Estimations_H2, [], []);
 
-    % NOTE: fit Harm 3
-    [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr_fit, Residuals2, 3*Freq);
-    disp(['Amp_H3 = ' num2str(Amp_DFT) ' V  |  Phi_H3 = ' num2str(Phi_DFT) ' deg'])
-    Estimations_H3.amp = Amp_DFT;
-    Estimations_H3.phi = Phi_DFT;
-    Estimations_H3.bg = 0;
-    [Result3, Residuals3] = any_sin_fit_f2(T_arr_fit, Residuals2, 3*Freq, Estimations_H3, [], []);
-    
-    % NOTE: extract harms and refit
-    Harm2_sig = calc_fitted_signal(Result2, T_arr_fit);
-    Harm3_sig = calc_fitted_signal(Result3, T_arr_fit);
-    V_arr_fit_new = V_arr_fit - Harm2_sig - Harm3_sig;
-%     Properties.const_amp = 0;
-%     Properties.const_bg = 0;
-%     Properties.const_phase = 0;
-%     Properties.linear_amp = 11;
-%     Properties.linear_bg = 0;
-%     Properties.linear_phase = 11;
-    [Result4, Residuals4, DEBUG] = any_sin_fit_f2(T_arr_fit, V_arr_fit_new, Freq, Estimations, Properties, []);
+    % NOTE: Harms estimation
+    Harm_est = struct('n', [], 'amp', [], 'phi', []);
+    k = 0;
+    for hn = 2:6
+        [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr_fit, V_arr_fit, hn*Freq);
+        disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
+            '    ' newline ...
+            'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline])
+        if Amp_DFT > 0.002 % FIXME: magic constant (DEBUG)
+            k = k + 1;
+            Harm_est(k).n = hn;
+            Harm_est(k).amp = Amp_DFT;
+            Harm_est(k).phi = Phi_DFT;
+        end
+    end
+    if k == 0
+        Harm_est = [];
+    end
 
-    
-    
+
+    % NOTE: fit with harmonics estimations
+%     [Result, Residuals] = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, ...
+%         Estimations, Properties, Harm_est);
+    [Result, Residuals] = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, ...
+        Estimations, Properties, Harm_est);
 
     disp(['Time to fit: ' num2str(toc, '%0.2f') ' s'])
     

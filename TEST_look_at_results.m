@@ -31,6 +31,9 @@ T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
 [ym, Amp_full, Phi_full, BG_full] = calc_fitted_signal(Result_in, T_arr);
 
+Harm_disp(Result_in);
+ym = ym + Harm_calc(Result_in, T_arr);
+
 Residuals_in = Data_signal - ym;
 
 
@@ -54,12 +57,13 @@ if Output.single_flag
     A_div = mean(abs(Props.amp - Amp_out)./Props.amp) * 100; % [%]
     P_div = mean(abs(Props.phi - Phi_out)); % [deg]
     C_div = mean(abs(Props.bg - BG_out)./Props.bg) * 100; % [%]
+    disp('Deviation from Props:')
     disp(['A div : ' num2str(A_div, '%0.2f') ' %'])
     disp(['P div : ' num2str(P_div, '%0.3f') ' deg'])
     disp(['C div : ' num2str(C_div, '%0.2f') ' %'])
 
 
-    disp([newline 'Calc values: '])
+    disp([newline 'Calc values (mean): '])
     Str = err_str(Amp_out, Amp_err_out);
     disp(['A = ' Str ' [V]'])
     Str = err_str(Phi_out, Phi_err_out);
@@ -67,7 +71,7 @@ if Output.single_flag
     Str = err_str(BG_out, BG_err_out);
     disp(['C = ' Str ' [V]'])
 
-    disp([newline 'Real values: '])
+    disp([newline 'Real values (mean): '])
     disp(['A = ' num2str(mean(Props.amp)) ' [V]']);
     disp(['P = ' num2str(mean(Props.phi)) ' [deg]']);
     disp(['C = ' num2str(mean(Props.bg)) ' [V]']);
@@ -138,9 +142,10 @@ title('Residuals histogram')
 
 
 
-
-
-
+%%
+HHH = Harm_calc(Result, T_arr);
+plot(T_arr, HHH);
+%%
 
 
 
@@ -202,7 +207,45 @@ end
 
 
 
+function Harm_disp(Result_in)
+Harm = Result_in.harm;
+if ~isempty(Harm)
+    Freq = Result_in.freq;
+    Freq_dev = Result_in.f_div_ppm;
+    Freq = Freq * (1 + Freq_dev/1e6);
+    for i = 1:numel(Harm)
+        hn = Harm(i).n;
+        A = Harm(i).amp;
+        P = Harm(i).phi;
+        disp(['Harmonic ' num2str(hn) ':'])
+        disp(['Freq = ' num2str(hn*Freq) ' Hz'])
+        disp(['A = ' num2str(A) ' V' ...
+              newline ...
+              'P = ' num2str(P) ' deg' newline])
+    end
+end
 
+end
+
+function out = Harm_calc(Result_in, Time)
+Harm = Result_in.harm;
+if ~isempty(Harm)
+    Freq = Result_in.freq;
+    Freq_dev = Result_in.f_div_ppm;
+    Freq = Freq * (1 + Freq_dev/1e6);
+    out = zeros(size(Time));
+    for i = 1:numel(Harm)
+        hn = Harm(i).n;
+        A = Harm(i).amp;
+        P = Harm(i).phi;
+        H_value = A*sin(2*pi*hn*Freq*Time + P/180*pi);
+        out = out + H_value;
+    end
+else
+    out= [];
+end
+
+end
 
 
 
