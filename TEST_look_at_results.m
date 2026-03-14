@@ -5,7 +5,12 @@ Data_time = Synth_time;
 V_arr_in = V_arr;
 Data_signal = Synth_signal;
 Result_in = Result;
+% T_arr = T_arr;
+T_arr = Synth_time;
+
 % Residuals_in = Residuals;
+
+
 
 % Data_time = Synth_time;
 % V_arr_in = Residuals;
@@ -32,10 +37,14 @@ T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 [ym, Amp_full, Phi_full, BG_full] = calc_fitted_signal(Result_in, T_arr);
 
 Harm_disp(Result_in);
-ym = ym + Harm_calc(Result_in, T_arr);
 
+Harm_y = Harm_calc(Result_in, T_arr);
+if ~isempty(Harm_y)
+    ym = ym + Harm_y;
+end
 Residuals_in = Data_signal - ym;
 
+Noise_amp = noise_amp_calc(freq, Synth_time, Synth_signal, Fs);
 
 [~, Amp, Phi, BG, Amp_err, Phi_err, BG_err] = ...
     calc_fitted_signal(Result_in, T_arr_min);
@@ -63,7 +72,7 @@ if Output.single_flag
     disp(['C div : ' num2str(C_div, '%0.2f') ' %'])
 
 
-    disp([newline 'Calc values (mean): '])
+    disp([newline 'Calc values (mean):'])
     Str = err_str(Amp_out, Amp_err_out);
     disp(['A = ' Str ' [V]'])
     Str = err_str(Phi_out, Phi_err_out);
@@ -71,10 +80,17 @@ if Output.single_flag
     Str = err_str(BG_out, BG_err_out);
     disp(['C = ' Str ' [V]'])
 
-    disp([newline 'Real values (mean): '])
+    disp([newline 'Real values (mean):'])
     disp(['A = ' num2str(mean(Props.amp)) ' [V]']);
     disp(['P = ' num2str(mean(Props.phi)) ' [deg]']);
     disp(['C = ' num2str(mean(Props.bg)) ' [V]']);
+
+    SNR = 20*log10(Amp_out/Noise_amp);
+    disp([newline 'Noise level:'])
+    disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
+    disp(['SNR = ' num2str(Amp_out/Noise_amp, '%0.2f')])
+    disp(['SNR = ' num2str(SNR, '%0.2f') ' dB'])
+
 end
 %-------------------------------------------------------------------
 

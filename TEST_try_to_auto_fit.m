@@ -13,13 +13,13 @@
 
 clc
 
-freq = 20;
+freq = 1;
 Freq_dev = 0;
-Duration = 1.0;
-Profile = 'weak';
+Duration = 5.0;
+Profile = 'strong';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
-Traits = ["", "", ""];
-Seed = 'XFKJVW';
+Traits = ["lownoise", "", ""];
+Seed = '';
 Filter_ON = false;
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -274,7 +274,7 @@ end
 
 
 
-%%
+%
 clc
 
 if no_estimations(Estimations) && no_estimations(Estimations_low) && ...
@@ -339,6 +339,10 @@ if ~no_estimations(Estimations)
         end
     end
     if k == 0
+        Harm_est = [];
+    end
+
+    if Overload_count > 0
         Harm_est = [];
     end
 
