@@ -1,7 +1,7 @@
 
 % FIXME: put in Fern module
 
-function [amp, freq] = fft_plot(sig, fs, phi_limit)
+function [amp, phi, freq] = fft_plot(sig, fs, phi_limit)
 arguments
     sig
     fs
@@ -49,6 +49,10 @@ subplot(2, 1, 1)
 hold off
 subplot(2, 1, 2)
 hold off
+
+if nargout == 0
+    amp = [];
+end
 
 end
 
