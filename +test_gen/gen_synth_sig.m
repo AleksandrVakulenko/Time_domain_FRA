@@ -8,8 +8,8 @@ arguments
     Duration double
     Profile {mustBeMember(Profile, ...
         ["strong", "mid", "weak", "const", "nobg"])} = "const"
-    Traits {mustBeMember(Traits, ...
-        ["", "nobg", "zerophi", "constphi", "nonoise", "lownoise", ...
+    Traits {mustBeMember(Traits, ["", "nobg", "zerophi", "constphi", ...
+        "nonoise", "lownoise", 'filter30' ...
         "noharm"])} = ""
     Seed string = ""
     Fs double = 10e3
@@ -17,15 +17,9 @@ end
 
 Seed = test_gen.set_rand(Seed);
 
-% FIXME: ADD THIS
+% FIXME: add time shift
 % Time_shift = rand_range(0, 10e3); % [s]
 % Synth_time = (0:1/Fs:Duration) + Time_shift;
-
-
-%------------------------------------
-Scale = 3e-10;
-
-%------------------------------------
 
 Synth_time = (0:1/Fs:Duration);
 
@@ -47,7 +41,8 @@ Synth_signal = Amp.*sin(2*pi*F.*Synth_time + Phi/180*pi) + Background;
 
 if ~any(Traits == "nonoise")
     Noise_gen = test_gen.current_noise_gen(Synth_time);
-    
+    % NOTE: scale for noise
+    Scale = 3e-10;
     if any(Traits == "lownoise")
         Synth_signal = Synth_signal + Noise_gen/Scale*0.08;
     else
@@ -72,10 +67,15 @@ if ~any(Traits == "noharm")
 else
     harm = [];
 end
-
 Props.harm = harm;
 
+% FIXME: add saturation limit property
 Synth_signal = test_gen.signal_saturation(Synth_signal, -5, 5);
+
+if any(Traits == "filter30")
+    load('+test_gen/Filter_LF_FIR_2_30.mat', 'Hd');
+    Synth_signal = filter(Hd, Synth_signal-Synth_signal(1))+Synth_signal(1);
+end
 
 end
 
