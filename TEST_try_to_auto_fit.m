@@ -1,25 +1,29 @@
 
-% FIXME: DFT vs fft problem
-% FIXME: [update sig_gen:] add underrange (span and mean) test signals
-% FIXME: use incoming estimations
+%      ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂
+
+% FIXME: finish make_fs_lower()
 % FIXME: use Estimations for Properties
+% FIXME: use incoming estimations
+% FIXME: [update sig_gen:] add underrange (span and mean) test signals
 % FIMXE: add new data viewer
 % FIXME: add errors must be 3*std
 % FIXME: use FFT or DFT for 50 Hz rejection
 % FIXME: analize residuals more (for what?)
+% FIXME: DFT vs fft problem (calculating many DFTs)
 % FIXME: phase around -180[deg] problem
 % FIXME: place fft functions to its own lib
 
 clc
 
+Save_data_flag = false;
 freq = 2;
 Freq_dev = 0;
-Duration = 1.0;
+Duration = 3;
+Fs = 10e3;
 Profile = 'mid';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
-Traits = ["", "", ""];
+Traits = ["lownoise", "", ""];
 Seed = '';
-Filter_ON = false;
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
 % VHJLJS (O_O)
@@ -28,50 +32,43 @@ Filter_ON = false;
 % CUSAIQ ???
 % AQIOEZ overload test
 % YYSRCS
-Fs = 10e3;
 
 [Synth_time, Synth_signal, Props] = test_gen.gen_synth_sig(freq, Freq_dev, ...
     Duration, Profile, Traits, Seed, Fs);
 
-% Synth_signal = Synth_signal/100;
-
 disp(['Seed: ' char(Props.seed)]);
 
-if Filter_ON
-    load('Filter_LF_FIR_2_30.mat')
-    Synth_signal = filter(Hd, Synth_signal-Synth_signal(1))+Synth_signal(1);
-end
 
-% y_harm2 = 0.01*sin(2*pi*2*freq*Synth_time + 42/180*pi);
-% y_harm3 = 0.005*sin(2*pi*3*freq*Synth_time + 52/180*pi);
-% y_harm4 = 0.008*sin(2*pi*4*freq*Synth_time + 135/180*pi);
-% Synth_signal = Synth_signal + y_harm2 + y_harm3 + y_harm4;
-
-FRA_dev = FRA_dummy_dev(Synth_time, Synth_signal);
+FRA_dev = test_gen.FRA_dummy_dev(Synth_time, Synth_signal);
 
 figure('position', [562 434 560 420])
 plot(Synth_time, Synth_signal)
+grid on
+grid minor
+ylabel('signal, V')
+xlabel('t, s')
+title('Test signal')
 
 %% Main part
 
 %--------------------------------
 Freq = freq;
 Underrange_force = false;
-%--------------------------------
-Period = 1/Freq;
+Fig = figure('position', [564 433 560 420]);
+Find_harms = true;
+MAX_CH2_LIMIT = 5;
+Time_to_underrange = 0.3; % [s]
+Overrange_tolerance = 0; % [%]
 %--------------------------------
 
 %--------------------------------
-Time_settings = struct(...
-    'max', 5*Period, ...
-    'fairly', 2*Period ...
-    );
+Period = 1/Freq;
+Time_settings = struct('max', 50*Period); % FIXME
 Accuracy_settings = struct(...
     ...
     );
 %--------------------------------
 
-clc
 
 % Shared data -------------------------
 T_arr = [];
@@ -90,16 +87,17 @@ Properties = struct(...
     'const_amp', 0, ...
     'linear_amp', 0);
 
-MAX_LIMIT = 5;
 Underrange = true;
+stop = false;
+Exit_flag = 0;
 % -------------------------------------
 
+clc
 FRA_dev.run();
-figure('position', [564 433 560 420])
-stop = false;
 while ~stop
-    [T_part, V_part] = FRA_dev.get_data_ch1();
     pause(0.001); %FIXME: for fast signal
+    [T_part, V_part] = FRA_dev.get_data_ch1();
+%     [T_part, V_part, V2_part] = get_CV(obj);
     if isempty(T_part)
         stop = true;
     end
@@ -114,14 +112,12 @@ while ~stop
     Time_passed = T_arr(end);
     Periods_counter = Time_passed/Period;
     
-    % FIXME: How to exit if overrange?
-    Overload_range = abs(V_arr) > MAX_LIMIT*0.999; % FIXME: magic constant
+    Overload_range = abs(V_arr) > MAX_CH2_LIMIT*0.999; % FIXME: magic constant
     Overload_count = numel(find(Overload_range));
     Overload_volume = Overload_count/numel(V_arr);
     if Overload_count > 0
         disp(['Overload: ' num2str(Overload_volume*100, '%0.2f') ' %'])
     end
-
 
     if Underrange
         [Mean, Span, Min, Max] = singal_stats(V_arr);
@@ -135,24 +131,28 @@ while ~stop
         if ~Cond1 && ~Cond2
             Underrange = false;
         end
-        disp('Underrange')
+        if Underrange
+            disp('Underrange') % FIXME: debug
+        end
     end
 
-    if Underrange && Time_passed > 0.5
-        % FIXME: how to save info about exit?
-        stop = true;
+    if Underrange && Time_passed > Time_to_underrange
+        Exit_flag = 1; % NOTE: EF 1: underrange
+        break;
     end
 
-    if Time_settings.max > Time_passed
-        % FIXME: how to exit?
+    if Time_passed > 0.3 && Overload_volume > Overrange_tolerance
+        Exit_flag = 2; % NOTE: EF 2: overrange
+        break;
     end
 
-    if Time_settings.fairly > Time_passed
-        % FXIME: how to exit?
+    if Time_passed > Time_settings.max
+        Exit_flag = 3; % NOTE: EF 3: Timeout_max
+        break;
     end
 
     if Periods_counter > 1.1
-%         stop = true;
+        % FIXME: ude this or Time_settings.max ?
     end
 
     % FIXME: do we need this?
@@ -164,8 +164,10 @@ while ~stop
     end
 
     switch signal_per_duration(Periods_counter)
-        case "invalid" % 0 : 0.5
-            % DO SOMETHING
+        case "invalid" % 0 : 0.45
+            % DO SOMETHING:
+            % - noise analysis
+            % pause(0.05*Period)
 
         case "get_lucky" % 0.45 : 0.5
             if no_estimations(Estimations_extra)
@@ -179,7 +181,7 @@ while ~stop
                 Estimations_extra = [Estimations_extra Result];
             end
 
-        case "min" % 0.5 : 1.2
+        case "min" % 0.5 : 1.0
             if no_estimations(Estimations_low)
                 Init_values = do_initial_estimation(T_arr, V_arr, Period);
                 Result = simple_sin_fit_f(T_arr, V_arr, ...
@@ -191,7 +193,8 @@ while ~stop
                 Estimations_low = [Estimations_low Result];
             end
             
-        case "single" % 1.2 : 2
+        case "single" % 1.0 : 2
+            % FIXME: we want to finish here !
             % FIXME: UNDONE (DEBUG VERSION)
 %             [out_time, out_sig] = get_last_period(T_arr, V_arr, Period);
             Result = simple_sin_fit_f(T_arr, V_arr, ...
@@ -235,15 +238,26 @@ while ~stop
 
     %--------------------------------
 
-    cla
-    plot(T_arr, V_arr);
-    title(['PC: ' num2str(Periods_counter, '%0.3f') ' '])
-    drawnow
-%     pause(0.5)
+    if ~isempty(Fig)
+        cla
+        plot(T_arr, V_arr);
+        title(['PC: ' num2str(Periods_counter, '%0.3f') ' '])
+        drawnow
+    end
 end
 FRA_dev.stop();
 
-%
+if Overload_count > 0
+    Find_harms = false;
+end
+
+disp(['Exit_flag: ' num2str(Exit_flag)]);
+
+
+
+%%
+clc
+
 if Periods_counter < 2
     Properties.const_amp = 11;
     Properties.const_bg = 0;
@@ -255,43 +269,9 @@ end
 Properties.linear_bg = 0;
 
 
-%FIXME: DEBUG ZONE
-if Periods_counter > 2
-    Est_time_min = [Estimations.t_max];
-    Est_time_max = [Estimations.t_max];
-    range = Est_time_min < Period & Est_time_max < Period;
-    Estimations(range) = [];
-else
-    Est_time_min = [Estimations.t_max];
-    Est_time_max = [Estimations.t_max];
-    range = Est_time_max < Period*0.5;
-    Estimations(range) = [];
-end
-% if numel(Estimations) > 10
-%     Estimations = Estimations(floor(end/2):end);
-% end
+Estimations = estimation_fix(Estimations, Periods_counter, freq);
 
 
-
-%%
-clc
-
-if no_estimations(Estimations) && no_estimations(Estimations_low) && ...
-        ~no_estimations(Estimations_extra)
-    disp([newline '! YOLO FIT ! (˶ᵔ ᵕ ᵔ˶) ‹𝟹' newline])
-    Estimations = Estimations_extra;
-elseif no_estimations(Estimations) && ~no_estimations(Estimations_low)
-    disp([newline '! FIT by bad estimations ! ⸜(｡˃ ᵕ ˂ )⸝♡' newline])
-    Estimations = Estimations_low;
-else
-    disp([newline '! OK, we have something ! („• ֊ •„)੭' newline])
-end
-
-% if no_estimations(Estimations) && ~no_estimations(Estimations_extra)
-%     disp([newline '! YOLO FIT ! (˶ᵔ ᵕ ᵔ˶) ‹𝟹' newline])
-%     Estimations = Estimations_extra;
-% end
-%
 if ~no_estimations(Estimations)
     disp('Start final fit:')
     
@@ -299,126 +279,77 @@ if ~no_estimations(Estimations)
     T_arr = T_arr(~Overload_range);
     V_arr = V_arr(~Overload_range);
     
-    tic
-    if numel(T_arr) > 200e3
-        disp('Nyan!')
-        T_arr_fit = interp1(1:numel(T_arr), T_arr, ...
-            linspace(1, numel(T_arr), 200000));
-        V_arr_fit = interp1(T_arr, V_arr, T_arr_fit);
-    else
-        T_arr_fit = T_arr;
-        V_arr_fit = V_arr;
-    end
+    Start_time_fit = tic;
+
+    [T_arr_fit, V_arr_fit, Fs_fit] = make_fs_lower(T_arr, V_arr, Fs, freq);
     
+    % -FIXME: debug-
     Properties.const_bg = 0;
     Properties.linear_bg = 0;
 
     Properties.const_amp = 0;
     Properties.linear_amp = 11;
 
-    Properties.const_phase = 11;
+    Properties.const_phase = 0;
     Properties.linear_phase = 0;
-
-    % FIXME: put results in cell array (or simple array)
-
+    % --------------
 
     % NOTE: Harms estimation
-    Harm_est = struct('n', [], 'amp', [], 'phi', []);
-    k = 0;
-    % FIXME: use full data or cut data for harm find?
-    [Noise_amp, nf_calc] = noise_amp_calc(freq, Synth_time, Synth_signal, Fs);
 
-    for hn = 2:6
-        [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr_fit, V_arr_fit, hn*Freq);
-        if Amp_DFT > nf_calc(hn*freq) % FIXME: magic constant
-            k = k + 1;
-            Harm_est(k).n = hn;
-            Harm_est(k).amp = Amp_DFT;
-            Harm_est(k).phi = Phi_DFT;
-            disp(['noise  = ' num2str(nf_calc(hn*freq)) ' V'])
-            disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
-                '    ' newline ...
-                'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline])
-        else
-            disp([num2str(nf_calc(hn*freq)) ' V'])
-            disp(['Amp_H' num2str(hn) ' = ' 'NaN' ' V' ...
-                '    ' newline ...
-                'Phi_H' num2str(hn) ' = ' 'NaN' ' deg' newline])
-        end
-    end
-    if k == 0
-        Harm_est = [];
-    end
-
-    if Overload_count > 0
+    if Find_harms
+        Harm_est = estimate_harmonics(freq, T_arr_fit, V_arr_fit, Fs_fit);
+    else
         Harm_est = [];
     end
 
 
     % NOTE: fit with harmonics estimations
-%     [Result, Residuals] = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, ...
-%         Estimations, Properties, Harm_est);
-    [Result, Residuals] = any_sin_fit_f2(T_arr_fit, V_arr_fit, Freq, ...
+    [Result, Residuals] = any_sin_fit(T_arr_fit, V_arr_fit, Freq, ...
         Estimations, Properties, Harm_est);
 
-    disp(['Time to fit: ' num2str(toc, '%0.2f') ' s'])
+    disp(['Time to fit: ' num2str(toc(Start_time_fit), '%0.2f') ' s'])
     
     disp([newline 'Finish'])
 else
     disp('No estimations')
 end
 
-% FIXME: put harms to savedata
-Savedata = struct( ...
-    'time', T_arr, ...
-    'ch1', V_arr, ...
-    'estimations', Estimations, ...
-    'result', Result, ...
-    'freq', Freq, ...
-    'Synth_time', Synth_time, ... % FIXME: debug (must be replaced)
-    'Synth_signal', Synth_signal, ... % FIXME: debug (must be replaced)
-    'Props', Props ... % FIXME: debug (must be replaced)
-    );
 
-Info = whos('Savedata');
-Size = Info.bytes/1024;
-if Size < 10e3
-    disp(['File size: ' num2str(Size, '%.1f') ' kB']);
-else
-    disp(['File size: ' num2str(Size/1024, '%.1f') ' MB']);
+if Save_data_flag
+    Savedata = struct( ...
+        'time', T_arr, ...
+        'ch1', V_arr, ...
+        'ch2', [], ...
+        'harm_est', Harm_est, ...
+        'estimations', Estimations, ...
+        'result', Result, ...
+        'freq', Freq, ...
+        'Synth_time', Synth_time, ... % FIXME: debug (must be replaced)
+        'Synth_signal', Synth_signal, ... % FIXME: debug (must be replaced)
+        'Props', Props ... % FIXME: debug (must be replaced)
+        );
+    
+    Info = whos('Savedata');
+    Size = Info.bytes/1024;
+    if Size < 10e3
+        disp(['File size: ' num2str(Size, '%.1f') ' kB']);
+    else
+        disp(['File size: ' num2str(Size/1024, '%.1f') ' MB']);
+    end
 end
 
 
-%% Old code // shows Estimation places
-
-clc
-
-hold on
-for i = 1:numel(Estimations)
-    
-    A = Estimations(i).amp;
-    P = Estimations(i).phi;
-    C = Estimations(i).bg;
-    fit_res = Estimations(i).fitres;
-    
-    disp(['A: ' num2str(A) ' P: ' num2str(P) ' C: ' num2str(C)])
-xline(Estimations(i).t_min)
-xline(Estimations(i).t_max)
-end
-
-disp('-----------------------')
-disp(['A: ' num2str(Props.amp(1)) ...
-      ' P: ' num2str(Props.phi(1)) ...
-      ' C: ' num2str(Props.bg(1))])
 
 
-ym = feval(fit_res, T_arr);
 
-plot(Synth_time, Synth_signal, '-b')
-plot(T_arr, ym, '-r', 'LineWidth', 2)
 
-% xline(Estimations(end).t_min)
-% xline(Estimations(end).t_max)
+
+
+
+
+
+
+
 
 
 %%
@@ -451,7 +382,7 @@ function Result = ... % do_initial_estimation
 
     [Mean, Span, ~, ~] = singal_stats(V_arr);
     
-    Start_Phi = estimate_phi_part_sin(T_arr, V_arr, Period);
+    Start_Phi = fit_helper.estimate_phi_part_sin(T_arr, V_arr, Period);
     if isempty(Start_Phi)
         Start_Phi = 0;
     end
@@ -615,7 +546,7 @@ end
 %     'bg_poly_err', bg_poly_err, ...
 %     'f_div_ppm', D, ...
 %     'f_dev_ppm_err', D_err, ...
-%     'fit_function', 'any_sin_fit_f2', ...
+%     'fit_function', 'any_sin_fit', ...
 %     'freq', Freq ...
 %     );
 
@@ -628,11 +559,11 @@ function state = signal_per_duration(Periods_counter)
         state = "get_lucky";
     end
 
-    if Periods_counter > 0.5 && Periods_counter <= 1.2
+    if Periods_counter > 0.5 && Periods_counter <= 1.0
         state = "min";
     end
 
-    if Periods_counter > 1.2 && Periods_counter <= 2.0
+    if Periods_counter > 1.0 && Periods_counter <= 2.0
         state = "single";
     end
 
@@ -656,7 +587,6 @@ function [Mean, Span, Min, Max] = singal_stats(Signal)
 end
 
 
-
 function [amp_poly, phi_poly, bg_poly] = estimations_const_fit(Estimations, Period)
     Est_amp = [Estimations.amp];
     Est_phi = [Estimations.phi];
@@ -676,12 +606,87 @@ function [amp_poly, phi_poly, bg_poly] = estimations_const_fit(Estimations, Peri
 end
 
 
+function Estimations = estimation_fix(Estimations, Periods_counter, freq)
+    Period = 1/freq;
+    % NOTE: delete early estimations
+    Est_time_min = [Estimations.t_max];
+    Est_time_max = [Estimations.t_max];
+    if Periods_counter > 2
+        range = Est_time_min < Period & Est_time_max < Period;
+    else
+        range = Est_time_max < Period*0.5;
+    end
+    Estimations(range) = [];
+    
+    % NOTE: Replce estimations (is none) by bad estimations
+    if no_estimations(Estimations) && no_estimations(Estimations_low) && ...
+            ~no_estimations(Estimations_extra)
+        disp([newline '! YOLO FIT ! („• ֊ •„)' newline])
+        Estimations = Estimations_extra;
+    elseif no_estimations(Estimations) && ~no_estimations(Estimations_low)
+        disp([newline '! FIT by bad estimations ! ⸜(｡˃ ᵕ ˂ )⸝♡' newline])
+        Estimations = Estimations_low;
+    else
+        disp([newline '! OK, we have something ! (˶ᵔ ᵕ ᵔ˶) ‹𝟹' newline])
+    end
+end
+
+%FIXME: UNDODE function
+function [T_arr_fit, V_arr_fit, Fs_fit] = make_fs_lower(T_arr, V_arr, Fs, freq)
+Period = 1/freq;
+Time_length = T_arr(end) - T_arr(1);
+Num = numel(T_arr);
+if Num > 20e3
+    
+end
+
+if numel(T_arr) > 200e3
+    disp('Nyan!')
+    T_arr_fit = interp1(1:numel(T_arr), T_arr, ...
+        linspace(1, numel(T_arr), 200000));
+    V_arr_fit = interp1(T_arr, V_arr, T_arr_fit);
+    Fs_fit = 1/mean(diff(T_arr_fit));
+else
+    T_arr_fit = T_arr;
+    V_arr_fit = V_arr;
+    Fs_fit = Fs;
+end
+
+end
 
 
+function Harm_est = estimate_harmonics(freq, T_arr, V_arr, Fs)
+Harm_est = struct('n', [], 'amp', [], 'phi', []);
+k = 0;
 
+% FIXME: use full data or cut data for harm find?
+[Noise_amp, nf_calc] = noise_amp_calc(freq, T_arr, V_arr, Fs);
 
+for hn = 2:6
+    [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr, V_arr, hn*freq);
+    if Amp_DFT > nf_calc(hn*freq) % FIXME: magic constant
+        k = k + 1;
+        Harm_est(k).n = hn;
+        Harm_est(k).amp = Amp_DFT;
+        Harm_est(k).phi = Phi_DFT;
+        disp('GOOD')
+        disp(['noise  = ' num2str(nf_calc(hn*freq)) ' V'])
+        disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
+            '    ' newline ...
+            'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline])
+    else
+        disp('BAD')
+        disp(['noise  = ' num2str(nf_calc(hn*freq)) ' V'])
+        disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
+            '    ' newline ...
+            'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline])
+    end
+end
+if k == 0
+    Harm_est = [];
+end
 
-
+end
 
 
 

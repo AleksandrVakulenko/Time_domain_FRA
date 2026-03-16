@@ -1,4 +1,5 @@
 
+% NOTE: 'DEBUG' is from any_sin_fit()
 
 plot(DEBUG.X_arr, DEBUG.StartPoint([1, 2, 3]), 'xk', 'MarkerSize', 15)
 

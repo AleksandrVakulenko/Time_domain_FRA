@@ -7,34 +7,13 @@ Data_signal = Synth_signal;
 Result_in = Result;
 % T_arr = T_arr;
 T_arr = Synth_time;
-
 % Residuals_in = Residuals;
 
 
 
-% Data_time = Synth_time;
-% V_arr_in = Residuals;
-% Data_signal = Residuals;
-% Result_in = Result2;
-% Residuals_in = Residuals2;
-
-% Data_time = Synth_time;
-% V_arr_in = Residuals2;
-% Data_signal = Residuals2;
-% Result_in = Result3;
-% Residuals_in = Residuals3;
-
-% Harm2_sig = calc_fitted_signal(Result2, Synth_time);
-% Harm3_sig = calc_fitted_signal(Result3, Synth_time);
-% Data_time = Synth_time;
-% V_arr_in = V_arr;
-% Data_signal = Synth_signal - Harm2_sig - Harm3_sig;
-% Result_in = Result4;
-% Residuals_in = Residuals4;
-
 T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
-[ym, Amp_full, Phi_full, BG_full] = calc_fitted_signal(Result_in, T_arr);
+[ym, Amp_full, Phi_full, BG_full] = fit_viewer.calc_fitted_signal(Result_in, T_arr);
 
 % Harm_disp(Result_in);
 
@@ -47,7 +26,7 @@ Residuals_in = Data_signal - ym;
 Noise_amp = noise_amp_calc(freq, Synth_time, Synth_signal, Fs);
 
 [~, Amp, Phi, BG, Amp_err, Phi_err, BG_err] = ...
-    calc_fitted_signal(Result_in, T_arr_min);
+    fit_viewer.calc_fitted_signal(Result_in, T_arr_min);
 
 
 % Calc output values and errors ------------------------------------
@@ -191,12 +170,12 @@ end
     end
     T_arr = linspace(T_start, T_end, N);
     
-    Amp = poly3calc(Result_in.amp_poly, T_arr);
-    Phi = poly3calc(Result_in.phi_poly, T_arr);
-    BG = poly3calc(Result_in.bg_poly, T_arr);
-    Amp_err = poly3calc(Result_in.amp_poly_err, T_arr);
-    Phi_err = poly3calc(Result_in.phi_poly_err, T_arr);
-    BG_err = poly3calc(Result_in.bg_poly_err, T_arr);
+    Amp = fit_viewer.poly3calc(Result_in.amp_poly, T_arr);
+    Phi = fit_viewer.poly3calc(Result_in.phi_poly, T_arr);
+    BG = fit_viewer.poly3calc(Result_in.bg_poly, T_arr);
+    Amp_err = fit_viewer.poly3calc(Result_in.amp_poly_err, T_arr);
+    Phi_err = fit_viewer.poly3calc(Result_in.phi_poly_err, T_arr);
+    BG_err = fit_viewer.poly3calc(Result_in.bg_poly_err, T_arr);
 
     if flag
         Amp_err = sqrt(std(Amp)^2 + mean(Amp_err).^2);

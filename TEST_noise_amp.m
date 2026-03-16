@@ -19,7 +19,7 @@ F_list = [0.2 0.5 1 2 5 10 20 50 100 200 500 1000];
 NF = noise_floor(F_list);
 hold on
 plot(fft_freq, fft_amp, '-b')
-plot(F_list, NF, '-xr', 'LineWidth', 2)
+plot(F_list, NF, '--xr', 'LineWidth', 1)
 set(gca, 'xscale', 'log')
 set(gca, 'yscale', 'log')
 
@@ -169,7 +169,23 @@ plot(F_list, NF, '-xr', 'LineWidth', 2)
 
 
 
+%%
 
 
-
-
+function Amp = find_spectrum_amps(Time, Signal, Freq_list)
+    Amp = zeros(size(Freq_list));
+    for i = 1:numel(Freq_list)
+        F = Freq_list(i);
+        Scale = 1.02; % FIXME: magic constant
+        LB = F/Scale;
+        HB = F*Scale;
+        Freq_list_part = 10.^linspace(log10(LB), log10(HB), 20);
+    
+        Amp_part = zeros(size(Freq_list_part));
+        for k = 1:numel(Freq_list_part)
+            Freq = Freq_list_part(k);
+            Amp_part(k) = DFT_single_freq(Time, Signal, Freq);
+        end
+        Amp(i) = max(Amp_part);
+    end
+end
