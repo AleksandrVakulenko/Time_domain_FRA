@@ -4,11 +4,16 @@
 
 clc
 
-[Noise_amp, noise_floor] = noise_amp_calc(freq, Synth_time, Synth_signal, Fs);
+Time = Synth_time;
+Signal = Synth_signal;
+
+[Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
+
+[Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fs);
 disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
 
 
-[fft_amp, fft_freq, ~, ~] = fft_calc(Synth_signal, Fs);
+[fft_amp, fft_freq, ~, ~] = fft_calc(Signal, Fs);
 
 F_list = [0.2 0.5 1 2 5 10 20 50 100 200 500 1000];
 NF = noise_floor(F_list);
