@@ -1,18 +1,29 @@
-
-%      ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂
-
-% FIXME: finish make_fs_lower()
-% FIXME: use Estimations for Properties
-% FIXME: use incoming estimations
-% FIXME: [update sig_gen:] add underrange (span and mean) test signals
-% FIMXE: add new data viewer
-% FIXME: add errors must be 3*std
-% FIXME: use FFT or DFT for 50 Hz rejection
-% FIXME: analize residuals more (for what?)
-% FIXME: DFT vs fft problem (calculating many DFTs)
-% FIXME: phase around -180[deg] problem
-% FIXME: place fft functions to its own lib
-
+% ------------------------------------------------------------------------------
+%
+%       ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂      ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂      ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂
+%
+%
+% TODO:
+% 1) Add second channel
+% 2) Update signal gen to use two channels
+% 3) [update sig_gen:] add underrange (span and mean) test signals
+% 4) finish make_fs_lower()
+% 5) add new data viewer
+% 6) 
+% 7) Add non-realtime version of fit
+% 8)
+% 9) use Estimations for Properties
+% 10) use incoming estimations
+% 11) add errors must be 3*std
+% 12) use FFT or DFT for 50 Hz rejection
+% 13) analize residuals more (for what?)
+% 14) DFT vs fft problem (calculating many DFTs)
+% 15) phase around -180[deg] problem
+% 16) place fft functions to its own lib
+% 17) make Fern module
+% 18)
+%
+% ------------------------------------------------------------------------------
 clc
 
 Save_data_flag = false;
