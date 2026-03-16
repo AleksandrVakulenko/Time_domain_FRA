@@ -1,0 +1,16 @@
+function [Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq)
+    Time_length = Time(end) - Time(1);
+    Period_length = Time_length*freq;
+    if Period_length < 1
+        % FIXME: maybe half period ?
+        Time = [];
+        Signal = [];
+    else
+        Period_length = floor(Period_length);
+        Time_length_new = Period_length*1/freq;
+        
+        range = Time > Time_length_new + Time(1);
+        Time(range) = [];
+        Signal(range) = [];
+    end
+end

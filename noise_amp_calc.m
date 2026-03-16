@@ -1,5 +1,7 @@
 function [Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fs)
 
+[Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
+
 % NOISE FIND FULL FREQ --------------------
 
 [fft_amp, fft_freq, ~, ~] = fft_calc(Signal, Fs);
