@@ -36,7 +36,7 @@ T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
 [ym, Amp_full, Phi_full, BG_full] = calc_fitted_signal(Result_in, T_arr);
 
-Harm_disp(Result_in);
+% Harm_disp(Result_in);
 
 Harm_y = Harm_calc(Result_in, T_arr);
 if ~isempty(Harm_y)
@@ -95,6 +95,7 @@ end
 %-------------------------------------------------------------------
 
 
+Harm_check(Result_in, Props);
 
 
 % Residuals = V_arr-ym;
@@ -222,13 +223,91 @@ end
 end
 
 
+function disp_harm_info(harm, Freq)
+hn = harm.n;
+A = harm.amp;
+P = harm.phi;
+disp(['Harmonic ' num2str(hn) ':'])
+disp(['Freq = ' num2str(hn*Freq) ' Hz'])
+disp(['A = ' num2str(A) ' V' ...
+      newline ...
+      'P = ' num2str(P) ' deg' newline])
+end
+
+function Harm_check(Result, Props)
+
+Freq = Props.freq;
+P_harm = Props.harm;
+R_harm = Result.harm;
+R_harm_err = Result.harm_err;
+
+disp([newline 'Harmonics:' newline '-----------------------'])
+if isempty(R_harm)
+    disp([newline 'No harmonic in result struct' newline])
+    return
+else
+end
+
+if isempty(P_harm)
+    disp('Wrong harmonics:')
+    for i = 1:numel(R_harm)
+        disp_harm_info(R_harm(i), Freq)
+    end
+else
+    for i = 1:numel(P_harm)
+        hn = P_harm(i).n;
+        ind = find([R_harm.n] == hn);
+        if ~isempty(ind)
+            disp([' Right harmonic: [' num2str(hn) ']'])
+
+            if ~isnan(R_harm_err(ind).amp)
+                Str = err_str(R_harm(ind).amp, R_harm_err(ind).amp);
+                disp(['A = ' Str ' [V]'])
+            else
+                disp(['A = ' num2str(R_harm(ind).amp) ' ± NaN [V]'])
+            end
+
+            if ~isnan(R_harm_err(ind).phi)
+                Str = err_str(R_harm(ind).phi, R_harm_err(ind).phi);
+                disp(['P = ' Str ' [deg]'])
+            else
+                disp(['A = ' num2str(R_harm(ind).phi) ' ± NaN [deg]'])
+            end
+
+            disp(' Real values:')
+            disp(['A = ' num2str(P_harm(i).amp) ' [V]'])
+            disp(['P = ' num2str(P_harm(i).phi) ' [deg]'])
+            disp(' ')
+
+            R_harm(ind) = [];
+            R_harm_err(ind) = [];
+        else
+            disp('NO harmonic:')
+            disp(['(for) Props harmonic:' '[' num2str(P_harm(i).n) ']'])
+            disp_harm_info(P_harm(i), Freq);
+            disp(' ')
+        end
+    end
+
+    if ~isempty(R_harm)
+    disp('Wrong harmonics:')
+    for i = 1:numel(R_harm)
+        disp_harm_info(R_harm(i), Freq)
+    end
+    end
+    
+disp(['-----------------------' newline])
+end
+
+end
+
 
 function Harm_disp(Result_in)
 Harm = Result_in.harm;
 if ~isempty(Harm)
     Freq = Result_in.freq;
-    Freq_dev = Result_in.f_div_ppm;
-    Freq = Freq * (1 + Freq_dev/1e6);
+%     Freq_dev = Result_in.f_div_ppm;
+%     Freq = Freq * (1 + Freq_dev/1e6);
     for i = 1:numel(Harm)
         hn = Harm(i).n;
         A = Harm(i).amp;

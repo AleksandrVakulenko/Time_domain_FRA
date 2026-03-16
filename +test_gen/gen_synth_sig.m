@@ -9,7 +9,8 @@ arguments
     Profile {mustBeMember(Profile, ...
         ["strong", "mid", "weak", "const", "nobg"])} = "const"
     Traits {mustBeMember(Traits, ...
-        ["", "nobg", "zerophi", "nonoise", "lownoise", "constphi"])} = ""
+        ["", "nobg", "zerophi", "constphi", "nonoise", "lownoise", ...
+        "noharm"])} = ""
     Seed string = ""
     Fs double = 10e3
 end
@@ -55,6 +56,24 @@ if ~any(Traits == "nonoise")
 
 end
 
+if ~any(Traits == "noharm")
+    harm = struct('n', [], 'amp', [], 'phi', []);
+    k = 0;
+    N = round(rand(10, 1)*4)+2;
+    for i = 2:N % FIXME
+        [H_amp, H_phi] = harm_gen(Amp);
+        y_harm = H_amp*sin(2*pi*i*freq*Synth_time + H_phi/180*pi);
+        Synth_signal = Synth_signal + y_harm;
+        k = k + 1;
+        harm(k).n = i;
+        harm(k).amp = H_amp;
+        harm(k).phi = H_phi;
+    end
+else
+    harm = [];
+end
+
+Props.harm = harm;
 
 Synth_signal = test_gen.signal_saturation(Synth_signal, -5, 5);
 
@@ -64,7 +83,15 @@ end
 
 
 
+function [Amp, Phi] = harm_gen(Amp)
 
+Max_amp = max(Amp);
+
+Amp_scale = test_gen.rand_log_range(0.0001, 0.1);
+
+Amp = Max_amp*Amp_scale;
+Phi = test_gen.rand_range(-180, 180);
+end
 
 
 

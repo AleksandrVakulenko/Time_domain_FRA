@@ -1,24 +1,23 @@
 
 
-% FIXME: use incoming estimations
-% FIXME: update sig_gen (harm gen)
 % FIXME: [update sig_gen:] add underrange (span and mean) test signals
-% FIXME: analize residuals more (for what?)
+% FIXME: use incoming estimations
 % FIXME: use Estimations for Properties
-% FIXME: use FFT or DFT for 50 Hz rejection (neh)
 % FIMXE: add new data viewer
 % FIXME: add errors must be 3*std
+% FIXME: analize residuals more (for what?)
 % FIXME: phase around -180[deg] problem
 % FIXME: place fft functions to its own lib
+% FIXME: use FFT or DFT for 50 Hz rejection (neh)
 
 clc
 
 freq = 1;
 Freq_dev = 0;
 Duration = 5.0;
-Profile = 'strong';
+Profile = 'mid';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
-Traits = ["lownoise", "", ""];
+Traits = ["", "", ""];
 Seed = '';
 Filter_ON = false;
 % LLGUHH (small signal)
@@ -43,10 +42,10 @@ if Filter_ON
     Synth_signal = filter(Hd, Synth_signal-Synth_signal(1))+Synth_signal(1);
 end
 
-y_harm2 = 0.01*sin(2*pi*2*freq*Synth_time + 42/180*pi);
-y_harm3 = 0.005*sin(2*pi*3*freq*Synth_time + 52/180*pi);
-y_harm4 = 0.008*sin(2*pi*4*freq*Synth_time + 135/180*pi);
-Synth_signal = Synth_signal + y_harm2 + y_harm3 + y_harm4;
+% y_harm2 = 0.01*sin(2*pi*2*freq*Synth_time + 42/180*pi);
+% y_harm3 = 0.005*sin(2*pi*3*freq*Synth_time + 52/180*pi);
+% y_harm4 = 0.008*sin(2*pi*4*freq*Synth_time + 135/180*pi);
+% Synth_signal = Synth_signal + y_harm2 + y_harm3 + y_harm4;
 
 FRA_dev = FRA_dummy_dev(Synth_time, Synth_signal);
 
@@ -326,16 +325,18 @@ if ~no_estimations(Estimations)
     % NOTE: Harms estimation
     Harm_est = struct('n', [], 'amp', [], 'phi', []);
     k = 0;
+    % FIXME: use full data or cut data for harm find?
+    Noise_amp = noise_amp_calc(freq, Synth_time, Synth_signal, Fs);
     for hn = 2:6
         [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr_fit, V_arr_fit, hn*Freq);
-        disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
-            '    ' newline ...
-            'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline])
-        if Amp_DFT > 0.002 % FIXME: magic constant (DEBUG)
+        if Amp_DFT > 0.0*Noise_amp % FIXME: magic constant
             k = k + 1;
             Harm_est(k).n = hn;
             Harm_est(k).amp = Amp_DFT;
             Harm_est(k).phi = Phi_DFT;
+            disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
+                '    ' newline ...
+                'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline])
         end
     end
     if k == 0

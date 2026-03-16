@@ -5,7 +5,8 @@ arguments
     Profile {mustBeMember(Profile, ...
         ["strong", "mid", "weak", "const"])} = "const"
     Traits {mustBeMember(Traits, ...
-        ["", "nobg", "zerophi", "nonoise", "lownoise", "constphi"])} = ""
+        ["", "nobg", "zerophi", "constphi", "nonoise", "lownoise", ...
+        "noharm"])} = ""
 end
 
 
