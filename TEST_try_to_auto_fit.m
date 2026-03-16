@@ -1,20 +1,20 @@
 
-
+% FIXME: DFT vs fft problem
 % FIXME: [update sig_gen:] add underrange (span and mean) test signals
 % FIXME: use incoming estimations
 % FIXME: use Estimations for Properties
 % FIMXE: add new data viewer
 % FIXME: add errors must be 3*std
+% FIXME: use FFT or DFT for 50 Hz rejection
 % FIXME: analize residuals more (for what?)
 % FIXME: phase around -180[deg] problem
 % FIXME: place fft functions to its own lib
-% FIXME: use FFT or DFT for 50 Hz rejection (neh)
 
 clc
 
-freq = 1;
+freq = 2;
 Freq_dev = 0;
-Duration = 5.0;
+Duration = 1.0;
 Profile = 'mid';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["", "", ""];
@@ -273,7 +273,7 @@ end
 
 
 
-%
+%%
 clc
 
 if no_estimations(Estimations) && no_estimations(Estimations_low) && ...
@@ -314,9 +314,9 @@ if ~no_estimations(Estimations)
     Properties.linear_bg = 0;
 
     Properties.const_amp = 0;
-    Properties.linear_amp = 0;
+    Properties.linear_amp = 11;
 
-    Properties.const_phase = 0;
+    Properties.const_phase = 11;
     Properties.linear_phase = 0;
 
     % FIXME: put results in cell array (or simple array)
@@ -326,17 +326,24 @@ if ~no_estimations(Estimations)
     Harm_est = struct('n', [], 'amp', [], 'phi', []);
     k = 0;
     % FIXME: use full data or cut data for harm find?
-    Noise_amp = noise_amp_calc(freq, Synth_time, Synth_signal, Fs);
+    [Noise_amp, nf_calc] = noise_amp_calc(freq, Synth_time, Synth_signal, Fs);
+
     for hn = 2:6
         [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr_fit, V_arr_fit, hn*Freq);
-        if Amp_DFT > 0.0*Noise_amp % FIXME: magic constant
+        if Amp_DFT > nf_calc(hn*freq) % FIXME: magic constant
             k = k + 1;
             Harm_est(k).n = hn;
             Harm_est(k).amp = Amp_DFT;
             Harm_est(k).phi = Phi_DFT;
+            disp(['noise  = ' num2str(nf_calc(hn*freq)) ' V'])
             disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
                 '    ' newline ...
                 'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline])
+        else
+            disp([num2str(nf_calc(hn*freq)) ' V'])
+            disp(['Amp_H' num2str(hn) ' = ' 'NaN' ' V' ...
+                '    ' newline ...
+                'Phi_H' num2str(hn) ' = ' 'NaN' ' deg' newline])
         end
     end
     if k == 0
