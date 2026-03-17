@@ -29,12 +29,12 @@ clc
 Save_data_flag = false;
 freq = 2;
 Freq_dev = 0;
-Duration = 3;
+Duration = 16;
 Fs = 10e3;
 Profile = 'mid';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["lownoise", "", ""];
-Seed = '';
+Seed = 'PWUHBA';
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
 % VHJLJS (O_O)
@@ -44,7 +44,7 @@ Seed = '';
 % AQIOEZ overload test
 % YYSRCS
 
-[Synth_time, Synth_signal, Props] = test_gen.gen_synth_sig(freq, Freq_dev, ...
+[Synth_time, Synth_signal, Props, Noise] = test_gen.gen_synth_sig(freq, Freq_dev, ...
     Duration, Profile, Traits, Seed, Fs);
 
 disp(['Seed: ' char(Props.seed)]);
@@ -89,6 +89,8 @@ V_arr = [];
 Estimations = empty_estimation();
 Estimations_extra = empty_estimation();
 Estimations_low = empty_estimation();
+% FIXME: need refactor
+est_cell_arr = {Estimations, Estimations_low, Estimations_extra};
 
 Properties = struct(...
     'const_bg', 11, ...
@@ -166,86 +168,9 @@ while ~stop
         % FIXME: ude this or Time_settings.max ?
     end
 
-    % FIXME: do we need this?
-    if no_estimations(Estimations) && Periods_counter > 1
-        Init_values = do_initial_estimation(T_arr, V_arr, Period);
-        Result = simple_sin_fit_f(T_arr, V_arr, ...
-            Freq, Init_values);
-        Estimations = Result;
-    end
-
-    switch signal_per_duration(Periods_counter)
-        case "invalid" % 0 : 0.45
-            % DO SOMETHING:
-            % - noise analysis
-            % pause(0.05*Period)
-
-        case "get_lucky" % 0.45 : 0.5
-            if no_estimations(Estimations_extra)
-                Init_values = do_initial_estimation(T_arr, V_arr, Period);
-                Result = simple_sin_fit_f(T_arr, V_arr, ...
-                    Freq, Init_values);
-                Estimations_extra = Result;
-            else
-                Result = simple_sin_fit_f(T_arr, V_arr, ...
-                    Freq, Estimations_extra);
-                Estimations_extra = [Estimations_extra Result];
-            end
-
-        case "min" % 0.5 : 1.0
-            if no_estimations(Estimations_low)
-                Init_values = do_initial_estimation(T_arr, V_arr, Period);
-                Result = simple_sin_fit_f(T_arr, V_arr, ...
-                    Freq, Init_values);
-                Estimations_low = Result;
-            else
-                Result = simple_sin_fit_f(T_arr, V_arr, ...
-                    Freq, Estimations_low);
-                Estimations_low = [Estimations_low Result];
-            end
-            
-        case "single" % 1.0 : 2
-            % FIXME: we want to finish here !
-            % FIXME: UNDONE (DEBUG VERSION)
-%             [out_time, out_sig] = get_last_period(T_arr, V_arr, Period);
-            Result = simple_sin_fit_f(T_arr, V_arr, ...
-                Freq, Estimations);
-            Estimations = [Estimations Result];
-
-            BG_diff = Result.z;
-            Amp_mean = Result.amp;
-            Properties = update_props(Properties, Amp_mean, BG_diff);
-            
-
-        case "long" % 2 : 10
-            % FIXME: UNDONE (DEBUG VERSION)
-            [out_time1, out_sig1] = get_first_period(T_arr, V_arr, Period);
-            Result1 = simple_sin_fit_f(out_time1, out_sig1, ...
-                Freq, Estimations);
-            
-            Scale = Periods_counter/2; % FXIME: magic constant
-            [out_time2, out_sig2] = get_last_period(T_arr, V_arr, Period, Scale);
-            Result2 = simple_sin_fit_f(out_time2, out_sig2, ...
-                Freq, Estimations);
-
-%             Result = DFT_estimation(T_arr, V_arr, Period);
-            Estimations = [Estimations Result2];
-
-            BG_diff = Result2.bg - Result1.bg;
-            Amp_mean = mean([Result2.amp Result1.amp]);
-            Properties = update_props(Properties, Amp_mean, BG_diff);
-
-
-        case "max" % 10 : inf
-            % FIXME: UNDONE (DEBUG VERSION)
-            Scale = 5; % FIXME: magic constant
-            [out_time, out_sig] = get_last_period(T_arr, V_arr, Period, Scale);
-%             Result = simple_sin_fit_f(out_time, out_sig, ...
-%                 Freq, Estimations);
-            Result = DFT_estimation(out_time, out_sig, Period);
-            Estimations = [Estimations Result];
-
-    end
+    % FIXME: refactor this function
+    [est_cell_arr, Properties] = do_estimations(est_cell_arr, ...
+        Properties, T_arr, V_arr, Freq, Periods_counter);
 
     %--------------------------------
 
@@ -258,11 +183,24 @@ while ~stop
 end
 FRA_dev.stop();
 
+disp(['Exit_flag: ' num2str(Exit_flag)]);
+
 if Overload_count > 0
     Find_harms = false;
 end
 
-disp(['Exit_flag: ' num2str(Exit_flag)]);
+if Exit_flag == 0 && Overload_count > 0
+    T_arr = T_arr(~Overload_range);
+    V_arr = V_arr(~Overload_range);
+end
+
+Estimations = est_cell_arr{1};
+Estimations_low = est_cell_arr{2};
+Estimations_extra = est_cell_arr{3};
+
+% FIXME: update
+Exit_status = struct('flag', Exit_flag, 'overload_count', Overload_count, ...
+    'Estimations', {Estimations, Estimations_low, Estimations_extra});
 
 
 
@@ -280,15 +218,11 @@ end
 Properties.linear_bg = 0;
 
 
-Estimations = estimation_fix(Estimations, Periods_counter, freq);
-
+Estimations = estimation_fix(Estimations, Estimations_low, ...
+    Estimations_extra, Periods_counter, freq);
 
 if ~no_estimations(Estimations)
     disp('Start final fit:')
-    
-    % FIXME: experimental
-    T_arr = T_arr(~Overload_range);
-    V_arr = V_arr(~Overload_range);
     
     Start_time_fit = tic;
 
@@ -299,7 +233,7 @@ if ~no_estimations(Estimations)
     Properties.linear_bg = 0;
 
     Properties.const_amp = 0;
-    Properties.linear_amp = 11;
+    Properties.linear_amp = 0;
 
     Properties.const_phase = 0;
     Properties.linear_phase = 0;
@@ -315,7 +249,7 @@ if ~no_estimations(Estimations)
 
 
     % NOTE: fit with harmonics estimations
-    [Result, Residuals] = any_sin_fit(T_arr_fit, V_arr_fit, Freq, ...
+    [Result, Residuals, DEBUG] = any_sin_fit(T_arr_fit, V_arr_fit, Freq, ...
         Estimations, Properties, Harm_est);
 
     disp(['Time to fit: ' num2str(toc(Start_time_fit), '%0.2f') ' s'])
@@ -617,29 +551,30 @@ function [amp_poly, phi_poly, bg_poly] = estimations_const_fit(Estimations, Peri
 end
 
 
-function Estimations = estimation_fix(Estimations, Periods_counter, freq)
-    Period = 1/freq;
-    % NOTE: delete early estimations
-    Est_time_min = [Estimations.t_max];
-    Est_time_max = [Estimations.t_max];
-    if Periods_counter > 2
-        range = Est_time_min < Period & Est_time_max < Period;
-    else
-        range = Est_time_max < Period*0.5;
-    end
-    Estimations(range) = [];
-    
-    % NOTE: Replce estimations (is none) by bad estimations
-    if no_estimations(Estimations) && no_estimations(Estimations_low) && ...
-            ~no_estimations(Estimations_extra)
-        disp([newline '! YOLO FIT ! („• ֊ •„)' newline])
-        Estimations = Estimations_extra;
-    elseif no_estimations(Estimations) && ~no_estimations(Estimations_low)
-        disp([newline '! FIT by bad estimations ! ⸜(｡˃ ᵕ ˂ )⸝♡' newline])
-        Estimations = Estimations_low;
-    else
-        disp([newline '! OK, we have something ! (˶ᵔ ᵕ ᵔ˶) ‹𝟹' newline])
-    end
+function Estimations = estimation_fix(Estimations, Estimations_low, ...
+    Estimations_extra, Periods_counter, freq)
+Period = 1/freq;
+% NOTE: delete early estimations
+Est_time_min = [Estimations.t_max];
+Est_time_max = [Estimations.t_max];
+if Periods_counter > 2
+    range = Est_time_min < Period & Est_time_max < Period;
+else
+    range = Est_time_max < Period*0.5;
+end
+Estimations(range) = [];
+
+% NOTE: Replce estimations (is none) by bad estimations
+if no_estimations(Estimations) && no_estimations(Estimations_low) && ...
+        ~no_estimations(Estimations_extra)
+    disp([newline '! YOLO FIT ! („• ֊ •„)' newline])
+    Estimations = Estimations_extra;
+elseif no_estimations(Estimations) && ~no_estimations(Estimations_low)
+    disp([newline '! FIT by bad estimations ! ⸜(｡˃ ᵕ ˂ )⸝♡' newline])
+    Estimations = Estimations_low;
+else
+    disp([newline '! OK, we have something ! (˶ᵔ ᵕ ᵔ˶) ‹𝟹' newline])
+end
 end
 
 %FIXME: UNDODE function
@@ -701,4 +636,95 @@ end
 
 
 
+function [est_cell_arr, Properties] = do_estimations(est_cell_arr, ...
+    Properties, T_arr, V_arr, Freq, Periods_counter)
 
+Estimations = est_cell_arr{1};
+Estimations_low = est_cell_arr{2};
+Estimations_extra = est_cell_arr{3};
+Period = 1/Freq;
+
+% FIXME: do we need this?
+if no_estimations(Estimations) && Periods_counter > 1
+    Init_values = do_initial_estimation(T_arr, V_arr, Period);
+    Result = simple_sin_fit_f(T_arr, V_arr, ...
+        Freq, Init_values);
+    Estimations = Result;
+end
+
+switch signal_per_duration(Periods_counter)
+    case "invalid" % 0 : 0.45
+        % DO SOMETHING:
+        % - noise analysis
+        % pause(0.05*Period)
+
+    case "get_lucky" % 0.45 : 0.5
+        if no_estimations(Estimations_extra)
+            Init_values = do_initial_estimation(T_arr, V_arr, Period);
+            Result = simple_sin_fit_f(T_arr, V_arr, ...
+                Freq, Init_values);
+            Estimations_extra = Result;
+        else
+            Result = simple_sin_fit_f(T_arr, V_arr, ...
+                Freq, Estimations_extra);
+            Estimations_extra = [Estimations_extra Result];
+        end
+
+    case "min" % 0.5 : 1.0
+        if no_estimations(Estimations_low)
+            Init_values = do_initial_estimation(T_arr, V_arr, Period);
+            Result = simple_sin_fit_f(T_arr, V_arr, ...
+                Freq, Init_values);
+            Estimations_low = Result;
+        else
+            Result = simple_sin_fit_f(T_arr, V_arr, ...
+                Freq, Estimations_low);
+            Estimations_low = [Estimations_low Result];
+        end
+
+    case "single" % 1.0 : 2
+        % FIXME: we want to finish here !
+        % FIXME: UNDONE (DEBUG VERSION)
+        %             [out_time, out_sig] = get_last_period(T_arr, V_arr, Period);
+        Result = simple_sin_fit_f(T_arr, V_arr, ...
+            Freq, Estimations);
+        Estimations = [Estimations Result];
+
+        BG_diff = Result.z;
+        Amp_mean = Result.amp;
+        Properties = update_props(Properties, Amp_mean, BG_diff);
+
+
+    case "long" % 2 : 10
+        % FIXME: UNDONE (DEBUG VERSION)
+        [out_time1, out_sig1] = get_first_period(T_arr, V_arr, Period);
+        Result1 = simple_sin_fit_f(out_time1, out_sig1, ...
+            Freq, Estimations);
+
+        Scale = Periods_counter/2; % FXIME: magic constant
+        [out_time2, out_sig2] = get_last_period(T_arr, V_arr, Period, Scale);
+        Result2 = simple_sin_fit_f(out_time2, out_sig2, ...
+            Freq, Estimations);
+
+        %             Result = DFT_estimation(T_arr, V_arr, Period);
+        Estimations = [Estimations Result2];
+
+        BG_diff = Result2.bg - Result1.bg;
+        Amp_mean = mean([Result2.amp Result1.amp]);
+        Properties = update_props(Properties, Amp_mean, BG_diff);
+
+
+    case "max" % 10 : inf
+        % FIXME: UNDONE (DEBUG VERSION)
+        Scale = 5; % FIXME: magic constant
+        [out_time, out_sig] = get_last_period(T_arr, V_arr, Period, Scale);
+        %             Result = simple_sin_fit_f(out_time, out_sig, ...
+        %                 Freq, Estimations);
+        Result = DFT_estimation(out_time, out_sig, Period);
+        Estimations = [Estimations Result];
+
+end
+
+est_cell_arr = {Estimations, Estimations_low, Estimations_extra};
+
+end
