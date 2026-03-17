@@ -16,6 +16,6 @@ function String = set_rand(String)
         rng(Seed)
     else
         rng('shuffle')
-        String = gen_string(6);
+        String = test_gen.gen_string(6);
     end
 end

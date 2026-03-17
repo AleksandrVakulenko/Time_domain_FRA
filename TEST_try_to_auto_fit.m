@@ -29,12 +29,12 @@ clc
 Save_data_flag = false;
 freq = 2;
 Freq_dev = 0;
-Duration = 16;
+Duration = 2;
 Fs = 10e3;
 Profile = 'mid';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["lownoise", "", ""];
-Seed = 'VHJLJS';
+Seed = '';
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
 % VHJLJS (O_O)
