@@ -9,14 +9,14 @@
 % 3) [update sig_gen:] add underrange (span and mean) test signals
 % 4) finish make_fs_lower()
 % 5) add new data viewer
-% 6) 
-% 7) Add non-realtime version of fit
-% 8)
+% 6) update harm detector (fft with window)
+% 7) 
+% 8) Add non-realtime version of fit
 % 9) use Estimations for Properties
 % 10) use incoming estimations
 % 11) add errors must be 3*std
-% 12) use FFT or DFT for 50 Hz rejection
-% 13) analize residuals more (for what?)
+% 12) analize residuals more (for lost harms)
+% 13) use FFT or DFT for 50 Hz rejection
 % 14) DFT vs fft problem (calculating many DFTs)
 % 15) phase around -180[deg] problem
 % 16) place fft functions to its own lib
@@ -34,7 +34,7 @@ Fs = 10e3;
 Profile = 'mid';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits = ["lownoise", "", ""];
-Seed = 'PWUHBA';
+Seed = 'VHJLJS';
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
 % VHJLJS (O_O)
