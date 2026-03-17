@@ -9,7 +9,7 @@
 % 3) [update sig_gen:] add underrange (span and mean) test signals
 % 4) finish make_fs_lower()
 % 5) add new data viewer
-% 6) update harm detector (fft with window)
+% 6) add condition for good harm measure (to use window)
 % 7) 
 % 8) Add non-realtime version of fit
 % 9) use Estimations for Properties
@@ -17,7 +17,7 @@
 % 11) add errors must be 3*std
 % 12) analize residuals more (for lost harms)
 % 13) use FFT or DFT for 50 Hz rejection
-% 14) DFT vs fft problem (calculating many DFTs)
+% 14) DFT vs fft problem (calculating many DFTs) (where?)
 % 15) phase around -180[deg] problem
 % 16) place fft functions to its own lib
 % 17) make Fern module
@@ -29,7 +29,7 @@ clc
 Save_data_flag = false;
 freq = 2;
 Freq_dev = 0;
-Duration = 2;
+Duration = 6;
 Fs = 10e3;
 Profile = 'mid';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
@@ -377,6 +377,7 @@ function Result = combining_estimations(Estimations)
 end
 
 
+% FIXME: unite "get_first_period" and "get_last_period"
 function [out_time, out_sig] = get_last_period(Time, Signal, Period, Scale)
     % Scale = 1.3;
     if Scale > 2
@@ -532,6 +533,7 @@ function [Mean, Span, Min, Max] = singal_stats(Signal)
 end
 
 
+%FIXME: unused - use or delete
 function [amp_poly, phi_poly, bg_poly] = estimations_const_fit(Estimations, Period)
     Est_amp = [Estimations.amp];
     Est_phi = [Estimations.phi];
@@ -606,7 +608,15 @@ Harm_est = struct('n', [], 'amp', [], 'phi', []);
 k = 0;
 
 % FIXME: use full data or cut data for harm find?
-[Noise_amp, nf_calc] = noise_amp_calc(freq, T_arr, V_arr, Fs);
+[V_arr, F_lim] = apply_nuttall(V_arr, freq, Fs);
+if ~isempty(F_lim)
+    disp('Nuttall window is used');
+else
+    disp('noise calc without window')
+end
+
+% FIXME: unused variable
+[Noise_amp, nf_calc] = noise_amp_calc(freq, T_arr, V_arr, Fs, F_lim);
 
 for hn = 2:6
     [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr, V_arr, hn*freq);
