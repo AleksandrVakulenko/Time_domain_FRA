@@ -1,4 +1,11 @@
-function [Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fs)
+function [Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fs, Min_freq)
+arguments
+    freq
+    Time
+    Signal
+    Fs
+    Min_freq = [];
+end
 
 [Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
 
@@ -16,7 +23,9 @@ Freq_exclude = sort(Freq_exclude);
 
 
 Time_length = Time(end) - Time(1);
-Min_freq = 1/Time_length;
+if isempty(Min_freq)
+    Min_freq = 1/Time_length;
+end
 Max_freq = Fs/4;
 
 if freq/Min_freq < 3

@@ -1,14 +1,29 @@
 
+% Nuttall window Freq limit finder:
 
-if ~exist("Win", "var")
-    disp('Loading window from: Nuttall_160k.mat')
-    load("Nuttall_160k.mat", "Win")
-end
+%% Number of points by freq limit (For Nuttall window)
+F_lim = 1; % [Hz]
+Fs = 10e3; % [1/s]
+pn = round(10.^(0.765 - log10(F_lim/Fs))) % [points]
+Dur = pn/Fs % [s]
+
+%% Freq limit by number of points (For Nuttall window)
+
+Fs = 10e3; % [1/s]
+F_lim = Fs*(10.^(-1*log10(pn) + 0.765));
+
+
+
+
+%% Main part
 
 L = numel(Synth_signal);
 % Window = hamming(L, "periodic");
-Window = Win; % Nuttall
 
+Win = nuttallwin(numel(Synth_signal)); % Nuttall
+% Win = chebwin(numel(Synth_signal)); % Chebyshev 
+Window = Win; 
+Time = Synth_time;
 
 figure('position', [459 154 677 847])
 subplot(3, 1, 1)
@@ -24,9 +39,11 @@ subplot(3, 1, 3)
 plot(Time, Synth_signal)
 
 
-
-
-%%
+Freq_limit_1 = 6.86e-5*Fs; % [Hz]
+Freq_limit_2 = 1/(Time(end)-Time(1)); % [Hz]
+Freq_limit_1
+Freq_limit_2
+%% Signal * Window
 clc
 
 Time = Synth_time;
@@ -34,7 +51,12 @@ Signal = Signal_w;
 
 [Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
 
-[Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fs);
+% For Nuttall window
+Fs = 10e3; % [1/s]
+F_lim = Fs*(10.^(-1*log10(numel(Signal)) + 0.765));
+%
+
+[Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fs, F_lim);
 disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
 
 
@@ -42,15 +64,17 @@ disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
 
 F_list = [0.2 0.5 1 2 5 10 20 50 100 200 500 1000];
 NF = noise_floor(F_list);
+
+figure
 hold on
 plot(fft_freq, fft_amp, '-b')
-% plot(F_list, NF, '--xr', 'LineWidth', 1)
+plot(F_list, NF, '--xr', 'LineWidth', 1)
 set(gca, 'xscale', 'log')
 set(gca, 'yscale', 'log')
+xline(F_lim)
 
 
-
-%%
+%% Signal only
 clc
 
 Time = Synth_time;
@@ -75,6 +99,27 @@ plot(fft_freq, fft_amp, '-b')
 plot(F_list, NF, '--xr', 'LineWidth', 1)
 set(gca, 'xscale', 'log')
 set(gca, 'yscale', 'log')
+xline(Freq_limit_1)
+
+
+%% Window only
+clc
+
+Time = Synth_time;
+Signal = Win;
+
+[Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
+[fft_amp, fft_freq, ~, ~] = fft_calc(Signal, Fs);
+
+
+
+figure
+hold on
+plot(fft_freq, fft_amp, '-b')
+set(gca, 'xscale', 'log')
+set(gca, 'yscale', 'log')
+xline(Freq_limit_1)
+
 
 
 
