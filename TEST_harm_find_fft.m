@@ -1,9 +1,11 @@
 
 
-if ~exist("Win", "var")
-    disp('Loading window from: Nuttall_160k.mat')
-    load("Nuttall_160k.mat", "Win")
-end
+% if ~exist("Win", "var")
+%     disp('Loading window from: Nuttall_160k.mat')
+%     load("Nuttall_160k.mat", "Win")
+% end
+
+% FIXME: create Nuttall window here
 
 L = numel(Synth_signal);
 % Window = hamming(L, "periodic");
