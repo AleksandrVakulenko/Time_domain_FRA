@@ -16,10 +16,6 @@ function String = set_rand(String)
         rng(Seed)
     else
         rng('shuffle')
-        array_c = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-        ind = round(rand(1, 6)*1000);
-        ind = mod(ind, numel(array_c))+1;
-        Word = array_c(ind);
-        String = test_gen.set_rand(Word);
+        String = gen_string(6);
     end
 end

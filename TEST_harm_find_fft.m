@@ -10,7 +10,7 @@
 L = numel(Synth_signal);
 % Window = hamming(L, "periodic");
 Window = Win; % Nuttall
-
+Time = Synth_time;
 
 figure('position', [459 154 677 847])
 subplot(3, 1, 1)
@@ -44,6 +44,8 @@ disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
 
 F_list = [0.2 0.5 1 2 5 10 20 50 100 200 500 1000];
 NF = noise_floor(F_list);
+
+figure
 hold on
 plot(fft_freq, fft_amp, '-b')
 % plot(F_list, NF, '--xr', 'LineWidth', 1)

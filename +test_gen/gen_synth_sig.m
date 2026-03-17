@@ -39,7 +39,15 @@ Props.fs = Fs;
 
 Synth_signal = Amp.*sin(2*pi*F.*Synth_time + Phi/180*pi) + Background;
 
+% NOTE: gen predetermined seeds for variable parts
+Seed_1 = test_gen.gen_string(6);
+Seed_2 = test_gen.gen_string(6);
+Seed_3 = test_gen.gen_string(6); % NOTE: unused
+Seed_4 = test_gen.gen_string(6); % NOTE: unused
+Seed_5 = test_gen.gen_string(6); % NOTE: unused
+
 if ~any(Traits == "nonoise")
+    test_gen.set_rand(Seed_1); % NOTE: use Seed_1 for noise gen
     Noise_gen = test_gen.current_noise_gen(Synth_time);
     % NOTE: scale for noise
     Scale = 3e-10;
@@ -54,6 +62,7 @@ else
 end
 
 if ~any(Traits == "noharm")
+    test_gen.set_rand(Seed_2); % NOTE: use Seed_2 for harm gen
     harm = struct('n', [], 'amp', [], 'phi', []);
     k = 0;
     N = round(rand(10, 1)*4)+2;
