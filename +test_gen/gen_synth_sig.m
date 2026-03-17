@@ -1,6 +1,6 @@
 
 
-function [Synth_time, Synth_signal, Props] = ...
+function [Synth_time, Synth_signal, Props, Noise] = ...
     gen_synth_sig(freq, Freq_dev_ppm, Duration, Profile, Traits, Seed, Fs)
 arguments
     freq double
@@ -44,11 +44,13 @@ if ~any(Traits == "nonoise")
     % NOTE: scale for noise
     Scale = 3e-10;
     if any(Traits == "lownoise")
-        Synth_signal = Synth_signal + Noise_gen/Scale*0.08;
+        Noise = Noise_gen/Scale*0.08;
     else
-        Synth_signal = Synth_signal + Noise_gen/Scale*0.4;
+        Noise = Noise_gen/Scale*0.4;
     end
-
+    Synth_signal = Synth_signal + Noise;
+else
+    Noise = [];
 end
 
 if ~any(Traits == "noharm")
