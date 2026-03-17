@@ -5,11 +5,12 @@
 clc
 
 Time = Synth_time;
-Signal = Synth_signal;
+% Signal = Synth_signal;
+Signal = Signal_w;
 
 [Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
 
-[Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fs);
+[Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fs, F_lim);
 disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
 
 
@@ -17,19 +18,29 @@ disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
 
 F_list = [0.2 0.5 1 2 5 10 20 50 100 200 500 1000];
 NF = noise_floor(F_list);
+
+figure
 hold on
 plot(fft_freq, fft_amp, '-b')
 plot(F_list, NF, '--xr', 'LineWidth', 1)
 set(gca, 'xscale', 'log')
 set(gca, 'yscale', 'log')
 
+
+%% Freq limit by number of points (For Nuttall window)
+
+
+Fs = 10e3; % [1/s]
+F_lim = Fs*(10.^(-1*log10(numel(Signal)) + 0.765))
+
 %% NOISE FIND FULL FREQ
 clc
 
-
+% Signal = Synth_signal;
+% Signal = Signal_w;
 % [amp, phi, freq] = fft_plot(Synth_signal, Fs);
 
-[fft_amp, fft_freq, fft_phi, fft_phi_limit] = fft_calc(Synth_signal, Fs);
+[fft_amp, fft_freq, fft_phi, fft_phi_limit] = fft_calc(Signal, Fs);
 
 % % FIXME: freq range???
 % Time_length = Synth_time(end) - Synth_time(1);
@@ -73,6 +84,8 @@ if freq/Min_freq < 3
     Min_freq = Min_freq*3;
     xline(Min_freq)
 end
+
+Min_freq = F_lim;
 
 Freq_exclude_log = log10(Freq_exclude);
 Freq_list_log = (Freq_exclude_log(1:end-1) + Freq_exclude_log(2:end))/2;

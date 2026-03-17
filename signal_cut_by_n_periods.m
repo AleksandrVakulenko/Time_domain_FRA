@@ -8,11 +8,17 @@ function [Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq)
         Time = [];
         Signal = [];
     else
-        Period_length = floor(Period_length);
-        Time_length_new = Period_length*1/freq;
-        
-        range = Time > Time_length_new + Time(1);
-        Time(range) = [];
-        Signal(range) = [];
+        Delta = abs(round(Period_length)-Period_length);
+        if Delta > 0.01 % FIXME: magic constant
+            Period_length = floor(Period_length);
+            Time_length_new = Period_length*1/freq;
+            
+            range = Time > Time_length_new + Time(1);
+            Time(range) = [];
+            Signal(range) = [];
+        else
+%             'OK'
+        end
+
     end
 end

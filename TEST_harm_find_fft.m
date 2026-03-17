@@ -22,8 +22,8 @@ figure('position', [459 154 677 847])
 subplot(3, 1, 1)
 plot(Synth_time, Window)
 
-
-Signal_w = Synth_signal.*Window';
+Win_scale = 2.7521;
+Signal_w = Synth_signal.*Window'*Win_scale;
 
 subplot(3, 1, 2)
 plot(Time, Signal_w)
@@ -53,7 +53,7 @@ F_lim = Fs*(10.^(-1*log10(numel(Signal)) + 0.765));
 disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
 
 
-[fft_amp, fft_freq, ~, ~] = fft_calc(Signal, Fs);
+[fft_amp, fft_freq, fft_phi, ~] = fft_calc(Signal, Fs, 5e-6);
 
 F_list = [0.2 0.5 1 2 5 10 20 50 100 200 500 1000];
 NF = noise_floor(F_list);
@@ -62,11 +62,18 @@ figure
 hold on
 plot(fft_freq, fft_amp, '-b')
 plot(F_list, NF, '--xr', 'LineWidth', 1)
+ylabel('amp, V')
 set(gca, 'xscale', 'log')
 set(gca, 'yscale', 'log')
 xline(F_lim)
 
-
+% figure
+% hold on
+% plot(fft_freq, fft_phi, '-b')
+% ylabel('phi, deg')
+% set(gca, 'xscale', 'log')
+% % set(gca, 'yscale', 'log')
+% xline(F_lim)
 %% Signal only
 clc
 
