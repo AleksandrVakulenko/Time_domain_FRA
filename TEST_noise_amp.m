@@ -1,12 +1,51 @@
 
+% TODO:
+% 1.1) Replace noise_amp_calc by new function
+%   OR
+% 1.2) update noise_amp_calc
+% 2) update this test file
+% 3) do more research for better use of windows
+
+
 % NOTE:
 % TEST for Noise_amp = noise_amp_calc(freq, Time, Signal, Fs)
 
 clc
 
+% Freq limit by number of points (For Nuttall window)
+F_lim_window = Fs*(10.^(-1*log10(numel(Synth_signal)) + 0.765));
+
+if freq/F_lim_window > 1.5 % FIXME: magic constant
+    Use_window = true;
+else
+    Use_window = false;
+end
+
+% Use_window = false;
+% Use_window = true;
+
+disp(['Use window: ' num2str(Use_window)])
+disp(['Freq = ' num2str(freq) ' Hz'])
+disp(['F_lim = ' num2str(F_lim_window) ' Hz'])
+disp(['R = ' num2str(freq/F_lim_window)])
+disp(' ')
+
+if Use_window
+    F_lim = F_lim_window;
+else
+    F_lim = [];
+end
+
+
 Time = Synth_time;
-% Signal = Synth_signal;
-Signal = Signal_w;
+if Use_window
+    Window = nuttallwin(numel(Synth_signal)); % Nuttall
+    Win_scale = 2.7521;
+    Signal_w = Synth_signal.*Window'*Win_scale;
+    Signal = Signal_w;
+else
+    Signal = Synth_signal;
+end
 
 [Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
 
@@ -27,11 +66,6 @@ set(gca, 'xscale', 'log')
 set(gca, 'yscale', 'log')
 
 
-%% Freq limit by number of points (For Nuttall window)
-
-
-Fs = 10e3; % [1/s]
-F_lim = Fs*(10.^(-1*log10(numel(Signal)) + 0.765))
 
 %% NOISE FIND FULL FREQ
 clc
