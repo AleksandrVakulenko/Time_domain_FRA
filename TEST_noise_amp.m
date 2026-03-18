@@ -8,10 +8,20 @@
 
 % NOTE: apply_nuttall() function could help in case of signal modulation
 
+
+Show_channel = 1;
+
+if Show_channel == 1
+    Signal_in = Synth_signal_1;
+elseif Show_channel == 2
+    Signal_in = Synth_signal_2;
+else
+    error('wrong channel number')
+end
+
 clc
 
-
-[Signal, F_lim] = apply_nuttall(Synth_signal, freq, Fs);
+[Signal, F_lim] = apply_nuttall(Signal_in, freq, Fs);
 
 %
 
@@ -34,6 +44,7 @@ plot(fft_freq, fft_amp, '-b')
 plot(F_list, NF, '--xr', 'LineWidth', 1)
 set(gca, 'xscale', 'log')
 set(gca, 'yscale', 'log')
+yline(10/2^17) % FIXME
 
 
 
@@ -81,15 +92,16 @@ Freq_exclude = sort(Freq_exclude);
 
 
 Time_length = T_arr(end) - T_arr(1);
-Min_freq = 1/Time_length;
-Max_freq = Fs/4;
+if isempty(Min_freq)
+    Min_freq = 1/Time_length;
+end
+Max_freq = Fs/2;
 
 if freq/Min_freq < 3
     Min_freq = Min_freq*3;
     xline(Min_freq)
 end
 
-Min_freq = F_lim;
 
 Freq_exclude_log = log10(Freq_exclude);
 Freq_list_log = (Freq_exclude_log(1:end-1) + Freq_exclude_log(2:end))/2;

@@ -1,5 +1,19 @@
 
-Estimations_in = Estimations;
+Show_channel = 2;
+
+if Show_channel == 1
+    Estimations_in = Estimations_1;
+    Props = Props_1;
+elseif Show_channel == 2
+
+    Estimations_in = Estimations_2;
+    Props = Props_2;
+else
+    error('wrong channel number')
+end
+
+
+
 % Estimations_in = Estimations_extra;
 % Estimations_in = Estimations_low;
 

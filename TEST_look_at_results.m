@@ -1,14 +1,29 @@
 
 clc
 
-Data_time = Synth_time;
-V_arr_in = V1_arr;
-Data_signal = Synth_signal;
-Result_in = Result_1;
-% T_arr = T_arr;
-T_arr = Synth_time;
-% Residuals_in = Residuals;
+% % T_arr = T_arr;
+% % Residuals_in = Residuals;
 
+Show_channel = 2;
+
+if Show_channel == 1
+    Data_time = Synth_time;
+    V_arr_in = V1_arr;
+    Data_signal = Synth_signal_1;
+    Result_in = Result_1;
+    Props = Props_1;
+    T_arr = Synth_time;
+elseif Show_channel == 2
+
+    Data_time = Synth_time;
+    V_arr_in = V2_arr;
+    Data_signal = Synth_signal_2;
+    Result_in = Result_2;
+    Props = Props_2;
+    T_arr = Synth_time;
+else
+    error('wrong channel number')
+end
 
 
 T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
@@ -23,7 +38,7 @@ if ~isempty(Harm_y)
 end
 Residuals_in = Data_signal - ym;
 
-Noise_amp = noise_amp_calc(freq, Synth_time, Synth_signal, Fs);
+Noise_amp = noise_amp_calc(freq, Synth_time, Data_signal, Fs);
 
 [~, Amp, Phi, BG, Amp_err, Phi_err, BG_err] = ...
     fit_viewer.calc_fitted_signal(Result_in, T_arr_min);
