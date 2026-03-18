@@ -4,39 +4,39 @@
 %
 %
 % TODO:
-% 1) 
-% 2) 
-% 3) [update sig_gen:] add underrange (span and mean) test signals
-% 4) finish make_fs_lower()
+% 1) finish make_fs_lower()
+% 2) use Estimations for Properties
+% 3) 
+% 4) use FFT or DFT for 50 Hz rejection
 % 5) add new data viewer
-% 6) add condition for good harm measure (to use window)
-% 7) 
-% 8) 
-% 9) use Estimations for Properties
-% 10) use incoming estimations
+% 6) analize residuals more (for lost harms)
+% 7) use incoming estimations
+% 8) add condition for good harm measure (to use window)
+% 9) [update sig_gen:] add underrange (span and mean) test signals
+% 10) make Fern module
 % 11) add errors must be 3*std
-% 12) analize residuals more (for lost harms)
-% 13) use FFT or DFT for 50 Hz rejection
-% 14) make Fern module
-% 15) phase around -180[deg] problem
-% 16) 
-% 17) place fft functions to its own lib
-% 18) DFT vs fft problem (calculating many DFTs) (where?)
-% 19) Add non-realtime version of fit (just incoming estimations)
+% 12) 
+% 13) 
+% 14) phase around -180[deg] problem
+% 15) place fft functions to its own lib
+% 16) DFT vs fft problem (calculating many DFTs) (where?)
+% 17) Add non-realtime version of fit (just incoming estimations)
+% 18) 
+% 19) 
 % ------------------------------------------------------------------------------
 clc
 
 Save_data_flag = false;
 freq = 2;
 Freq_dev = 0;
-Duration = 6;
+Duration = 10;
 Fs = 10e3;
 Profile_1 = 'weak';
 Profile_2 = 'mid';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits_1 = ["lownoise", "nobg", "lowharm"];
 Traits_2 = ["", "", ""];
-Seed = 'QDNRSE';
+Seed = 'QRMFYA'; % QDNRSE
 
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -56,29 +56,14 @@ Seed_2 = [char(Props_1.seed) 'A'];
     Freq_dev, Duration, Profile_2, Traits_2, Seed_2, Fs);
 
 disp(['Seed: ' char(Props_1.seed)]);
-% disp(['Seed: ' char(Props_2.seed)]);
 
 Synth_signal_1 = test_gen.signal_digitizer(Synth_signal_1, 10, 18-1);
 Synth_signal_2 = test_gen.signal_digitizer(Synth_signal_2, 6, 18-1);
 
 FRA_dev = test_gen.FRA_dummy_dev(Synth_time, Synth_signal_1, Synth_signal_2);
 
-figure('position', [502 246 687 725])
-subplot(2, 1, 1)
-plot(Synth_time, Synth_signal_1)
-grid on
-grid minor
-ylabel('signal, V')
-xlabel('t, s')
-title('Ch 1')
+test_gen.plot_test_signals(Synth_time, Synth_signal_1, Synth_signal_2);
 
-subplot(2, 1, 2)
-plot(Synth_time, Synth_signal_2)
-grid on
-grid minor
-ylabel('signal, V')
-xlabel('t, s')
-title('Ch 2')
 
 %% Main part
 
@@ -95,7 +80,7 @@ Overrange_tolerance = 0; % [%]
 %--------------------------------
 
 %--------------------------------
-Time_settings = struct('max', 50*Period); % FIXME
+Time_settings = struct('max', 1e6*Period); % FIXME
 Accuracy_settings = struct(...
     ...
     );
@@ -216,6 +201,7 @@ while ~stop
     % FIXME: refactor this function
     [est_cell_arr_1, Properties_1] = do_estimations(est_cell_arr_1, ...
         Properties_1, T_arr, V1_arr, Freq, Periods_counter);
+
     [est_cell_arr_2, Properties_2] = do_estimations(est_cell_arr_2, ...
         Properties_2, T_arr, V2_arr, Freq, Periods_counter);
     %--------------------------------
@@ -235,7 +221,13 @@ while ~stop
 end
 FRA_dev.stop();
 
-disp(['Exit_flag: ' num2str(Exit_flag)]);
+if Exit_flag == 0 % FIXME: debug
+        disp(['Exit_flag: ' num2str(Exit_flag)]);
+else
+    for i = 1:10
+        disp(['Exit_flag: ' num2str(Exit_flag)]);
+    end
+end
 
 if Find_harms
     Find_harms_1 = true;
@@ -264,7 +256,7 @@ Exit_status = struct('flag', Exit_flag, 'overload_1_count', Overload_1.count, ..
 Estimations_1 = estimation_fix_wrapper(est_cell_arr_1, Periods_counter, freq);
 Estimations_2 = estimation_fix_wrapper(est_cell_arr_2, Periods_counter, freq);
 
-%%
+%
 clc
 
 % if Periods_counter < 2
@@ -492,7 +484,7 @@ function [out_time, out_sig] = get_last_period(Time, Signal, Period, Scale)
         out_time = Time;
         out_sig = Signal;
     else
-        range = Time >= Time(end) - Period*Scale;
+        range = Time >= (Time(end) - Period*Scale);
         out_time = Time(range);
         out_sig = Signal(range);
     end
@@ -844,6 +836,7 @@ switch signal_per_duration(Periods_counter)
         %             Result = simple_sin_fit_f(out_time, out_sig, ...
         %                 Freq, Estimations);
         Result = DFT_estimation(out_time, out_sig, Period);
+%         disp(['Est te = ' num2str(Result.t_max) ' s']); % FIXME: delete
         Estimations = [Estimations Result];
 
 end

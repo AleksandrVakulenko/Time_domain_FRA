@@ -6,7 +6,7 @@ clc
 
 Show_channel = 2;
 
-if Show_channel == 1
+if  1 == Show_channel
     Data_time = Synth_time;
     V_arr_in = V1_arr;
     Data_signal = Synth_signal_1;
