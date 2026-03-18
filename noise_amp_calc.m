@@ -26,7 +26,7 @@ Time_length = Time(end) - Time(1);
 if isempty(Min_freq)
     Min_freq = 1/Time_length;
 end
-Max_freq = Fs/4;
+Max_freq = Fs/2;
 
 if freq/Min_freq < 3
     Min_freq = Min_freq*3;
