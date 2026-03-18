@@ -4,10 +4,11 @@
 
 
 % NOTE:
-% TEST for Noise_amp = noise_amp_calc(freq, Time, Signal, Fs)
+% TEST for Noise_amp = noise_amp_calc(freq, Time, Signal, Fss)
 
 % NOTE: apply_nuttall() function could help in case of signal modulation
 
+Force_no_window = false;
 
 Show_channel = 1;
 
@@ -18,22 +19,38 @@ elseif Show_channel == 2
 else
     error('wrong channel number')
 end
+Time = Synth_time;
+Fss = Fs;
+
+% N_old = numel(Time);
+% N_new = 1000;
+% Time_new = interp1(1:numel(Time), Time, linspace(1, numel(Time), N_new));
+% Signal_in = interp1(Time, Signal_in, Time_new);
+% Time = Time_new;
+% Fss = 1/mean(diff(Time));
+
+
 
 clc
 
-[Signal, F_lim] = apply_nuttall(Signal_in, freq, Fs);
+if ~Force_no_window
+    [Signal, F_lim] = apply_nuttall(Signal_in, freq, Fss);
+else
+    Signal = Signal_in;
+    F_lim = [];
+end
 
 %
 
-Time = Synth_time;
+
 
 [Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
 
-[Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fs, F_lim);
+[Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fss, F_lim);
 disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
 
 
-[fft_amp, fft_freq, ~, ~] = fft_calc(Signal, Fs);
+[fft_amp, fft_freq, ~, ~] = fft_calc(Signal, Fss);
 
 F_list = [0.2 0.5 1 2 5 10 20 50 100 200 500 1000];
 NF = noise_floor(F_list);
@@ -53,14 +70,14 @@ clc
 
 % Signal = Synth_signal;
 % Signal = Signal_w;
-% [amp, phi, freq] = fft_plot(Synth_signal, Fs);
+% [amp, phi, freq] = fft_plot(Synth_signal, Fss);
 
-[fft_amp, fft_freq, fft_phi, fft_phi_limit] = fft_calc(Signal, Fs);
+[fft_amp, fft_freq, fft_phi, fft_phi_limit] = fft_calc(Signal_in, Fss);
 
 % % FIXME: freq range???
 % Time_length = Synth_time(end) - Synth_time(1);
 % Freq_min = 1./Time_length;
-% Freq_max = Fs/2;
+% Freq_max = Fss/2;
 % Freq_list = 10.^linspace(log10(Freq_min), log10(Freq_max), 10000);
 % 
 % Amp = zeros(size(Freq_list));
@@ -95,7 +112,7 @@ Time_length = T_arr(end) - T_arr(1);
 if isempty(Min_freq)
     Min_freq = 1/Time_length;
 end
-Max_freq = Fs/2;
+Max_freq = Fss/2;
 
 if freq/Min_freq < 3
     Min_freq = Min_freq*3;
@@ -141,9 +158,9 @@ set(gca, 'yscale', 'log')
 clc
 
 
-% [amp, phi, freq] = fft_plot(Synth_signal, Fs);
+% [amp, phi, freq] = fft_plot(Synth_signal, Fss);
 
-% [amp, freq, phi, phi_limit] = fft_calc(Synth_signal, Fs);
+% [amp, freq, phi, phi_limit] = fft_calc(Synth_signal, Fss);
 
 
 Freq_list = [1:20]*50;

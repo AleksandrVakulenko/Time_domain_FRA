@@ -23,20 +23,30 @@
 % 17) Add non-realtime version of fit (just incoming estimations)
 % 18) 
 % 19) 
+% 
+% NOTE:
+% 1) Add estimation on final time point
+% 2) Add estimation on first time point
+% 3) do more estimations by DFT
+%
+% NOTE: new way of fitting
+% 1) create sparse data with 1000-10000 points
+% 2) fit fundamental
+% 3) fit harms in residuals
 % ------------------------------------------------------------------------------
 clc
 
 Save_data_flag = false;
-freq = 2;
+freq = 0.5;
 Freq_dev = 0;
-Duration = 10;
+Duration = 6;
 Fs = 10e3;
 Profile_1 = 'weak';
 Profile_2 = 'mid';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits_1 = ["lownoise", "nobg", "lowharm"];
 Traits_2 = ["", "", ""];
-Seed = 'QRMFYA'; % QDNRSE
+Seed = ''; % QDNRSE
 
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -256,7 +266,7 @@ Exit_status = struct('flag', Exit_flag, 'overload_1_count', Overload_1.count, ..
 Estimations_1 = estimation_fix_wrapper(est_cell_arr_1, Periods_counter, freq);
 Estimations_2 = estimation_fix_wrapper(est_cell_arr_2, Periods_counter, freq);
 
-%
+%%
 clc
 
 % if Periods_counter < 2
@@ -271,12 +281,12 @@ clc
 
 % -FIXME: debug-
 Properties_1.const_bg = 0;
-Properties_1.linear_bg = 0;
+Properties_1.linear_bg = 11;
 
-Properties_1.const_amp = 0;
+Properties_1.const_amp = 11;
 Properties_1.linear_amp = 0;
 
-Properties_1.const_phase = 0;
+Properties_1.const_phase = 11;
 Properties_1.linear_phase = 0;
 % --------------
 
@@ -287,7 +297,7 @@ Properties_2.linear_bg = 0;
 Properties_2.const_amp = 0;
 Properties_2.linear_amp = 0;
 
-Properties_2.const_phase = 0;
+Properties_2.const_phase = 11;
 Properties_2.linear_phase = 0;
 % --------------
 
