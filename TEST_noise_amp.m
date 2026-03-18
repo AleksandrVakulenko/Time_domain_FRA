@@ -10,7 +10,7 @@
 
 Force_no_window = false;
 
-Show_channel = 1;
+Show_channel = 2;
 
 if Show_channel == 1
     Signal_in = Synth_signal_1;
@@ -40,8 +40,11 @@ else
     F_lim = [];
 end
 
-%
-
+if isempty(F_lim)
+    disp('no window')
+else
+    disp('using window')
+end
 
 
 [Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
@@ -61,7 +64,7 @@ plot(fft_freq, fft_amp, '-b')
 plot(F_list, NF, '--xr', 'LineWidth', 1)
 set(gca, 'xscale', 'log')
 set(gca, 'yscale', 'log')
-yline(10/2^17) % FIXME
+% yline(10/2^17) % FIXME
 
 
 

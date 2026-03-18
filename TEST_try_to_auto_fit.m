@@ -3,19 +3,20 @@
 %       ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂      ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂      ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂
 %
 %
+%                                ⎛⎝( ` ᢍ ´ )⎠⎞ᵐᵘʰᵃʰᵃ
 % TODO:
 % 1) finish make_fs_lower()
-% 2) use Estimations for Properties
-% 3) 
-% 4) use FFT or DFT for 50 Hz rejection
-% 5) add new data viewer
-% 6) analize residuals more (for lost harms)
-% 7) use incoming estimations
-% 8) add condition for good harm measure (to use window)
-% 9) [update sig_gen:] add underrange (span and mean) test signals
-% 10) make Fern module
-% 11) add errors must be 3*std
-% 12) 
+% 2) spread Estimations to [Tmin, Tmax]
+% 3) use Estimations for Properties
+% 4) start time point problem (FX1001)
+% 5) use FFT or DFT for 50 Hz rejection
+% 6) add new data viewer
+% 7) analize residuals more (for lost harms)
+% 8) use incoming estimations
+% 9) add condition for good harm measure (to use window)
+% 10) [update sig_gen:] add underrange (span and mean) test signals
+% 11) make Fern module
+% 12) add errors must be 3*std
 % 13) 
 % 14) phase around -180[deg] problem
 % 15) place fft functions to its own lib
@@ -25,8 +26,8 @@
 % 19) 
 % 
 % NOTE:
-% 1) Add estimation on final time point
-% 2) Add estimation on first time point
+% 1) Add estimation on final time point !!!
+% 2) Add estimation on first time point !!!
 % 3) do more estimations by DFT
 %
 % NOTE: new way of fitting
@@ -37,16 +38,16 @@
 clc
 
 Save_data_flag = false;
-freq = 0.5;
+freq = 1;
 Freq_dev = 0;
-Duration = 6;
+Duration = 11;
 Fs = 10e3;
 Profile_1 = 'weak';
-Profile_2 = 'mid';
+Profile_2 = 'weak';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits_1 = ["lownoise", "nobg", "lowharm"];
 Traits_2 = ["", "", ""];
-Seed = ''; % QDNRSE
+Seed = 'BTSISX'; % QDNRSE
 
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -56,6 +57,7 @@ Seed = ''; % QDNRSE
 % CUSAIQ ???
 % AQIOEZ overload test
 % YYSRCS
+% BTSISX window demo / f = 1, D = 11, weak weak, use S2
 
 [Synth_time, Synth_signal_1, Props_1, Noise_1] = test_gen.gen_synth_sig(freq, ...
     Freq_dev, Duration, Profile_1, Traits_1, Seed, Fs, 10);
@@ -74,6 +76,7 @@ FRA_dev = test_gen.FRA_dummy_dev(Synth_time, Synth_signal_1, Synth_signal_2);
 
 test_gen.plot_test_signals(Synth_time, Synth_signal_1, Synth_signal_2);
 
+% FRA_dev = test_gen.FRA_dummy_dev(T_a, V, -I);
 
 %% Main part
 
@@ -110,7 +113,7 @@ V2_arr = [];
 est_cell_arr_1 = {empty_estimation(), empty_estimation(), empty_estimation()};
 est_cell_arr_2 = {empty_estimation(), empty_estimation(), empty_estimation()};
 
-Properties_1 = struct(...
+Basic_properties = struct(...
     'const_bg', 11, ...
     'linear_bg', 0, ...
     'const_phase', 0, ...
@@ -118,13 +121,8 @@ Properties_1 = struct(...
     'const_amp', 0, ...
     'linear_amp', 0);
 
-Properties_2 = struct(...
-    'const_bg', 11, ...
-    'linear_bg', 0, ...
-    'const_phase', 0, ...
-    'linear_phase', 0, ...
-    'const_amp', 0, ...
-    'linear_amp', 0);
+Properties_1 = Basic_properties;
+Properties_2 = Basic_properties;
 
 Underrange_1 = true;
 Underrange_2 = true;
@@ -155,9 +153,10 @@ while ~stop
     Time_passed = T_arr(end);
     Periods_counter = Time_passed/Period;
 
-    if T_arr(1) ~= 0
-        T_arr = T_arr - T_arr(1);
-    end
+    % FIXME: it does not work (FX1001)
+%     if T_arr(1) ~= 0
+%         T_arr = T_arr - T_arr(1);
+%     end
 
     %--------------------------------
     Overload_1.range = abs(V1_arr) > MAX_CH1_LIMIT*0.999; % FIXME: magic constant
@@ -263,8 +262,11 @@ end
 Exit_status = struct('flag', Exit_flag, 'overload_1_count', Overload_1.count, ...
     'estimations_cell', est_cell_arr_1);
 
-Estimations_1 = estimation_fix_wrapper(est_cell_arr_1, Periods_counter, freq);
-Estimations_2 = estimation_fix_wrapper(est_cell_arr_2, Periods_counter, freq);
+Estimations_1 = estimation_fix_wrapper(est_cell_arr_1, ...
+    Periods_counter, freq, T_arr);
+Estimations_2 = estimation_fix_wrapper(est_cell_arr_2, ...
+    Periods_counter, freq, T_arr);
+
 
 %%
 clc
@@ -280,8 +282,8 @@ clc
 % Properties_1.linear_bg = 0;
 
 % -FIXME: debug-
-Properties_1.const_bg = 0;
-Properties_1.linear_bg = 11;
+Properties_1.const_bg = 11;
+Properties_1.linear_bg = 0;
 
 Properties_1.const_amp = 11;
 Properties_1.linear_amp = 0;
@@ -294,7 +296,7 @@ Properties_1.linear_phase = 0;
 Properties_2.const_bg = 0;
 Properties_2.linear_bg = 0;
 
-Properties_2.const_amp = 0;
+Properties_2.const_amp = 11;
 Properties_2.linear_amp = 0;
 
 Properties_2.const_phase = 11;
@@ -658,12 +660,19 @@ function [amp_poly, phi_poly, bg_poly] = estimations_const_fit(Estimations, Peri
     bg_poly.p3 = mean(Est_bg);
 end
 
-function Estimations = estimation_fix_wrapper(est_cell_arr, Periods_counter, freq)
+function Estimations = estimation_fix_wrapper(est_cell_arr, Periods_counter, ...
+    freq, T_arr)
 Estimations = est_cell_arr{1};
 Estimations_low = est_cell_arr{2};
 Estimations_extra = est_cell_arr{3};
 Estimations = estimation_fix(Estimations, Estimations_low, ...
     Estimations_extra, Periods_counter, freq);
+
+% FIXME: debug; replace by something
+Estimations(1).t_min = 0;
+Estimations(1).t_max = 0;
+Estimations(end).t_min = T_arr(end);
+Estimations(end).t_max = T_arr(end);
 end
 
 % FIXME: what if empty estimations?

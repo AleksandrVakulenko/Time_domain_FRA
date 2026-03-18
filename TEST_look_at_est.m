@@ -36,16 +36,17 @@ Props_amp = interp1(Synth_time, Props_amp, Est_time);
 Props_phi = interp1(Synth_time, Props_phi, Est_time);
 Props_bg = interp1(Synth_time, Props_bg, Est_time);
 
-
+Est_full_time = linspace(T_arr(1), T_arr(end), 10);
+Est_full_time_norm = Est_full_time/Period;
 Est_time_norm = Est_time/Period;
 amp_poly = fit(Est_time_norm', Est_amp', 'poly1');
-Amp_fit = feval(amp_poly, Est_time_norm);
+Amp_fit = feval(amp_poly, Est_full_time_norm);
 
 phi_poly = fit(Est_time_norm', Est_phi', 'poly1');
-Phi_fit = feval(phi_poly, Est_time_norm);
+Phi_fit = feval(phi_poly, Est_full_time_norm);
 
 bg_poly = fit(Est_time_norm', Est_bg', 'poly2');
-BG_fit = feval(bg_poly, Est_time_norm);
+BG_fit = feval(bg_poly, Est_full_time_norm);
 
 
 % figure('position', [360 205 882 784])
@@ -54,7 +55,7 @@ subplot(2, 2, 1)
 hold on
 plot(Est_time, Props_amp, '.b')
 plot(Est_time, Est_amp, '.r')
-plot(Est_time, Amp_fit, '.-k')
+plot(Est_full_time, Amp_fit, '.-k')
 % errorbar(Est_time, Est_amp, Est_amperr, '.')
 ylabel('Amp')
 legend({'Props', 'Est'}, 'Location', 'best')
@@ -63,7 +64,7 @@ subplot(2, 2, 2)
 hold on
 plot(Est_time, Props_phi, '.b')
 plot(Est_time, Est_phi, '.r')
-plot(Est_time, Phi_fit, '.-k')
+plot(Est_full_time, Phi_fit, '.-k')
 % errorbar(Est_time, Est_phi, Est_phierr, '.')
 ylabel('Phi, [deg]')
 
@@ -71,7 +72,7 @@ subplot(2, 2, 3)
 hold on
 plot(Est_time, Props_bg, '.b')
 plot(Est_time, Est_bg, '.r')
-plot(Est_time, BG_fit, '.-k')
+plot(Est_full_time, BG_fit, '.-k')
 % errorbar(Est_time, Est_bg, Est_bgerr, '.')
 ylabel('bg')
 
