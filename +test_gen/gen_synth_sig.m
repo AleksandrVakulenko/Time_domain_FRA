@@ -1,7 +1,7 @@
 
 
 function [Synth_time, Synth_signal, Props, Noise] = ...
-    gen_synth_sig(freq, Freq_dev_ppm, Duration, Profile, Traits, Seed, Fs)
+    gen_synth_sig(freq, Freq_dev_ppm, Duration, Profile, Traits, Seed, Fs, saturation)
 arguments
     freq double
     Freq_dev_ppm double
@@ -10,9 +10,10 @@ arguments
         ["strong", "mid", "weak", "const", "nobg"])} = "const"
     Traits {mustBeMember(Traits, ["", "nobg", "zerophi", "constphi", ...
         "nonoise", "lownoise", 'filter30' ...
-        "noharm"])} = ""
+        "noharm", "lowharm"])} = ""
     Seed string = ""
     Fs double = 10e3
+    saturation double = 5
 end
 
 Seed = test_gen.set_rand(Seed);
@@ -65,9 +66,15 @@ if ~any(Traits == "noharm")
     test_gen.set_rand(Seed_2); % NOTE: use Seed_2 for harm gen
     harm = struct('n', [], 'amp', [], 'phi', []);
     k = 0;
-    N = round(rand(10, 1)*4)+2;
+    N = round(rand(1, 1)*4)+2;
+    if any(Traits == "lowharm") && N > 3
+        N = 3;
+    end
     for i = 2:N % FIXME
         [H_amp, H_phi] = harm_gen(Amp);
+        if any(Traits == "lowharm")
+            H_amp = H_amp/10;
+        end
         y_harm = H_amp*sin(2*pi*i*freq*Synth_time + H_phi/180*pi);
         Synth_signal = Synth_signal + y_harm;
         k = k + 1;
@@ -81,7 +88,7 @@ end
 Props.harm = harm;
 
 % FIXME: add saturation limit property
-Synth_signal = test_gen.signal_saturation(Synth_signal, -5, 5);
+Synth_signal = test_gen.signal_saturation(Synth_signal, -saturation, saturation);
 
 if any(Traits == "filter30")
     load('+test_gen/Filter_LF_FIR_2_30.mat', 'Hd');

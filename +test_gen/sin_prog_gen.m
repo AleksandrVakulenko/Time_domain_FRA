@@ -6,7 +6,7 @@ arguments
         ["strong", "mid", "weak", "const"])} = "const"
     Traits {mustBeMember(Traits, ["", "nobg", "zerophi", "constphi", ...
         "nonoise", "lownoise", 'filter30' ...
-        "noharm"])} = ""
+        "noharm", "lowharm"])} = ""
 end
 
 
