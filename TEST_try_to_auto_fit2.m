@@ -1,29 +1,4 @@
-% ------------------------------------------------------------------------------
-%
-%       ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂      ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂      ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂
-%
-%
-% TODO:
-% 1) Add second channel
-% 2) 
-% 3) [update sig_gen:] add underrange (span and mean) test signals
-% 4) finish make_fs_lower()
-% 5) add new data viewer
-% 6) add condition for good harm measure (to use window)
-% 7) 
-% 8) Add non-realtime version of fit
-% 9) use Estimations for Properties
-% 10) use incoming estimations
-% 11) add errors must be 3*std
-% 12) analize residuals more (for lost harms)
-% 13) use FFT or DFT for 50 Hz rejection
-% 14) DFT vs fft problem (calculating many DFTs) (where?)
-% 15) phase around -180[deg] problem
-% 16) place fft functions to its own lib
-% 17) make Fern module
-% 18)
-%
-% ------------------------------------------------------------------------------
+
 clc
 
 Save_data_flag = false;
@@ -31,10 +6,13 @@ freq = 2;
 Freq_dev = 0;
 Duration = 6;
 Fs = 10e3;
-Profile = 'mid';
+Profile_1 = 'weak';
+Profile_2 = 'mid';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
-Traits = ["lownoise", "", ""];
-Seed = '';
+Traits_1 = ["lownoise", "nobg", "lowharm"];
+Traits_2 = ["", "", ""];
+Seed = 'WKYJRB';
+
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
 % VHJLJS (O_O)
@@ -44,56 +22,68 @@ Seed = '';
 % AQIOEZ overload test
 % YYSRCS
 
-[Synth_time, Synth_signal, Props, Noise] = test_gen.gen_synth_sig(freq, Freq_dev, ...
-    Duration, Profile, Traits, Seed, Fs);
+[Synth_time, Synth_signal_1, Props_1, Noise_1] = test_gen.gen_synth_sig(freq, ...
+    Freq_dev, Duration, Profile_1, Traits_1, Seed, Fs, 10);
 
-disp(['Seed: ' char(Props.seed)]);
+Seed_2 = [char(Props_1.seed) 'A'];
 
+[~, Synth_signal_2, Props_2, Noise_2] = test_gen.gen_synth_sig(freq, ...
+    Freq_dev, Duration, Profile_2, Traits_2, Seed_2, Fs);
 
-FRA_dev = test_gen.FRA_dummy_dev(Synth_time, Synth_signal);
+disp(['Seed: ' char(Props_1.seed)]);
+% disp(['Seed: ' char(Props_2.seed)]);
 
-figure('position', [562 434 560 420])
-plot(Synth_time, Synth_signal)
+FRA_dev = test_gen.FRA_dummy_dev(Synth_time, Synth_signal_1, Synth_signal_2);
+
+figure('position', [502 246 687 725])
+subplot(2, 1, 1)
+plot(Synth_time, Synth_signal_1)
 grid on
 grid minor
 ylabel('signal, V')
 xlabel('t, s')
-title('Test signal')
+title('Ch 1')
 
+subplot(2, 1, 2)
+plot(Synth_time, Synth_signal_2)
+grid on
+grid minor
+ylabel('signal, V')
+xlabel('t, s')
+title('Ch 2')
 %% Main part
 
 %--------------------------------
 Freq = freq;
-Period = 1/Freq;
 Underrange_force = false;
 Fig = figure('position', [564 433 560 420]);
 Find_harms = true;
-MAX_CH1_LIMIT = 5;
 MAX_CH2_LIMIT = 5;
-Time_to_underrange = 0.1*Period; % [s]
+Time_to_underrange = 0.3; % [s]
 Overrange_tolerance = 0; % [%]
 %--------------------------------
 
 %--------------------------------
+Period = 1/Freq;
 Time_settings = struct('max', 50*Period); % FIXME
 Accuracy_settings = struct(...
     ...
     );
 %--------------------------------
-if Time_to_underrange < 0.3
-    Time_to_underrange = 0.3; % FIXME: magic constant
-end
-%--------------------------------
 
 
 % Shared data -------------------------
 T_arr = [];
-V1_arr = [];
+V_arr = [];
 
+% clearvars Estimations
+Estimations = empty_estimation();
+Estimations_extra = empty_estimation();
+Estimations_low = empty_estimation();
 % FIXME: need refactor
-est_cell_arr_1 = {empty_estimation(), empty_estimation(), empty_estimation()};
+est_cell_arr = {Estimations, Estimations_low, Estimations_extra};
 
-Properties_1 = struct(...
+Properties = struct(...
     'const_bg', 11, ...
     'linear_bg', 0, ...
     'const_phase', 0, ...
@@ -101,10 +91,7 @@ Properties_1 = struct(...
     'const_amp', 0, ...
     'linear_amp', 0);
 
-Underrange_1 = true;
-
-Overload_1 = struct('range', [], 'count', 0, 'volume', 0);
-Overload_2 = struct('range', [], 'count', 0, 'volume', 0);
+Underrange = true;
 % -------------------------------------
 
 % Common data -------------------------
@@ -117,33 +104,31 @@ clc
 FRA_dev.run();
 while ~stop
     pause(0.001); %FIXME: for fast signal
-    [T_part, V1_part] = FRA_dev.get_data_ch1();
-%     [T_part, V1_part, V2_part] = get_CV(obj);
+    [T_part, V_part] = FRA_dev.get_data_ch1();
+%     [T_part, V_part, V2_part] = get_CV(obj);
     if isempty(T_part)
         stop = true;
     end
     T_arr = [T_arr T_part];
-    V1_arr = [V1_arr V1_part];
-
-    Time_passed = T_arr(end);
-    Periods_counter = Time_passed/Period;
+    V_arr = [V_arr V_part];
 
     if T_arr(1) ~= 0
         T_arr = T_arr - T_arr(1);
     end
 
     %--------------------------------
-    Overload_1.range = abs(V1_arr) > MAX_CH1_LIMIT*0.999; % FIXME: magic constant
-    Overload_1.count = numel(find(Overload_1.range));
-    Overload_1.volume = Overload_1.count/numel(V1_arr);
+    Time_passed = T_arr(end);
+    Periods_counter = Time_passed/Period;
     
-    % FIXME: debug print
-    if Overload_1.count > 0
-        disp(['Overload: ' num2str(Overload_1.volume*100, '%0.2f') ' %'])
+    Overload_range = abs(V_arr) > MAX_CH2_LIMIT*0.999; % FIXME: magic constant
+    Overload_count = numel(find(Overload_range));
+    Overload_volume = Overload_count/numel(V_arr);
+    if Overload_count > 0
+        disp(['Overload: ' num2str(Overload_volume*100, '%0.2f') ' %'])
     end
 
-    if Underrange_1
-        [Mean, Span, Min, Max] = singal_stats(V1_arr);
+    if Underrange
+        [Mean, Span, Min, Max] = singal_stats(V_arr);
         if Underrange_force
             Underrange_level = 0.001*5; % FIXME: magic constant
         else
@@ -152,19 +137,19 @@ while ~stop
         Cond1 = abs(Mean) < Underrange_level;
         Cond2 = Span < Underrange_level;
         if ~Cond1 && ~Cond2
-            Underrange_1 = false;
+            Underrange = false;
         end
-        if Underrange_1
+        if Underrange
             disp('Underrange') % FIXME: debug
         end
     end
 
-    if Underrange_1 && Time_passed > Time_to_underrange
+    if Underrange && Time_passed > Time_to_underrange
         Exit_flag = 1; % NOTE: EF 1: underrange
         break;
     end
 
-    if Time_passed > 0.3 && Overload_1.volume > Overrange_tolerance
+    if Time_passed > 0.3 && Overload_volume > Overrange_tolerance
         Exit_flag = 2; % NOTE: EF 2: overrange
         break;
     end
@@ -179,14 +164,14 @@ while ~stop
     end
 
     % FIXME: refactor this function
-    [est_cell_arr_1, Properties_1] = do_estimations(est_cell_arr_1, ...
-        Properties_1, T_arr, V1_arr, Freq, Periods_counter);
+    [est_cell_arr, Properties] = do_estimations(est_cell_arr, ...
+        Properties, T_arr, V_arr, Freq, Periods_counter);
 
     %--------------------------------
 
     if ~isempty(Fig)
         cla
-        plot(T_arr, V1_arr);
+        plot(T_arr, V_arr);
         title(['PC: ' num2str(Periods_counter, '%0.3f') ' '])
         drawnow
     end
@@ -195,23 +180,22 @@ FRA_dev.stop();
 
 disp(['Exit_flag: ' num2str(Exit_flag)]);
 
-if Find_harms
-    Find_harms_1 = true;
-    Find_harms_2 = true;
+if Overload_count > 0
+    Find_harms = false;
 end
 
-if Overload_1.count > 0
-    Find_harms_1 = false;
+if Exit_flag == 0 && Overload_count > 0
+    T_arr = T_arr(~Overload_range);
+    V_arr = V_arr(~Overload_range);
 end
 
-if Exit_flag == 0 && Overload_1.count > 0
-    T_arr = T_arr(~Overload_1.range);
-    V1_arr = V1_arr(~Overload_1.range);
-end
+Estimations = est_cell_arr{1};
+Estimations_low = est_cell_arr{2};
+Estimations_extra = est_cell_arr{3};
 
 % FIXME: update
-Exit_status = struct('flag', Exit_flag, 'overload_1_count', Overload_1.count, ...
-    'estimations_cell', est_cell_arr_1);
+Exit_status = struct('flag', Exit_flag, 'overload_count', Overload_count, ...
+    'Estimations', {Estimations, Estimations_low, Estimations_extra});
 
 
 
@@ -219,47 +203,49 @@ Exit_status = struct('flag', Exit_flag, 'overload_1_count', Overload_1.count, ..
 clc
 
 if Periods_counter < 2
-    Properties_1.const_amp = 11;
-    Properties_1.const_bg = 0;
-    Properties_1.const_phase = 11;
-    Properties_1.linear_amp = 0;
-    Properties_1.linear_bg = 11;
-    Properties_1.linear_phase = 0;
+    Properties.const_amp = 11;
+    Properties.const_bg = 0;
+    Properties.const_phase = 11;
+    Properties.linear_amp = 0;
+    Properties.linear_bg = 11;
+    Properties.linear_phase = 0;
 end
-Properties_1.linear_bg = 0;
-
-Estimations_1 = estimation_fix_wrapper(est_cell_arr_1, Periods_counter, freq);
+Properties.linear_bg = 0;
 
 
-if ~no_estimations(Estimations_1)
+Estimations = estimation_fix(Estimations, Estimations_low, ...
+    Estimations_extra, Periods_counter, freq);
+
+if ~no_estimations(Estimations)
     disp('Start final fit:')
     
     Start_time_fit = tic;
 
-    [T_arr_fit, V_arr_fit, Fs_fit] = make_fs_lower(T_arr, V1_arr, Fs, freq);
+    [T_arr_fit, V_arr_fit, Fs_fit] = make_fs_lower(T_arr, V_arr, Fs, freq);
     
     % -FIXME: debug-
-    Properties_1.const_bg = 0;
-    Properties_1.linear_bg = 0;
+    Properties.const_bg = 0;
+    Properties.linear_bg = 0;
 
-    Properties_1.const_amp = 0;
-    Properties_1.linear_amp = 0;
+    Properties.const_amp = 0;
+    Properties.linear_amp = 0;
 
-    Properties_1.const_phase = 0;
-    Properties_1.linear_phase = 0;
+    Properties.const_phase = 0;
+    Properties.linear_phase = 0;
     % --------------
 
     % NOTE: Harms estimation
 
-    if Find_harms_1
-        Harm_est_1 = estimate_harmonics(freq, T_arr_fit, V_arr_fit, Fs_fit);
+    if Find_harms
+        Harm_est = estimate_harmonics(freq, T_arr_fit, V_arr_fit, Fs_fit);
     else
-        Harm_est_1 = [];
+        Harm_est = [];
     end
 
+
     % NOTE: fit with harmonics estimations
-    [Result_1, Residuals_1, DEBUG] = any_sin_fit(T_arr_fit, V_arr_fit, Freq, ...
-        Estimations_1, Properties_1, Harm_est_1);
+    [Result, Residuals, DEBUG] = any_sin_fit(T_arr_fit, V_arr_fit, Freq, ...
+        Estimations, Properties, Harm_est);
 
     disp(['Time to fit: ' num2str(toc(Start_time_fit), '%0.2f') ' s'])
     
@@ -272,12 +258,11 @@ end
 if Save_data_flag
     Savedata = struct( ...
         'time', T_arr, ...
-        'ch1', V1_arr, ...
+        'ch1', V_arr, ...
         'ch2', [], ...
-        'harm_est_1', Harm_est_1, ...
-        'harm_est_2', [], ...
-        'estimations', Estimations_1, ...
-        'result', Result_1, ...
+        'harm_est', Harm_est, ...
+        'estimations', Estimations, ...
+        'result', Result, ...
         'freq', Freq, ...
         'Synth_time', Synth_time, ... % FIXME: debug (must be replaced)
         'Synth_signal', Synth_signal, ... % FIXME: debug (must be replaced)
@@ -562,13 +547,6 @@ function [amp_poly, phi_poly, bg_poly] = estimations_const_fit(Estimations, Peri
     bg_poly.p3 = mean(Est_bg);
 end
 
-function Estimations = estimation_fix_wrapper(est_cell_arr, Periods_counter, freq)
-Estimations = est_cell_arr{1};
-Estimations_low = est_cell_arr{2};
-Estimations_extra = est_cell_arr{3};
-Estimations = estimation_fix(Estimations, Estimations_low, ...
-    Estimations_extra, Periods_counter, freq);
-end
 
 function Estimations = estimation_fix(Estimations, Estimations_low, ...
     Estimations_extra, Periods_counter, freq)

@@ -2,9 +2,9 @@
 clc
 
 Data_time = Synth_time;
-V_arr_in = V_arr;
+V_arr_in = V1_arr;
 Data_signal = Synth_signal;
-Result_in = Result;
+Result_in = Result_1;
 % T_arr = T_arr;
 T_arr = Synth_time;
 % Residuals_in = Residuals;
