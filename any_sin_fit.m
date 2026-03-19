@@ -142,19 +142,24 @@ switch Phi_type
         error('unreachable')
 end
 
-Freq_div_flag = false; % FIXME: debug
+Freq_div_flag = true; % FIXME: debug
 if Freq_div_flag
-    F_div_str = '*(1+0/1e6)'; % FIXME: add D
+    F_div_str = '*(1+q/1e6)'; % FIXME: add D (coeffname: q)
+    Lower = [Lower -500];
+    StartPoint = [StartPoint -150]; % FIXME: magic constant
+    Upper = [Upper +500];
 else
     F_div_str = '';
 end
 
 Eq = [Amp_str ' * sin(2*pi*' num2str(Freq) F_div_str '*x + ' Phi_str '/180*pi) + ' BG_str];
 
+HPref = 'r';
 if ~isempty(Harm_est)
     for i = 1:numel(Harm_est)
         Hn = Harm_est(i).n;
-        HarmN_eq = ['q' num2str(Hn) 'a' '*sin(2*pi*' num2str(Hn*Freq) F_div_str '*x + q' num2str(Hn) 'p' '/180*pi)'];
+        HarmN_eq = [HPref num2str(Hn) 'a' '*sin(2*pi*' ...
+            num2str(Hn*Freq) F_div_str '*x + ' HPref num2str(Hn) 'p' '/180*pi)'];
         Eq = [Eq ' + ' HarmN_eq];
         Lower = [Lower Harm_est(i).amp*0.1 Harm_est(i).phi-45];
         StartPoint = [StartPoint Harm_est(i).amp Harm_est(i).phi];
@@ -169,6 +174,11 @@ opts.TolX = 1e-12; % FIXME: default
 opts.TolFun = 1e-12; % default
 opts.Display = 'Off';
 
+% FIXME: debug, comment or delete 3 lines
+disp(Eq)
+coeffnames(ft)
+disp(num2str(StartPoint'))
+
 opts.Lower = Lower;
 opts.StartPoint = StartPoint;
 opts.Upper = Upper;
@@ -182,11 +192,12 @@ DEBUG.X_arr = X_arr;
 
 Residuals = output.residuals';
 
+Error_mult = 3; % NOTE: ± N*std
 
-try % FIXME: D now unused, we need it back
-    D = fitresult.D;
-    D_err = get_error(fitresult, 'D');
-catch
+if Freq_div_flag
+    D = get_value(fitresult, 'q');
+    D_err = get_error(fitresult, 'q')*Error_mult;
+else
     D = 0;
     D_err = 0;
 end
@@ -206,19 +217,19 @@ phi_poly_out.p2 = get_value(fitresult, 'p2');
 phi_poly_out.p3 = get_value(fitresult, 'p3');
 phi_poly_out.x = X_arr;
 
-amp_poly_err.p1 = get_error(fitresult, 'a1');
-amp_poly_err.p2 = get_error(fitresult, 'a2');
-amp_poly_err.p3 = get_error(fitresult, 'a3');
+amp_poly_err.p1 = get_error(fitresult, 'a1')*Error_mult;
+amp_poly_err.p2 = get_error(fitresult, 'a2')*Error_mult;
+amp_poly_err.p3 = get_error(fitresult, 'a3')*Error_mult;
 amp_poly_err.x = X_arr;
 
-bg_poly_err.p1 = get_error(fitresult, 'c1');
-bg_poly_err.p2 = get_error(fitresult, 'c2');
-bg_poly_err.p3 = get_error(fitresult, 'c3');
+bg_poly_err.p1 = get_error(fitresult, 'c1')*Error_mult;
+bg_poly_err.p2 = get_error(fitresult, 'c2')*Error_mult;
+bg_poly_err.p3 = get_error(fitresult, 'c3')*Error_mult;
 bg_poly_err.x = X_arr;
 
-phi_poly_err.p1 = get_error(fitresult, 'p1');
-phi_poly_err.p2 = get_error(fitresult, 'p2');
-phi_poly_err.p3 = get_error(fitresult, 'p3');
+phi_poly_err.p1 = get_error(fitresult, 'p1')*Error_mult;
+phi_poly_err.p2 = get_error(fitresult, 'p2')*Error_mult;
+phi_poly_err.p3 = get_error(fitresult, 'p3')*Error_mult;
 phi_poly_err.x = X_arr;
 
 if ~isempty(Harm_est)
@@ -227,11 +238,11 @@ if ~isempty(Harm_est)
     for i = 1:numel(Harm_est)
         hn = Harm_est(i).n;
         harm_out(i).n = hn;
-        harm_out(i).amp = get_value(fitresult, ['q' num2str(hn) 'a']);
-        harm_out(i).phi = get_value(fitresult, ['q' num2str(hn) 'p']);
+        harm_out(i).amp = get_value(fitresult, [HPref num2str(hn) 'a']);
+        harm_out(i).phi = get_value(fitresult, [HPref num2str(hn) 'p']);
         harm_err(i).n = hn;
-        harm_err(i).amp = get_error(fitresult, ['q' num2str(hn) 'a']);
-        harm_err(i).phi = get_error(fitresult, ['q' num2str(hn) 'p']);
+        harm_err(i).amp = get_error(fitresult, [HPref num2str(hn) 'a'])*Error_mult;
+        harm_err(i).phi = get_error(fitresult, [HPref num2str(hn) 'p'])*Error_mult;
     end
 else
     harm_out = [];
