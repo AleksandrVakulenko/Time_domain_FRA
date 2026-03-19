@@ -143,7 +143,7 @@ FRA_dev.run();
 while ~stop
     pause(0.001); %FIXME: for fast signal
 %     [T_part, V1_part] = FRA_dev.get_data_ch1();
-    [T_part, V1_part, V2_part] = FRA_dev.get_CV();
+    [T_part, V1_part, V2_part] = FRA_dev.get_VV();
     if isempty(T_part)
         stop = true;
     end

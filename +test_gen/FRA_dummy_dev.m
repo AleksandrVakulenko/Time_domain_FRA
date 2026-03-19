@@ -56,7 +56,7 @@ classdef FRA_dummy_dev < handle
         end
 
 
-        function [T, V1, V2] = get_CV(obj)
+        function [T, V1, V2] = get_VV(obj)
             if ~isnan(obj.init_time)
                 Time_passed = toc(obj.init_time);
                 if ~isempty(obj.T_arr)
