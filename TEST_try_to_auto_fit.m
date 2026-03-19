@@ -93,7 +93,8 @@ Overrange_tolerance = 0; % [%]
 %--------------------------------
 
 %--------------------------------
-Time_settings = struct('max', 1e6*Period); % FIXME
+% Time_settings = struct('max', 1e6*Period); % FIXME
+Time_settings = struct('max', 10); % FIXME
 Accuracy_settings = struct(...
     ...
     );
@@ -731,7 +732,7 @@ Harm_est = struct('n', [], 'amp', [], 'phi', []);
 k = 0;
 
 % FIXME: use full data or cut data for harm find?
-[V_arr, F_lim] = apply_nuttall(V_arr, freq, Fs);
+[V_arr, F_lim] = apply_nuttall(V_arr, Fs, freq);
 % FIXME: debug print
 if ~isempty(F_lim)
     disp(['Nuttall window is used' newline]);
