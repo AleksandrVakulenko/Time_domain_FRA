@@ -34,7 +34,7 @@ Fss = Fs;
 clc
 
 if ~Force_no_window
-    [Signal, F_lim] = apply_nuttall(Signal_in, freq, Fss);
+    [Signal, F_lim] = apply_nuttall(Signal_in, Fss, freq);
 else
     Signal = Signal_in;
     F_lim = [];
@@ -65,7 +65,9 @@ plot(F_list, NF, '--xr', 'LineWidth', 1)
 set(gca, 'xscale', 'log')
 set(gca, 'yscale', 'log')
 % yline(10/2^17) % FIXME
-
+if ~isempty(F_lim)
+    xline(F_lim)
+end
 
 
 %% NOISE FIND FULL FREQ

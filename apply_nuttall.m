@@ -1,7 +1,13 @@
-function [Signal_out, F_lim] = apply_nuttall(Signal, freq, Fs)
+function [Signal_out, F_lim] = apply_nuttall(Signal, Fs, freq)
+arguments
+    Signal
+    Fs
+    freq = inf;
+end
 % Freq limit by number of points (For Nuttall window)
 F_lim_window = Fs*(10.^(-1*log10(numel(Signal)) + 0.765));
 
+% FIXME: do not check here
 if freq/F_lim_window > 1.5 % FIXME: magic constant
     Use_window = true;
 else
