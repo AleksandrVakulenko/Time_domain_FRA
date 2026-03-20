@@ -2,28 +2,32 @@
 % FIXME: put in Fern module
 
 function Signal_filt = fft_band_rejection(Signal, Fs, ValueDB, Freq_min, Freq_max)
-    if mod(numel(Signal), 2) == 1
-        Signal(end) = [];
-        flag = true;
+    if ~isempty(Freq_max) && Freq_min >= Freq_max
+        Signal_filt = Signal;
     else
-        flag = false;
-    end
-    
-    L = numel(Signal);
-    FFT_freq = Fs*(0:(L/2-1))/L;
-    
-    FFT = fft(Signal)/numel(Signal);
-    FFT = fft_erase_zone(FFT, FFT_freq, ValueDB, Freq_min, Freq_max);
-    
-    FFT2 = flip(fft(FFT));
-    
-    FFT2(2:end+1) = FFT2;
-    FFT2(1) = FFT2(2);
-    FFT2(end) = [];
-    
-    Signal_filt = real(FFT2);
-    if flag
-        Signal_filt(end+1) = Signal_filt(end);
+        if mod(numel(Signal), 2) == 1
+            Signal(end) = [];
+            append_point = true;
+        else
+            append_point = false;
+        end
+
+        L = numel(Signal);
+        FFT_freq = Fs*(0:(L/2-1))/L;
+        
+        FFT = fft(Signal)/numel(Signal);
+        FFT = fft_erase_zone(FFT, FFT_freq, ValueDB, Freq_min, Freq_max);
+        
+        FFT2 = flip(fft(FFT));
+        
+        FFT2(2:end+1) = FFT2;
+        FFT2(1) = FFT2(2);
+        FFT2(end) = [];
+        
+        Signal_filt = real(FFT2);
+        if append_point
+            Signal_filt(end+1) = Signal_filt(end);
+        end
     end
 end
 

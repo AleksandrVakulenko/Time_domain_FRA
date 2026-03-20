@@ -1,4 +1,5 @@
 
+% NOTE: test file for fft_band_rejection function
 
 clc
 
@@ -23,7 +24,7 @@ Noise = test_gen.current_noise_gen(Time)/3e-10*Noise_scale;
 Synth_signal = Signal_clear + Noise;
 
 
-Signal_filt = fft_brf(Synth_signal, Fs, -80, 11, []);
+Signal_filt = fft_band_rejection(Synth_signal, Fs, -80, 11, []);
 
 hold on
 plot(Time, Synth_signal, '-b')
@@ -38,8 +39,8 @@ plot(Time, Signal_clear, '.g')
 
 clc
 
-Signal_filt = fft_brf(Synth_signal, Fs, -80, 0.00, 0.04);
-Signal_filt = fft_brf(Signal_filt, Fs, -80, 0.08, []);
+Signal_filt = fft_band_rejection(Synth_signal, Fs, -80, 0.00, 0.04);
+Signal_filt = fft_band_rejection(Signal_filt, Fs, -80, 0.08, []);
 
 hold on
 plot(Synth_time, Synth_signal, '-b')
@@ -62,76 +63,9 @@ fft_plot(Signal_filt, Fs);
 
 
 
-%%
 
 
 
-
-function FFT = FFT_erase_freq(FFT, FFT_freq, Freq_filt)
-    [~, ind1] = min(abs(FFT_freq - Freq_filt));
-    ind2 = 2 + numel(FFT) - ind1;
-    FFT(ind1) = 0;
-    FFT(ind2) = 0;
-end
-
-
-
-
-
-function Signal_filt = fft_brf(Signal, Fs, ValueDB, Freq_min, Freq_max)
-    if mod(numel(Signal), 2) == 1
-        Signal(end) = [];
-        flag = true;
-    else
-        flag = false;
-    end
-    
-    L = numel(Signal);
-    FFT_freq = Fs*(0:(L/2-1))/L;
-    
-    FFT = fft(Signal)/numel(Signal);
-    FFT = FFT_erase_zone(FFT, FFT_freq, ValueDB, Freq_min, Freq_max);
-    
-    FFT2 = flip(fft(FFT));
-    
-    FFT2(2:end+1) = FFT2;
-    FFT2(1) = FFT2(2);
-    FFT2(end) = [];
-    
-    Signal_filt = real(FFT2);
-    if flag
-        Signal_filt(end+1) = Signal_filt(end);
-    end
-end
-
-
-function FFT = FFT_erase_zone(FFT, FFT_freq, ValueDB, Freq_min, Freq_max)
-arguments
-    FFT
-    FFT_freq
-    ValueDB
-    Freq_min
-    Freq_max = []
-end
-    if isempty(Freq_max)
-        Freq_max = FFT_freq(end);
-    end
-    [~, ind11] = min(abs(FFT_freq - Freq_min));
-    if ind11 < 2
-        ind11 = 2;
-    end
-    ind12 = 2 + numel(FFT) - ind11;
-
-    [~, ind21] = min(abs(FFT_freq - Freq_max));
-    if ind21 < 2
-        ind21 = 2;
-    end
-    ind22 = 2 + numel(FFT) - ind21;
-
-    FFT(ind11:ind21) = FFT(ind11:ind21)*10^(ValueDB/20);
-    FFT(ind22:ind12) = FFT(ind22:ind12)*10^(ValueDB/20);
-
-end
 
 
 
