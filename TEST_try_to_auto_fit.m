@@ -4,33 +4,37 @@
 %
 %
 %                                ⎛⎝( ` ᢍ ´ )⎠⎞ᵐᵘʰᵃʰᵃ
-% TODO:
-% 1) finish make_fs_lower()
-% 2) spread Estimations to [Tmin, Tmax]
-% 3) use Estimations for Properties
-% 4) start time point problem (FX1001)
-% 5) use FFT or DFT for 50 Hz rejection
-% 6) add new data viewer
-% 7) analize residuals more (for lost harms)
-% 8) use incoming estimations
-% 9) add condition for good harm measure (to use window)
-% 10) [update sig_gen:] add underrange (span and mean) test signals
-% 11) make Fern module
-% 12) add errors must be 3*std
-% 13) 
-% 14) phase around -180[deg] problem
-% 15) place fft functions to its own lib
-% 16) DFT vs fft problem (calculating many DFTs) (where?)
-% 17) Add non-realtime version of fit (just incoming estimations)
-% 18) 
-% 19) 
 % 
-% NOTE:
-% 1) Add estimation on final time point !!!
-% 2) Add estimation on first time point !!!
-% 3) do more estimations by DFT
+% TODO:
+% 0) f_div -> f_dev
 %
-% NOTE: new way of fitting
+% 1) finish make_fs_lower()
+% 2) 
+% 3) use FFT or DFT for 50 Hz rejection
+% 4) start time point problem (FX1001)
+%  
+% 5) update data viewer (to both test or real data)
+% 6) add condition for harm measure or ignore
+% 7) update harm detection
+% 8) [sig_gen:] add underrange (span and mean) test signals
+%  
+% 9) add absolute errors (hardware)
+% 10) use Estimations for Properties
+% 11) use incoming estimations
+% 12) do more estimations by DFT
+%  
+% 13) analize residuals more (for lost harms)
+% 14) Add non-realtime version of fit (just incoming estimations)
+% 15) place fft functions to its own lib
+% 16) make Fern module
+%
+% 17) 
+% 18) DFT vs fft problem (calculating many DFTs) (where?)
+% 19) phase around -180[deg] problem
+% 20) 
+
+% TODO:
+% NOTE: (maybe) new way of fitting
 % 1) create sparse data with 1000-10000 points
 % 2) fit fundamental
 % 3) fit harms in residuals
@@ -38,9 +42,9 @@
 clc
 
 Save_data_flag = false;
-freq = 1;
+freq = 10;
 Freq_dev = 0;
-Duration = 11;
+Duration = 0.5;
 Fs = 10e3;
 Profile_1 = 'weak';
 Profile_2 = 'weak';
@@ -232,11 +236,18 @@ end
 FRA_dev.stop();
 
 if Exit_flag == 0 % FIXME: debug
-        disp(['Exit_flag: ' num2str(Exit_flag)]);
+    disp(['Exit_flag: ' num2str(Exit_flag)]);
 else
     for i = 1:10
         disp(['Exit_flag: ' num2str(Exit_flag)]);
     end
+end
+
+if Periods_counter > 1
+    est_cell_arr_1 = finish_estimations(est_cell_arr_1, T_arr, V1_arr, Period);
+    est_cell_arr_2 = finish_estimations(est_cell_arr_2, T_arr, V2_arr, Period);
+else
+    error('finish_estimations error: Periods_counter < 1')
 end
 
 if Find_harms
@@ -409,6 +420,7 @@ end
 
 
 function Properties = update_props(Properties, Amp_mean, BG_diff)
+% FIXME: undone function
     Value = abs(BG_diff/Amp_mean);
     % disp([num2str(BG_diff) '    ' num2str(Amp_mean)])
     % disp([num2str(Value*100, '%0.2f') ' %'])
@@ -488,6 +500,12 @@ end
 
 % FIXME: unite "get_first_period" and "get_last_period"
 function [out_time, out_sig] = get_last_period(Time, Signal, Period, Scale)
+arguments
+    Time
+    Signal
+    Period
+    Scale = 1
+end
     % Scale = 1.3;
     if Scale > 2
         Scale = 2;
@@ -668,12 +686,6 @@ Estimations_low = est_cell_arr{2};
 Estimations_extra = est_cell_arr{3};
 Estimations = estimation_fix(Estimations, Estimations_low, ...
     Estimations_extra, Periods_counter, freq);
-
-% FIXME: debug; replace by something
-Estimations(1).t_min = 0;
-Estimations(1).t_max = 0;
-Estimations(end).t_min = T_arr(end);
-Estimations(end).t_max = T_arr(end);
 end
 
 % FIXME: what if empty estimations?
@@ -683,12 +695,20 @@ Period = 1/freq;
 % NOTE: delete early estimations
 Est_time_min = [Estimations.t_max];
 Est_time_max = [Estimations.t_max];
+
+Est_status = "";
+for i = 1:numel(Estimations)
+    Est_status(i) = string(Estimations(i).status);
+end
+range2 = Est_status == "fixed";
+
 if Periods_counter > 2
     range = Est_time_min < Period & Est_time_max < Period;
 else
     range = Est_time_max < Period*0.5;
 end
-Estimations(range) = [];
+
+Estimations(range & ~range2) = [];
 
 % NOTE: Replce estimations (is none) by bad estimations
 if no_estimations(Estimations) && no_estimations(Estimations_low) && ...
@@ -884,3 +904,53 @@ if Underrange
     end
 end
 end
+
+
+function est_cell_arr = finish_estimations(est_cell_arr, T_arr, V_arr, Period)
+
+Time_passed = T_arr(end)-T_arr(1);
+Periods_counter = Time_passed/Period;
+
+Estimations = est_cell_arr{1};
+
+if Periods_counter >= 1
+    [out_time1, out_sig1] = get_first_period(T_arr, V_arr, Period);
+    [out_time2, out_sig2] = get_last_period(T_arr, V_arr, Period, 1.1);
+
+    Result1 = DFT_estimation(out_time1, out_sig1, Period);
+    Result1.t_min = 0;
+    Result1.t_max = 0;
+    Result1.status = 'fixed';
+
+    if ~isnan(Result1.amp)
+        Estimations = [Estimations Result1];
+    else
+        error('err EF2'); % FIXME: undone
+    end
+
+    Result2 = DFT_estimation(out_time2, out_sig2, Period);
+    Result2.t_min = T_arr(end);
+    Result2.t_max = T_arr(end);
+    Result2.status = 'fixed';
+
+    if ~isnan(Result1.amp)
+        Estimations = [Estimations Result2];
+    else
+        error('err EF4'); % FIXME: undone
+    end
+
+else
+    % FIXME: do something else
+    Estimations(1).t_min = 0;
+    Estimations(1).t_max = 0;
+    Estimations(1).status = 'fixed';
+    Estimations(end).t_min = T_arr(end);
+    Estimations(end).t_max = T_arr(end);
+    Estimations(end).status = 'fixed';
+end
+
+
+est_cell_arr{1} = Estimations;
+end
+
+

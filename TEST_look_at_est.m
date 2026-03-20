@@ -1,13 +1,22 @@
 
+Synth_flag = true;
 Show_channel = 2;
+
+if Synth_flag
+    Props_in_1 = Props_1;
+    Props_in_2 = Props_2;
+else
+    Props_in_1 = [];
+    Props_in_2 = [];
+end
 
 if Show_channel == 1
     Estimations_in = Estimations_1;
-    Props = Props_1;
+    Props = Props_in_1;
 elseif Show_channel == 2
 
     Estimations_in = Estimations_2;
-    Props = Props_2;
+    Props = Props_in_2;
 else
     error('wrong channel number')
 end
@@ -27,14 +36,15 @@ Est_phierr = [Estimations_in.p_err];
 Est_bg = [Estimations_in.bg];
 Est_bgerr = [Estimations_in.c_err];
 
-
-Props_amp = Props.amp;
-Props_phi = Props.phi;
-Props_bg = Props.bg;
-
-Props_amp = interp1(Synth_time, Props_amp, Est_time);
-Props_phi = interp1(Synth_time, Props_phi, Est_time);
-Props_bg = interp1(Synth_time, Props_bg, Est_time);
+if ~isempty(Props)
+    Props_amp = Props.amp;
+    Props_phi = Props.phi;
+    Props_bg = Props.bg;
+    
+    Props_amp = interp1(Synth_time, Props_amp, Est_time);
+    Props_phi = interp1(Synth_time, Props_phi, Est_time);
+    Props_bg = interp1(Synth_time, Props_bg, Est_time);
+end
 
 Est_full_time = linspace(T_arr(1), T_arr(end), 10);
 Est_full_time_norm = Est_full_time/Period;
@@ -53,7 +63,9 @@ BG_fit = feval(bg_poly, Est_full_time_norm);
 
 subplot(2, 2, 1)
 hold on
-plot(Est_time, Props_amp, '.b')
+if Synth_flag
+    plot(Est_time, Props_amp, '.b')
+end
 plot(Est_time, Est_amp, '.r')
 plot(Est_full_time, Amp_fit, '.-k')
 % errorbar(Est_time, Est_amp, Est_amperr, '.')
@@ -62,7 +74,9 @@ legend({'Props', 'Est'}, 'Location', 'best')
 
 subplot(2, 2, 2)
 hold on
-plot(Est_time, Props_phi, '.b')
+if Synth_flag
+    plot(Est_time, Props_phi, '.b')
+end
 plot(Est_time, Est_phi, '.r')
 plot(Est_full_time, Phi_fit, '.-k')
 % errorbar(Est_time, Est_phi, Est_phierr, '.')
@@ -70,7 +84,9 @@ ylabel('Phi, [deg]')
 
 subplot(2, 2, 3)
 hold on
-plot(Est_time, Props_bg, '.b')
+if Synth_flag
+    plot(Est_time, Props_bg, '.b')
+end
 plot(Est_time, Est_bg, '.r')
 plot(Est_full_time, BG_fit, '.-k')
 % errorbar(Est_time, Est_bg, Est_bgerr, '.')
