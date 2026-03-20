@@ -25,16 +25,24 @@ end
 %% Get data from Sater
 % FIXME: [in Aster_dev:] read_data forces dev to measure single point
 
-Voltage_level = 1; % [V]
-freq = 5; % [Hz]
-Cap_pred = 1e-9; % [F]
+Voltage_level = 2; % [V]
+Offset_level = 0; % [V]
+freq = 11; % [Hz]
+Meas_duration = 5; % [s]
+Cap_pred = 100e-9; % [F]
+
 
 Res_pred = 1/(2*pi*freq*Cap_pred); % [Ohm]
 Current_pred = Voltage_level/Res_pred; % [A]
 
-% Current_pred = 1/1e3;
+Current_pred = 2/1e6;
 
 clc
+Gen = AFG1022_dev();
+Gen.set_func("sin");
+Gen.set_amp(Voltage_level, "amp");
+Gen.set_freq(freq);
+Gen.set_offset(Offset_level);
 Aster = Aster_dev(3);
 
 Aster.set_connection_mode("I2V");
@@ -42,6 +50,7 @@ Sense = Aster.set_sensitivity(Current_pred);
 disp('Range: ');
 print_res(5/Sense);
 
+Gen.initiate();
 Aster.initiate();
 if Sense < 1e-11
     adev_utils.Wait(10, 'Init pause ...');
@@ -51,22 +60,24 @@ end
 
 Aster.CMD_data_stream(1);
 
-adev_utils.Wait(15, 'Wait for data gathering ...');
+adev_utils.Wait(Meas_duration, 'Wait for data gathering ...');
 
 
 pause(0.05);
 
 
 % [Time_arr, V1_arr, V2_arr] = Aster.get_CV();
-[Time_arr, V1_arr, V2_arr, Scale] = Aster.get_VV();
+[Time_arrA, V1_arrA, V2_arrA, R_Scale] = Aster.get_VV();
 Aster.CMD_data_stream(0);
 
 Aster.terminate();
+Gen.terminate();
 delete(Aster);
+delete(Gen);
 
 % V1_arr = V1_arr - mean(V1_arr);
-Time_arr = Time_arr - Time_arr(1);
-V2_arr = -V2_arr;
+% Time_arrA = Time_arrA - Time_arrA(1);
+V2_arrA = -V2_arrA;
 
 %
 
@@ -74,21 +85,21 @@ figure('position', [303 235 768 797])
 
 subplot(2, 1, 1)
 hold on
-plot(Time_arr, V1_arr, '.-b')
+plot(Time_arrA, V1_arrA, '-b')
 
 
 subplot(2, 1, 2)
 hold on
-plot(Time_arr, V2_arr, '.-b')
+plot(Time_arrA, V2_arrA, '-b')
 
 %% Load data to FRA_dummy_dev
 
 Save_data_flag = false;
 % freq = 3.131;
 Fs = 10e3;
-Synth_time = Time_arr;
-Synth_signal_1 = V1_arr;
-Synth_signal_2 = V2_arr;
+Synth_time = Time_arrA;
+Synth_signal_1 = V1_arrA;
+Synth_signal_2 = V2_arrA;
 
 
 FRA_dev = test_gen.FRA_dummy_dev(Synth_time, Synth_signal_1, Synth_signal_2);
@@ -113,8 +124,8 @@ P2e = Output.phi_err;
 
 clc
 
-Cur = Volt2*Scale;
-Cur_err = Volt2_err*Scale;
+Cur = Volt2*R_Scale;
+Cur_err = Volt2_err*R_Scale;
 Res = Volt1/Cur;
 Res_err = sqrt(((1/Cur)*Volt1_err)^2 + ((-Volt1/Cur^2)*Cur_err)^2);
 Phase_diff = (P1) - (P2);

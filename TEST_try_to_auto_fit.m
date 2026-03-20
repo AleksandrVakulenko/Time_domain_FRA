@@ -8,25 +8,25 @@
 % TODO:
 % 0) f_div -> f_dev
 %
-% 1) finish make_fs_lower()
-% 2) use FFT or DFT for 50 Hz rejection
-% 3) start time point problem (FX1001)
-% 4) reverse properties set logic
+% 1) test low freq signal with low period counter
+% 2) add input condition for harm measure or harm ignore
+% 3) do more estimations by DFT
+% 4) reverse properties set logic (from const to poly2)
 %  
 % 5) update data viewer (to both test or real data)
-% 6) add condition for harm measure or ignore
-% 7) update harm detection
-% 8) [sig_gen:] add underrange (span and mean) test signals
+% 6) [sig_gen:] add underrange (span and mean) test signals
+% 7) analize residuals more (for lost harms)
+% 8) use Estimations for Properties
 %  
-% 9) add absolute errors (hardware)
-% 10) use Estimations for Properties
-% 11) use incoming estimations
-% 12) do more estimations by DFT
+% 9) use incoming estimations
+% 10) add absolute errors (hardware)
+% 11) Add non-realtime version of fit (just incoming estimations)
+% 12) 
 %  
-% 13) analize residuals more (for lost harms)
-% 14) Add non-realtime version of fit (just incoming estimations)
-% 15) place fft functions to its own lib
-% 16) make Fern module
+% 13) place fft functions to its own lib
+% 14) make Fern module
+% 15) 
+% 16) 
 %
 % 17) DFT vs fft problem (calculating many DFTs) (where?)
 % 18) phase around -180[deg] problem
@@ -51,7 +51,7 @@ Profile_2 = 'weak';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits_1 = ["lownoise", "nobg", "lowharm"];
 Traits_2 = ["", "", ""];
-Seed = 'BTSISX'; % QDNRSE
+Seed = 'KRXSYO'; % QDNRSE
 
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -145,6 +145,7 @@ Exit_flag = 0;
 clc
 FRA_dev.initiate();
 FRA_dev.run();
+First_time = true;
 while ~stop
     pause(0.001); %FIXME: for fast signal
 %     [T_part, V1_part] = FRA_dev.get_data_ch1();
@@ -152,18 +153,20 @@ while ~stop
     if isempty(T_part)
         stop = true;
     end
+    
+    if First_time
+        Time_shift = T_part(1);
+        First_time = false;
+    end
+    T_part = T_part - Time_shift;
+
     T_arr = [T_arr T_part];
     V1_arr = [V1_arr V1_part];
     V2_arr = [V2_arr V2_part];
 
     Time_passed = T_arr(end);
     Periods_counter = Time_passed/Period;
-
-    % FIXME: it does not work (FX1001)
-%     if T_arr(1) ~= 0
-%         T_arr = T_arr - T_arr(1);
-%     end
-
+    
     %--------------------------------
     Overload_1.range = abs(V1_arr) > MAX_CH1_LIMIT*0.999; % FIXME: magic constant
     Overload_1.count = numel(find(Overload_1.range));
@@ -321,10 +324,10 @@ Properties_2.linear_phase = 0;
 disp(['Start final fit:' newline])
 
 
-
+Max_points = 100e3;
 Find_harms_num = [2 3 4 5 6]; % FIXME: use as function argument
 [T_arr, V1_arr, V2_arr, Fs] = make_fs_lower(T_arr, V1_arr, V2_arr, Fs, ...
-    freq, Find_harms_num);
+    freq, Find_harms_num, Max_points);
 
 
 disp('---- Channel 1: ----')
@@ -731,12 +734,12 @@ end
 
 %FIXME: UNDODE function
 function [T_arr_new, V1_arr_new, V2_arr_new, Fs_new] = make_fs_lower(T_arr, ...
-    V1_arr, V2_arr, Fs, freq, Find_harms_num)
+    V1_arr, V2_arr, Fs, freq, Find_harms_num, Max_points)
 
 Period = 1/freq;
 Time_length = T_arr(end) - T_arr(1);
 Period_counter = Time_length/Period;
-Num = numel(T_arr)
+Num = numel(T_arr);
 
 if ~isempty(Find_harms_num)
     Max_harm = max(Find_harms_num);
@@ -748,7 +751,7 @@ Max_freq = Max_harm * freq;
 Filter_freq = Max_freq*2;
 Fs_new = Max_freq*4;
 
-if Num > 100e3 % FIXME: magic constant
+if Num > Max_points
     [T_arr, V1_arr, V2_arr] = ...
         fft_filter_dbl_ch(T_arr, V1_arr, V2_arr, freq, Fs, Filter_freq);
 
@@ -766,8 +769,6 @@ end
 
 
 function Harm_est = estimate_harmonics(freq, T_arr, V_arr, Fs)
-Harm_est = struct('n', [], 'amp', [], 'phi', []);
-k = 0;
 
 % FIXME: use full data or cut data for harm find?
 [V_arr, F_lim] = apply_nuttall(V_arr, Fs, freq);
@@ -781,9 +782,13 @@ end
 % FIXME: unused variable
 [Noise_amp, nf_calc] = noise_amp_calc(freq, T_arr, V_arr, Fs, F_lim);
 
+HNR_min_dB = 10; % FIXME: magic constant "harm to noise ratio"
+
+k = 0;
+Harm_est = struct('n', [], 'amp', [], 'phi', []);
 for hn = 2:6
     [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr, V_arr, hn*freq);
-    if Amp_DFT > nf_calc(hn*freq) % FIXME: magic constant
+    if Amp_DFT > 10^(HNR_min_dB/20)*nf_calc(hn*freq)
         k = k + 1;
         Harm_est(k).n = hn;
         Harm_est(k).amp = Amp_DFT;

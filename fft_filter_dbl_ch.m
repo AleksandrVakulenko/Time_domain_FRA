@@ -40,7 +40,7 @@ if apply_filter
     Signal_filt_2(range) = [];
 else
     % FIXME: debug
-    warning('Filter does not applied');
+    warning(['Filter does not applied: ' num2str(Ratio)]);
 end
 
 end

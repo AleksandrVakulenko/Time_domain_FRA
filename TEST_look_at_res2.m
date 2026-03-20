@@ -78,7 +78,7 @@ end
 figure('position', [98 155 742 874])
 subplot(2, 1, 1)
 hold on
-plot(Data_time, Data_signal, '-b')
+plot(Data_time, Data_signal, '.b')
 plot(T_arr, ym, '--r', 'LineWidth', 2)
 plot(T_arr, BG_full, '--k', 'LineWidth', 1)
 plot(T_arr, BG_full+Amp_full, '--k', 'LineWidth', 1)

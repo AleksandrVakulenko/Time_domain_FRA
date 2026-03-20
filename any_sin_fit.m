@@ -175,9 +175,9 @@ opts.TolFun = 1e-12; % default
 opts.Display = 'Off';
 
 % FIXME: debug, comment or delete 3 lines
-disp(Eq)
-coeffnames(ft)
-disp(num2str(StartPoint'))
+% disp(Eq)
+% coeffnames(ft)
+% disp(num2str(StartPoint'))
 
 opts.Lower = Lower;
 opts.StartPoint = StartPoint;
