@@ -12,7 +12,7 @@ if  1 == Show_channel
     Data_signal = Synth_signal_1;
     Result_in = Result_1;
     Props = Props_1;
-    T_arr = Synth_time;
+    T_arr_print = Synth_time;
 elseif Show_channel == 2
 
     Data_time = Synth_time;
@@ -20,19 +20,19 @@ elseif Show_channel == 2
     Data_signal = Synth_signal_2;
     Result_in = Result_2;
     Props = Props_2;
-    T_arr = Synth_time;
+    T_arr_print = Synth_time;
 else
     error('wrong channel number')
 end
 
 
-T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
+T_arr_min = linspace(T_arr_print(1), T_arr_print(end), 1000);
 
-[ym, Amp_full, Phi_full, BG_full] = fit_viewer.calc_fitted_signal(Result_in, T_arr);
+[ym, Amp_full, Phi_full, BG_full] = fit_viewer.calc_fitted_signal(Result_in, T_arr_print);
 
 % Harm_disp(Result_in);
 
-Harm_y = Harm_calc(Result_in, T_arr);
+Harm_y = Harm_calc(Result_in, T_arr_print);
 if ~isempty(Harm_y)
     ym = ym + Harm_y;
 end
@@ -99,14 +99,14 @@ figure('position', [98 155 742 874])
 subplot(2, 1, 1)
 hold on
 plot(Data_time, Data_signal, '-b')
-plot(T_arr, ym, '--r', 'LineWidth', 2)
-plot(T_arr, BG_full, '--k', 'LineWidth', 1)
-plot(T_arr, BG_full+Amp_full, '--k', 'LineWidth', 1)
-plot(T_arr, BG_full-Amp_full, '--k', 'LineWidth', 1)
+plot(T_arr_print, ym, '--r', 'LineWidth', 2)
+plot(T_arr_print, BG_full, '--k', 'LineWidth', 1)
+plot(T_arr_print, BG_full+Amp_full, '--k', 'LineWidth', 1)
+plot(T_arr_print, BG_full-Amp_full, '--k', 'LineWidth', 1)
 title('Signal')
 
 subplot(2, 1, 2)
-plot(T_arr, Residuals_in, '-b')
+plot(T_arr_print, Residuals_in, '-b')
 yline(std(Residuals_in)*2)
 title('Residuals')
 
@@ -154,8 +154,8 @@ title('Residuals histogram')
 
 
 %%
-HHH = Harm_calc(Result, T_arr);
-plot(T_arr, HHH);
+HHH = Harm_calc(Result, T_arr_print);
+plot(T_arr_print, HHH);
 %%
 
 

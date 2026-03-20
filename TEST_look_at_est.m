@@ -1,5 +1,5 @@
 
-Synth_flag = true;
+Synth_flag = false;
 Show_channel = 2;
 
 if Synth_flag

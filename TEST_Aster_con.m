@@ -26,12 +26,13 @@ end
 % FIXME: [in Aster_dev:] read_data forces dev to measure single point
 
 Voltage_level = 1; % [V]
-freq = 0.1; % [Hz]
-Cap_pred = 10e-12; % [F]
+freq = 5; % [Hz]
+Cap_pred = 1e-9; % [F]
 
 Res_pred = 1/(2*pi*freq*Cap_pred); % [Ohm]
 Current_pred = Voltage_level/Res_pred; % [A]
 
+% Current_pred = 1/1e3;
 
 clc
 Aster = Aster_dev(3);
@@ -39,7 +40,7 @@ Aster = Aster_dev(3);
 Aster.set_connection_mode("I2V");
 Sense = Aster.set_sensitivity(Current_pred);
 disp('Range: ');
-res_print(5/Sense);
+print_res(5/Sense);
 
 Aster.initiate();
 if Sense < 1e-11
@@ -50,7 +51,7 @@ end
 
 Aster.CMD_data_stream(1);
 
-adev_utils.Wait(10*3, 'Wait for data gathering ...');
+adev_utils.Wait(15, 'Wait for data gathering ...');
 
 
 pause(0.05);
@@ -83,7 +84,7 @@ plot(Time_arr, V2_arr, '.-b')
 %% Load data to FRA_dummy_dev
 
 Save_data_flag = false;
-% freq = 10;
+% freq = 3.131;
 Fs = 10e3;
 Synth_time = Time_arr;
 Synth_signal_1 = V1_arr;
@@ -137,32 +138,74 @@ end
 % Cap_3 = 1/(6.28*freq*(Res-Res_err))
 % Cap_err = 1/(6.28*freq*Res_i^2)*Res_err;
 
-Cap = 1/(6.28*freq*Res);
-Cap_err = 1/(6.28*freq*Res^2)*Res_err;
-
-
-res_print(Res, Res_err)
-cap_print(Cap, Cap_err)
-phi_print(Phase_diff, Phase_diff_error)
+Zfull = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
+[C_par, R_par] = RC_calc_parallel(Zfull, freq);
+[C_ser, R_ser] = RC_calc_series(Zfull, freq);
 
 
 
+print_f_dev(Result_1.f_div_ppm, Result_1.f_dev_ppm_err);
+print_f_dev(Result_2.f_div_ppm, Result_2.f_dev_ppm_err);
 
-function res_print(Res, Res_err)
+disp(' ')
+
+print_res(Res, Res_err)
+% Cap = 1/(6.28*freq*Res);
+% Cap_err = 1/(6.28*freq*Res^2)*Res_err;
+% print_cap(Cap, Cap_err)
+print_phi(Phase_diff, Phase_diff_error)
+
+disp(' ')
+
+disp('Parallel:')
+print_cap(C_par)
+print_res(R_par)
+
+disp(' ')
+
+disp('Series:')
+print_cap(C_ser)
+print_res(R_ser)
+
+disp(' ')
+
+warning('|R| may be calculated incorrectly!')
+
+
+
+
+
+
+function [C_par, R_par] = RC_calc_parallel(Z, Freq)
+% FIXME: add errors
+Abs_sq = real(Z)^2 + imag(Z)^2;
+R_par = Abs_sq/real(Z);
+C_par = -imag(Z)/(2*pi*Freq * Abs_sq);
+end
+
+function [C_ser, R_ser] = RC_calc_series(Z, Freq)
+% FIXME: add errors
+R_ser = real(Z);
+C_ser = -1/(2*pi*Freq*imag(Z));
+end
+
+
+
+function print_res(Res, Res_err)
 arguments
     Res
     Res_err = []
 end
-    if Res > 1e12
+    if abs(Res) >= 1e12
         unit = 'TOhm';
         scale = 1e-12;
-    elseif Res > 1e9
+    elseif abs(Res) >= 1e9
         unit = 'GOhm';
         scale = 1e-9;
-    elseif Res > 1e6
+    elseif abs(Res) >= 1e6
         unit = 'MOhm';
         scale = 1e-6;
-    elseif Res > 1e3
+    elseif abs(Res) >= 1e3
         unit = 'kOhm';
         scale = 1e-3;
     else
@@ -171,27 +214,33 @@ end
     end
     
     if ~isempty(Res_err)
-        disp(['|R| = ' num2str(Res*scale, '%0.3f') ' ± ' ...
-            num2str(Res_err*scale, '%0.3f') ' ' unit])
+        disp(['|R| = ' num2str(Res*scale, '%0.4f') ' ± ' ...
+            num2str(Res_err*scale, '%0.4f') ' ' unit])
     else
-        disp(['|R| = ' num2str(Res*scale, '%0.3f') ' ' unit])
+        disp(['|R| = ' num2str(Res*scale, '%0.4f') ' ' unit])
     end
 end
 
-function cap_print(Cap, Cap_err)
+function print_cap(Cap, Cap_err)
 arguments
     Cap
     Cap_err = []
 end
-    if Cap < 1e-9
+    if abs(Cap) < 1e-9
         unit = 'pF';
         scale = 1e12;
-    elseif Cap < 1e-6
+    elseif abs(Cap) < 1e-6
         unit = 'nF';
         scale = 1e9;
-    else
+    elseif abs(Cap) < 1e-3
         unit = 'uF';
         scale = 1e6;
+    elseif abs(Cap) < 1
+        unit = 'mF';
+        scale = 1e3;
+    else
+        unit = 'F';
+        scale = 1;
     end
 
     if ~isempty(Cap_err)
@@ -203,25 +252,23 @@ end
 end
 
 
-function phi_print(Phi, Phi_err)
+function print_phi(Phi, Phi_err)
 arguments
     Phi
     Phi_err = []
 end
     if ~isempty(Phi_err)
-        disp(['P = ' num2str(Phi, '%0.2f') ' ± ' ...
-            num2str(Phi_err, '%0.2f') ' deg'])
+        disp(['Phi = ' num2str(Phi, '%0.3f') ' ± ' ...
+            num2str(Phi_err, '%0.3f') ' deg'])
     else
-        disp(['P = ' num2str(Phi, '%0.2f') ' deg'])
+        disp(['Phi = ' num2str(Phi, '%0.3f') ' deg'])
     end
 end
 
-
-
-
-
-
-
+function print_f_dev(f_dev, f_dev_err)
+    disp(['Δf = ' num2str(f_dev, '%0.1f') ' ± ' ...
+        num2str(f_dev_err, '%0.1f') 'ppm'])
+end
 
 
 

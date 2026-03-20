@@ -27,6 +27,13 @@ classdef FRA_dummy_dev < handle
             obj.V2_arr_stash = V2_arr;
         end
 
+        function initiate(obj)
+            disp('FRA_dummy_dev: initiate')
+        end
+
+        function terminate(obj)
+            disp('FRA_dummy_dev: terminate')
+        end
 
         function run(obj)
             obj.init_time = tic;

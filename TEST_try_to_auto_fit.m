@@ -9,9 +9,9 @@
 % 0) f_div -> f_dev
 %
 % 1) finish make_fs_lower()
-% 2) 
-% 3) use FFT or DFT for 50 Hz rejection
-% 4) start time point problem (FX1001)
+% 2) use FFT or DFT for 50 Hz rejection
+% 3) start time point problem (FX1001)
+% 4) reverse properties set logic
 %  
 % 5) update data viewer (to both test or real data)
 % 6) add condition for harm measure or ignore
@@ -28,9 +28,9 @@
 % 15) place fft functions to its own lib
 % 16) make Fern module
 %
-% 17) 
-% 18) DFT vs fft problem (calculating many DFTs) (where?)
-% 19) phase around -180[deg] problem
+% 17) DFT vs fft problem (calculating many DFTs) (where?)
+% 18) phase around -180[deg] problem
+% 19) 
 % 20) 
 
 % TODO:
@@ -42,9 +42,9 @@
 clc
 
 Save_data_flag = false;
-freq = 10;
+freq = 1;
 Freq_dev = 0;
-Duration = 0.5;
+Duration = 11;
 Fs = 10e3;
 Profile_1 = 'weak';
 Profile_2 = 'weak';
@@ -98,7 +98,7 @@ Overrange_tolerance = 0; % [%]
 
 %--------------------------------
 % Time_settings = struct('max', 1e6*Period); % FIXME
-Time_settings = struct('max', 10); % FIXME
+Time_settings = struct('max', 100); % FIXME
 Accuracy_settings = struct(...
     ...
     );
@@ -143,6 +143,7 @@ Exit_flag = 0;
 
 
 clc
+FRA_dev.initiate();
 FRA_dev.run();
 while ~stop
     pause(0.001); %FIXME: for fast signal
@@ -234,6 +235,7 @@ while ~stop
     end
 end
 FRA_dev.stop();
+FRA_dev.terminate();
 
 if Exit_flag == 0 % FIXME: debug
     disp(['Exit_flag: ' num2str(Exit_flag)]);
@@ -319,6 +321,12 @@ Properties_2.linear_phase = 0;
 disp(['Start final fit:' newline])
 
 
+
+Find_harms_num = [2 3 4 5 6]; % FIXME: use as function argument
+[T_arr, V1_arr, V2_arr, Fs] = make_fs_lower(T_arr, V1_arr, V2_arr, Fs, ...
+    freq, Find_harms_num);
+
+
 disp('---- Channel 1: ----')
 Time_start_1_fit = tic;
 [Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr, V1_arr, Fs, freq, ...
@@ -393,21 +401,19 @@ end
 
 %%
 
-function [Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr, V1_arr, Fs, freq, ...
+function [Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr, V_arr, Fs, freq, ...
     Estimations_1, Properties_1, Find_harms_1)
 
 if ~no_estimations(Estimations_1)
 
-    [T_arr_fit, V_arr_fit, Fs_fit] = make_fs_lower(T_arr, V1_arr, Fs, freq);
-
     if Find_harms_1
-        Harm_est_1 = estimate_harmonics(freq, T_arr_fit, V_arr_fit, Fs_fit);
+        Harm_est_1 = estimate_harmonics(freq, T_arr, V_arr, Fs);
     else
         Harm_est_1 = [];
     end
 
     % NOTE: fit with harmonics estimations
-    [Result_1, Residuals_1, DEBUG_1] = any_sin_fit(T_arr_fit, V_arr_fit, freq, ...
+    [Result_1, Residuals_1, DEBUG_1] = any_sin_fit(T_arr, V_arr, freq, ...
         Estimations_1, Properties_1, Harm_est_1);
 else
     Result_1 = [];
@@ -724,24 +730,36 @@ end
 end
 
 %FIXME: UNDODE function
-function [T_arr_fit, V_arr_fit, Fs_fit] = make_fs_lower(T_arr, V_arr, Fs, freq)
+function [T_arr_new, V1_arr_new, V2_arr_new, Fs_new] = make_fs_lower(T_arr, ...
+    V1_arr, V2_arr, Fs, freq, Find_harms_num)
+
 Period = 1/freq;
 Time_length = T_arr(end) - T_arr(1);
-Num = numel(T_arr);
-if Num > 20e3
-    
+Period_counter = Time_length/Period;
+Num = numel(T_arr)
+
+if ~isempty(Find_harms_num)
+    Max_harm = max(Find_harms_num);
+else
+    Max_harm = 1;
 end
 
-if numel(T_arr) > 200e3
-    disp('Nyan!')
-    T_arr_fit = interp1(1:numel(T_arr), T_arr, ...
-        linspace(1, numel(T_arr), 200000));
-    V_arr_fit = interp1(T_arr, V_arr, T_arr_fit);
-    Fs_fit = 1/mean(diff(T_arr_fit));
+Max_freq = Max_harm * freq;
+Filter_freq = Max_freq*2;
+Fs_new = Max_freq*4;
+
+if Num > 100e3 % FIXME: magic constant
+    [T_arr, V1_arr, V2_arr] = ...
+        fft_filter_dbl_ch(T_arr, V1_arr, V2_arr, freq, Fs, Filter_freq);
+
+    T_arr_new = T_arr(1) : 1/Fs_new : T_arr(end);
+    V1_arr_new = interp1(T_arr, V1_arr, T_arr_new);
+    V2_arr_new = interp1(T_arr, V2_arr, T_arr_new);
 else
-    T_arr_fit = T_arr;
-    V_arr_fit = V_arr;
-    Fs_fit = Fs;
+    T_arr_new = T_arr;
+    V1_arr_new = V1_arr;
+    V2_arr_new = V2_arr;
+    Fs_new = Fs;
 end
 
 end
