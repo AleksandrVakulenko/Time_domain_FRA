@@ -155,8 +155,8 @@ Zfull = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
 
 
 
-print_f_dev(Result_1.f_div_ppm, Result_1.f_dev_ppm_err);
-print_f_dev(Result_2.f_div_ppm, Result_2.f_dev_ppm_err);
+print_f_dev(Result_1.f_dev_ppm, Result_1.f_dev_ppm_err);
+print_f_dev(Result_2.f_dev_ppm, Result_2.f_dev_ppm_err);
 
 disp(' ')
 

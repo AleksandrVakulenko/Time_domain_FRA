@@ -48,7 +48,7 @@ Phi_err_out = Output.phi_err;
 BG_err_out = Output.bg_err;
 T_out = Output.time;
 
-Freq_div = Result_in.f_div_ppm;
+Freq_div = Result_in.f_dev_ppm;
 Freq_div_err = Result_in.f_dev_ppm_err;
 disp([num2str(Freq_div, '%0.1f') ' ± ' num2str(Freq_div_err, '%0.1f') ' ppm'])
 
@@ -276,7 +276,7 @@ function Harm_disp(Result_in)
 Harm = Result_in.harm;
 if ~isempty(Harm)
     Freq = Result_in.freq;
-%     Freq_dev = Result_in.f_div_ppm;
+%     Freq_dev = Result_in.f_dev_ppm;
 %     Freq = Freq * (1 + Freq_dev/1e6);
     for i = 1:numel(Harm)
         hn = Harm(i).n;
@@ -296,7 +296,7 @@ function out = Harm_calc(Result_in, Time)
 Harm = Result_in.harm;
 if ~isempty(Harm)
     Freq = Result_in.freq;
-    Freq_dev = Result_in.f_div_ppm;
+    Freq_dev = Result_in.f_dev_ppm;
     Freq = Freq * (1 + Freq_dev/1e6);
     out = zeros(size(Time));
     for i = 1:numel(Harm)

@@ -144,22 +144,22 @@ end
 
 Freq_div_flag = true; % FIXME: debug
 if Freq_div_flag
-    F_div_str = '*(1+q/1e6)'; % FIXME: add D (coeffname: q)
+    F_dev_str = '*(1+q/1e6)'; % FIXME: add D (coeffname: q)
     Lower = [Lower -500];
     StartPoint = [StartPoint -150]; % FIXME: magic constant
     Upper = [Upper +500];
 else
-    F_div_str = '';
+    F_dev_str = '';
 end
 
-Eq = [Amp_str ' * sin(2*pi*' num2str(Freq) F_div_str '*x + ' Phi_str '/180*pi) + ' BG_str];
+Eq = [Amp_str ' * sin(2*pi*' num2str(Freq) F_dev_str '*x + ' Phi_str '/180*pi) + ' BG_str];
 
 HPref = 'r';
 if ~isempty(Harm_est)
     for i = 1:numel(Harm_est)
         Hn = Harm_est(i).n;
         HarmN_eq = [HPref num2str(Hn) 'a' '*sin(2*pi*' ...
-            num2str(Hn*Freq) F_div_str '*x + ' HPref num2str(Hn) 'p' '/180*pi)'];
+            num2str(Hn*Freq) F_dev_str '*x + ' HPref num2str(Hn) 'p' '/180*pi)'];
         Eq = [Eq ' + ' HarmN_eq];
         Lower = [Lower Harm_est(i).amp*0.1 Harm_est(i).phi-45];
         StartPoint = [StartPoint Harm_est(i).amp Harm_est(i).phi];
@@ -256,7 +256,7 @@ Result = struct(...
     'amp_poly_err', amp_poly_err, ...
     'phi_poly_err', phi_poly_err, ...
     'bg_poly_err', bg_poly_err, ...
-    'f_div_ppm', D, ...
+    'f_dev_ppm', D, ...
     'f_dev_ppm_err', D_err, ...
     'fit_function', 'any_sin_fit_f2', ...
     'freq', Freq, ...

@@ -300,7 +300,7 @@ function Harm_disp(Result_in)
 Harm = Result_in.harm;
 if ~isempty(Harm)
     Freq = Result_in.freq;
-%     Freq_dev = Result_in.f_div_ppm;
+%     Freq_dev = Result_in.f_dev_ppm;
 %     Freq = Freq * (1 + Freq_dev/1e6);
     for i = 1:numel(Harm)
         hn = Harm(i).n;
@@ -320,7 +320,7 @@ function out = Harm_calc(Result_in, Time)
 Harm = Result_in.harm;
 if ~isempty(Harm)
     Freq = Result_in.freq;
-    Freq_dev = Result_in.f_div_ppm;
+    Freq_dev = Result_in.f_dev_ppm;
     Freq = Freq * (1 + Freq_dev/1e6);
     out = zeros(size(Time));
     for i = 1:numel(Harm)
