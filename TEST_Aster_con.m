@@ -25,19 +25,32 @@ end
 %% Get data from Sater
 % FIXME: [in Aster_dev:] read_data forces dev to measure single point
 
+Voltage_level = 1; % [V]
+freq = 0.1; % [Hz]
+Cap_pred = 10e-12; % [F]
+
+Res_pred = 1/(2*pi*freq*Cap_pred); % [Ohm]
+Current_pred = Voltage_level/Res_pred; % [A]
+
+
 clc
 Aster = Aster_dev(3);
 
 Aster.set_connection_mode("I2V");
-Sense = Aster.set_sensitivity(1/40e3);
-disp(['Range: ' num2str(5/Sense)])
+Sense = Aster.set_sensitivity(Current_pred);
+disp('Range: ');
+res_print(5/Sense);
 
 Aster.initiate();
-pause(0.2);
+if Sense < 1e-11
+    adev_utils.Wait(10, 'Init pause ...');
+else
+    pause(0.2);
+end
 
 Aster.CMD_data_stream(1);
 
-adev_utils.Wait(1, 'Wait for data gathering ...');
+adev_utils.Wait(10*3, 'Wait for data gathering ...');
 
 
 pause(0.05);
@@ -70,7 +83,7 @@ plot(Time_arr, V2_arr, '.-b')
 %% Load data to FRA_dummy_dev
 
 Save_data_flag = false;
-freq = 30;
+% freq = 10;
 Fs = 10e3;
 Synth_time = Time_arr;
 Synth_signal_1 = V1_arr;
@@ -106,6 +119,13 @@ Res_err = sqrt(((1/Cur)*Volt1_err)^2 + ((-Volt1/Cur^2)*Cur_err)^2);
 Phase_diff = (P1) - (P2);
 Phase_diff_error = sqrt(P1e^2 + P2e^2);
 
+if Phase_diff > 180
+    Phase_diff = Phase_diff - 360;
+end
+if Phase_diff < -180
+    Phase_diff = Phase_diff + 360;
+end
+
 % Res_cplx = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
 % Res
 % Res_r = real(Res_cplx)
@@ -117,22 +137,84 @@ Phase_diff_error = sqrt(P1e^2 + P2e^2);
 % Cap_3 = 1/(6.28*freq*(Res-Res_err))
 % Cap_err = 1/(6.28*freq*Res_i^2)*Res_err;
 
-
-disp(['|R| = ' num2str(Res/1e3, '%0.3f') ' ± ' ...
-    num2str(Res_err/1e3, '%0.3f') ' kOhm'])
-% disp(['C = ' num2str(Cap*1e9, '%0.2f') ' ± ' ...
-%     num2str(Cap_err*1e9, '%0.2f') ' nF'])
-disp(['P = ' num2str(Phase_diff, '%0.2f') ' ± ' ...
-    num2str(Phase_diff_error, '%0.2f') ' deg'])
+Cap = 1/(6.28*freq*Res);
+Cap_err = 1/(6.28*freq*Res^2)*Res_err;
 
 
+res_print(Res, Res_err)
+cap_print(Cap, Cap_err)
+phi_print(Phase_diff, Phase_diff_error)
 
 
 
 
+function res_print(Res, Res_err)
+arguments
+    Res
+    Res_err = []
+end
+    if Res > 1e12
+        unit = 'TOhm';
+        scale = 1e-12;
+    elseif Res > 1e9
+        unit = 'GOhm';
+        scale = 1e-9;
+    elseif Res > 1e6
+        unit = 'MOhm';
+        scale = 1e-6;
+    elseif Res > 1e3
+        unit = 'kOhm';
+        scale = 1e-3;
+    else
+        unit = 'Ohm';
+        scale = 1;
+    end
+    
+    if ~isempty(Res_err)
+        disp(['|R| = ' num2str(Res*scale, '%0.3f') ' ± ' ...
+            num2str(Res_err*scale, '%0.3f') ' ' unit])
+    else
+        disp(['|R| = ' num2str(Res*scale, '%0.3f') ' ' unit])
+    end
+end
+
+function cap_print(Cap, Cap_err)
+arguments
+    Cap
+    Cap_err = []
+end
+    if Cap < 1e-9
+        unit = 'pF';
+        scale = 1e12;
+    elseif Cap < 1e-6
+        unit = 'nF';
+        scale = 1e9;
+    else
+        unit = 'uF';
+        scale = 1e6;
+    end
+
+    if ~isempty(Cap_err)
+    disp(['C = ' num2str(Cap*scale, '%0.3f') ' ± ' ...
+        num2str(Cap_err*scale, '%0.3f') ' ' unit])
+    else
+    disp(['C = ' num2str(Cap*scale, '%0.3f') ' ' unit])
+    end
+end
 
 
-
+function phi_print(Phi, Phi_err)
+arguments
+    Phi
+    Phi_err = []
+end
+    if ~isempty(Phi_err)
+        disp(['P = ' num2str(Phi, '%0.2f') ' ± ' ...
+            num2str(Phi_err, '%0.2f') ' deg'])
+    else
+        disp(['P = ' num2str(Phi, '%0.2f') ' deg'])
+    end
+end
 
 
 
