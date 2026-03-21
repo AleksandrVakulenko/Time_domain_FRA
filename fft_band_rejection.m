@@ -1,5 +1,6 @@
 
 % FIXME: put in Fern module
+% FIXME:Remember about f = 0 on fft calc data
 
 function Signal_filt = fft_band_rejection(Signal, Fs, ValueDB, Freq_min, Freq_max)
     if ~isempty(Freq_max) && Freq_min >= Freq_max

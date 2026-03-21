@@ -29,7 +29,7 @@
 %
 % 17) DFT vs fft problem (calculating many DFTs) (where?)
 % 18) phase around -180[deg] problem
-% 19) 
+% 19) Remember about f = 0 on fft calc data
 % 20) 
 
 % TODO:
@@ -46,7 +46,7 @@ Freq_dev = 0;
 Duration = 11;
 Fs = 10e3;
 Profile_1 = 'weak';
-Profile_2 = 'strong';
+Profile_2 = 'weak';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits_1 = ["lownoise", "nobg", "lowharm"];
 Traits_2 = ["", "", ""];
@@ -298,13 +298,13 @@ disp(['Start final fit:' newline])
 
 Max_points = 1000e3;
 % FIXME: use as function argument
-Find_harms_num = [2 3 4 5 6];
+Find_harms_num = [2 3 4 5 6]; % FIXME: use incoming harms
 % FIXME: do it after harm estimation
 % FIXME: upgrade function make_fs_lower
 [T_arr, V1_arr, V2_arr, Fs] = make_fs_lower(T_arr, V1_arr, V2_arr, Fs, ...
     freq, Find_harms_num, Max_points);
 
-% FIXME undone
+% FIXME undone section
 % "const" "linear" "poly2"
 Properties_1.Amp_type = "const";
 Properties_1.BG_type = "poly2";
@@ -319,14 +319,17 @@ Time_start_1_fit = tic;
 [Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr, V1_arr, Fs, freq, ...
     Estimations_1, Properties_1, Find_harms_1);
 Time_ch1_fit = toc(Time_start_1_fit);
+disp('--------------------')
 
-disp([newline '---- Channel 2: ----'])
+disp(' ')
+
+disp('---- Channel 2: ----')
 Time_start_2_fit = tic;
 [Result_2, Residuals_2, DEBUG_2] = fit_channel(T_arr, V2_arr, Fs, freq, ...
     Estimations_2, Properties_2, Find_harms_2);
 Time_ch2_fit = toc(Time_start_2_fit);
+disp('--------------------')
 
-disp(['--------------------'])
 
 disp(' ')
 disp(['Time to fit 1: ' num2str(Time_ch1_fit, '%0.2f') ' s'])
@@ -388,24 +391,24 @@ end
 
 %%
 
-function [Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr, V_arr, Fs, freq, ...
-    Estimations_1, Properties, Find_harms_1)
+function [Result, Residuals, DEBUG] = fit_channel(T_arr, V_arr, Fs, freq, ...
+    Estimations, Properties, Find_harms)
 
-if ~no_estimations(Estimations_1)
+if ~no_estimations(Estimations)
 
-    if Find_harms_1
+    if Find_harms
         Harm_est_1 = estimate_harmonics(freq, T_arr, V_arr, Fs);
     else
         Harm_est_1 = [];
     end
 
     % NOTE: fit with harmonics estimations
-    [Result_1, Residuals_1, DEBUG_1] = any_sin_fit(T_arr, V_arr, freq, ...
-        Estimations_1, Properties, Harm_est_1);
+    [Result, Residuals, DEBUG] = any_sin_fit(T_arr, V_arr, freq, ...
+        Estimations, Properties, Harm_est_1);
 else
-    Result_1 = [];
-    Residuals_1 = [];
-    DEBUG_1 = [];
+    Result = [];
+    Residuals = [];
+    DEBUG = [];
 end
 
 end
@@ -738,8 +741,8 @@ else
     disp(['noise calc without window' newline])
 end
 
-% FIXME: unused variable
-[Noise_amp, nf_calc] = noise_amp_calc(freq, T_arr, V_arr, Fs, F_lim);
+% NOTE: do not use for noise amp calc
+[~, nf_calc] = noise_amp_calc(freq, T_arr, V_arr, Fs, F_lim);
 
 HNR_min_dB = 10; % FIXME: magic constant "harm to noise ratio"
 
