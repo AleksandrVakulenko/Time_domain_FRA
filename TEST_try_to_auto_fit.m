@@ -7,20 +7,20 @@
 % 
 % TODO:
 %
-% 1) test low freq signal with low period counter
-% 2) add input condition for harm measure or harm ignore
-% 3) do more estimations by DFT
-% 4) calculate full noise power
+% 1) analize residuals more (for lost harms)
+% 2) use Estimations for Properties
+% 3) add input condition for harm measure or harm ignore
+% 4) do more estimations by DFT
 %  
-% 5) update data viewer (to both test or real data)
-% 6) [sig_gen:] add underrange (span and mean) test signals
-% 7) analize residuals more (for lost harms)
-% 8) use Estimations for Properties
+% 5) use incoming estimations
+% 6) pass f_dev from fit V1 to fit V2
+% 7) [sig_gen:] add underrange (span and mean) test signals
+% 8) update data viewer (to both test or real data)
 %  
-% 9) use incoming estimations
-% 10) pass f_dev from fit V1 to fit V2
-% 11) add absolute errors (hardware)
-% 12) Add non-realtime version of fit (just incoming estimations)
+% 9) add absolute errors (hardware)
+% 10) Add non-realtime version of fit (just incoming estimations)
+% 11) 
+% 12) 
 %  
 % 13) place fft functions to its own lib
 % 14) make Fern module
@@ -107,9 +107,12 @@ Time_printer();
 %--------------------------------
 % Time_settings = struct('max', 1e6*Period); % FIXME
 Time_settings = struct('max', 100); % FIXME
+
 Accuracy_settings = struct(...
     ...
     );
+
+Harm_num(Harm_num == 1) = [];
 %--------------------------------
 if Time_to_underrange < 0.3
     Time_to_underrange = 0.3; % FIXME: magic constant
@@ -253,23 +256,16 @@ else
     error('finish_estimations error: Periods_counter < 1')
 end
 
-if any(Harm_num > 1)
-    Find_harms = true;
-else
-    Find_harms = false;
-end
 
-if Find_harms
-    Find_harms_1 = true;
-    Find_harms_2 = true;
-end
+Harm_num_1 = Harm_num;
+Harm_num_2 = Harm_num;
 
 if Overload_1.count > 0
-    Find_harms_1 = false;
+    Harm_num_1 = [];
 end
 
 if Overload_2.count > 0
-    Find_harms_2 = false;
+    Harm_num_2 = [];
 end
 
 if Exit_flag == 0 && Overload_1.count > 0
@@ -296,13 +292,7 @@ clc
 disp(['Start final fit:' newline])
 
 
-Max_points = 1000e3;
-% FIXME: use as function argument
-Find_harms_num = [2 3 4 5 6]; % FIXME: use incoming harms
-% FIXME: do it after harm estimation
-% FIXME: upgrade function make_fs_lower
-[T_arr, V1_arr, V2_arr, Fs] = make_fs_lower(T_arr, V1_arr, V2_arr, Fs, ...
-    freq, Find_harms_num, Max_points);
+
 
 % FIXME undone section
 % "const" "linear" "poly2"
@@ -317,7 +307,7 @@ Properties_2.Phi_type = "const";
 disp('---- Channel 1: ----')
 Time_start_1_fit = tic;
 [Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr, V1_arr, Fs, freq, ...
-    Estimations_1, Properties_1, Find_harms_1);
+    Estimations_1, Properties_1, Harm_num_1);
 Time_ch1_fit = toc(Time_start_1_fit);
 disp('--------------------')
 
@@ -326,7 +316,7 @@ disp(' ')
 disp('---- Channel 2: ----')
 Time_start_2_fit = tic;
 [Result_2, Residuals_2, DEBUG_2] = fit_channel(T_arr, V2_arr, Fs, freq, ...
-    Estimations_2, Properties_2, Find_harms_2);
+    Estimations_2, Properties_2, Harm_num_2);
 Time_ch2_fit = toc(Time_start_2_fit);
 disp('--------------------')
 
@@ -392,19 +382,31 @@ end
 %%
 
 function [Result, Residuals, DEBUG] = fit_channel(T_arr, V_arr, Fs, freq, ...
-    Estimations, Properties, Find_harms)
+    Estimations, Properties, Harm_num)
 
 if ~no_estimations(Estimations)
 
-    if Find_harms
-        Harm_est_1 = estimate_harmonics(freq, T_arr, V_arr, Fs);
+    if ~isempty(Harm_num)
+        Harm_est = estimate_harmonics(T_arr, V_arr, Fs, freq, Harm_num);
     else
-        Harm_est_1 = [];
+        Harm_est = [];
+    end
+
+    Max_points = 100e3; % FIXME: magic constant
+    % FIXME: upgrade function make_fs_lower
+    % FIXME: make it single channel
+    [T_arr, V_arr, ~, Fs2] = make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
+        freq, Harm_num, Max_points);
+
+    if Fs2 ~= Fs % FIXME: debug print
+        disp(' ')
+        warning(['Sampling freq reduced: ' num2str(Fs) ' -> ' num2str(Fs2)])
+        disp(' ')
     end
 
     % NOTE: fit with harmonics estimations
     [Result, Residuals, DEBUG] = any_sin_fit(T_arr, V_arr, freq, ...
-        Estimations, Properties, Harm_est_1);
+        Estimations, Properties, Harm_est);
 else
     Result = [];
     Residuals = [];
@@ -728,52 +730,6 @@ else
 end
 
 end
-
-
-function Harm_est = estimate_harmonics(freq, T_arr, V_arr, Fs)
-
-% FIXME: use full data or cut data for harm find?
-[V_arr, F_lim] = apply_nuttall(V_arr, Fs, freq);
-% FIXME: debug print
-if ~isempty(F_lim)
-    disp(['Nuttall window is used' newline]);
-else
-    disp(['noise calc without window' newline])
-end
-
-% NOTE: do not use for noise amp calc
-[~, nf_calc] = noise_amp_calc(freq, T_arr, V_arr, Fs, F_lim);
-
-HNR_min_dB = 10; % FIXME: magic constant "harm to noise ratio"
-
-k = 0;
-Harm_est = struct('n', [], 'amp', [], 'phi', []);
-for hn = 2:6
-    [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr, V_arr, hn*freq);
-    if Amp_DFT > 10^(HNR_min_dB/20)*nf_calc(hn*freq)
-        k = k + 1;
-        Harm_est(k).n = hn;
-        Harm_est(k).amp = Amp_DFT;
-        Harm_est(k).phi = Phi_DFT;
-        disp('GOOD')
-        disp(['noise  = ' num2str(nf_calc(hn*freq)) ' V'])
-        disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
-            '    ' newline ...
-            'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline])
-    else
-        disp('BAD')
-        disp(['noise  = ' num2str(nf_calc(hn*freq)) ' V'])
-        disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
-            '    ' newline ...
-            'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline])
-    end
-end
-if k == 0
-    Harm_est = [];
-end
-
-end
-
 
 
 function [est_cell_arr] = do_estimations(est_cell_arr, T_arr, V_arr, ...

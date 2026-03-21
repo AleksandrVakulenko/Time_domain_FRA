@@ -19,6 +19,9 @@ Time_length = T_arr_filt(end) - T_arr_filt(1);
 Period_counter = Time_length/Period;
 Period_counter_new = (Time_length-Time_cut_length)/Period;
 Ratio = Period_counter_new/Period_counter;
+if Ratio < 0
+    Ratio = 0;
+end
 
 if Ratio > 0.8 % FIXME: magic constant
     apply_filter = true;
