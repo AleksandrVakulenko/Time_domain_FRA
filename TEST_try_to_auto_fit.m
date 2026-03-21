@@ -18,9 +18,9 @@
 % 8) use Estimations for Properties
 %  
 % 9) use incoming estimations
-% 10) add absolute errors (hardware)
-% 11) Add non-realtime version of fit (just incoming estimations)
-% 12) 
+% 10) pass f_dev from fit V1 to fit V2
+% 11) add absolute errors (hardware)
+% 12) Add non-realtime version of fit (just incoming estimations)
 %  
 % 13) place fft functions to its own lib
 % 14) make Fern module
@@ -46,7 +46,7 @@ Freq_dev = 0;
 Duration = 11;
 Fs = 10e3;
 Profile_1 = 'weak';
-Profile_2 = 'weak';
+Profile_2 = 'strong';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits_1 = ["lownoise", "nobg", "lowharm"];
 Traits_2 = ["", "", ""];
@@ -118,11 +118,11 @@ est_cell_arr_1 = {empty_estimation(), empty_estimation(), empty_estimation()};
 est_cell_arr_2 = {empty_estimation(), empty_estimation(), empty_estimation()};
 
 Basic_properties = struct(...
-    'const_bg', 11, ...
+    'const_bg', 100, ...
     'linear_bg', 0, ...
-    'const_phase', 0, ...
+    'const_phase', 100, ...
     'linear_phase', 0, ...
-    'const_amp', 0, ...
+    'const_amp', 100, ...
     'linear_amp', 0);
 
 Properties_1 = Basic_properties;
@@ -223,6 +223,7 @@ while ~stop
         Properties_2, T_arr, V2_arr, Freq, Periods_counter);
     %--------------------------------
 
+
     if ~isempty(Fig)
         subplot(2, 1, 1)
         cla
@@ -298,25 +299,25 @@ clc
 % Properties_1.linear_bg = 0;
 
 % -FIXME: debug-
-Properties_1.const_bg = 11;
-Properties_1.linear_bg = 0;
-
-Properties_1.const_amp = 11;
-Properties_1.linear_amp = 0;
-
-Properties_1.const_phase = 11;
-Properties_1.linear_phase = 0;
+% Properties_1.const_bg = 11;
+% Properties_1.linear_bg = 0;
+% 
+% Properties_1.const_amp = 11;
+% Properties_1.linear_amp = 0;
+% 
+% Properties_1.const_phase = 11;
+% Properties_1.linear_phase = 0;
 % --------------
 
 % -FIXME: debug-
-Properties_2.const_bg = 0;
-Properties_2.linear_bg = 0;
-
-Properties_2.const_amp = 11;
-Properties_2.linear_amp = 0;
-
-Properties_2.const_phase = 11;
-Properties_2.linear_phase = 0;
+% Properties_2.const_bg = 0;
+% Properties_2.linear_bg = 0;
+% 
+% Properties_2.const_amp = 11;
+% Properties_2.linear_amp = 0;
+% 
+% Properties_2.const_phase = 11;
+% Properties_2.linear_phase = 0;
 % --------------
 
 
@@ -427,16 +428,16 @@ end
 
 
 
-function Properties = update_props(Properties, Amp_mean, BG_diff)
+function Properties = update_props(Properties, Amp_mean, BG_diff, Amp_diff)
 % FIXME: undone function
     Value = abs(BG_diff/Amp_mean);
     % disp([num2str(BG_diff) '    ' num2str(Amp_mean)])
     % disp([num2str(Value*100, '%0.2f') ' %'])
-    if Value > 0.2
+    if Value >= 0.2
         Properties.linear_bg = 0;
         Properties.const_bg = 0;
     end
-    if Value < 0.2 && Value > 0.05
+    if Value < 0.2 && Value >= 0.1
         Properties.linear_bg = Properties.linear_bg + 2;
         Properties.const_bg = 0;
     end
@@ -448,6 +449,27 @@ function Properties = update_props(Properties, Amp_mean, BG_diff)
         Properties.linear_bg = Properties.linear_bg - 1;
         Properties.const_bg = Properties.const_bg + 2;
     end
+
+    if ~isempty(Amp_diff)
+        Value2 = abs(Amp_diff/Amp_mean);
+        if Value2 >= 0.2
+            Properties.linear_amp = 0;
+            Properties.const_amp = 0;
+        end
+        if Value2 < 0.2 && Value2 >= 0.1
+            Properties.linear_amp = Properties.linear_amp + 2;
+            Properties.const_amp = 0;
+        end
+        if Value2 < 0.1
+            Properties.linear_amp = Properties.linear_amp + 1;
+            Properties.const_amp = Properties.const_amp + 1;
+        end
+        if Value2 < 0.001
+            Properties.linear_amp = Properties.linear_amp - 1;
+            Properties.const_amp = Properties.const_amp + 2;
+        end
+    end
+
 end
 
 
@@ -822,7 +844,7 @@ Estimations_extra = est_cell_arr{3};
 Period = 1/Freq;
 
 % FIXME: do we need this?
-if no_estimations(Estimations) && Periods_counter > 1
+if no_estimations(Estimations) && Periods_counter > 1.0
     Init_values = do_initial_estimation(T_arr, V_arr, Period);
     Result = simple_sin_fit_f(T_arr, V_arr, ...
         Freq, Init_values);
@@ -860,20 +882,16 @@ switch signal_per_duration(Periods_counter)
         end
 
     case "single" % 1.0 : 2
-        % FIXME: we want to finish here !
-        % FIXME: UNDONE (DEBUG VERSION)
-        %             [out_time, out_sig] = get_last_period(T_arr, V_arr, Period);
         Result = simple_sin_fit_f(T_arr, V_arr, ...
             Freq, Estimations);
         Estimations = [Estimations Result];
 
         BG_diff = Result.z;
         Amp_mean = Result.amp;
-        Properties = update_props(Properties, Amp_mean, BG_diff);
+        Properties = update_props(Properties, Amp_mean, BG_diff, []);
 
 
     case "long" % 2 : 10
-        % FIXME: UNDONE (DEBUG VERSION)
         [out_time1, out_sig1] = get_first_period(T_arr, V_arr, Period);
         Result1 = simple_sin_fit_f(out_time1, out_sig1, ...
             Freq, Estimations);
@@ -888,17 +906,14 @@ switch signal_per_duration(Periods_counter)
 
         BG_diff = Result2.bg - Result1.bg;
         Amp_mean = mean([Result2.amp Result1.amp]);
-        Properties = update_props(Properties, Amp_mean, BG_diff);
+        Amp_diff = Result2.amp - Result1.amp;
+        Properties = update_props(Properties, Amp_mean, BG_diff, Amp_diff);
 
 
     case "max" % 10 : inf
-        % FIXME: UNDONE (DEBUG VERSION)
         Scale = 5; % FIXME: magic constant
         [out_time, out_sig] = get_last_period(T_arr, V_arr, Period, Scale);
-        %             Result = simple_sin_fit_f(out_time, out_sig, ...
-        %                 Freq, Estimations);
         Result = DFT_estimation(out_time, out_sig, Period);
-%         disp(['Est te = ' num2str(Result.t_max) ' s']); % FIXME: delete
         Estimations = [Estimations Result];
 
 end

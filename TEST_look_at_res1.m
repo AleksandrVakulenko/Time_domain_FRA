@@ -14,7 +14,6 @@ if  1 == Show_channel
     Props = Props_1;
     T_arr_print = Synth_time;
 elseif Show_channel == 2
-
     Data_time = Synth_time;
     V_arr_in = V2_arr;
     Data_signal = Synth_signal_2;
