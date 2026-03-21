@@ -88,11 +88,19 @@ Freq = freq;
 Period = 1/Freq;
 Underrange_force = false;
 Fig = figure('position', [471 217 690 691]);
-Find_harms = true;
+Harm_num = [1 2 3];
 MAX_CH1_LIMIT = 5;
 MAX_CH2_LIMIT = 5;
 Time_to_underrange = 0.1*Period; % [s]
 Overrange_tolerance = 0; % [%]
+%--------------------------------
+
+%--------------------------------
+Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
+Harm_profile = "common"; % "common", "most_accurate"
+[Times_conf, Time_printer] = get_time_config_Aster(Period, Harm_num, ...
+    Time_profile, Harm_profile);
+Time_printer();
 %--------------------------------
 
 %--------------------------------
@@ -253,6 +261,12 @@ if Periods_counter > 1
     est_cell_arr_2 = finish_estimations(est_cell_arr_2, T_arr, V2_arr, Period);
 else
     error('finish_estimations error: Periods_counter < 1')
+end
+
+if any(Harm_num > 1)
+    Find_harms = true;
+else
+    Find_harms = false;
 end
 
 if Find_harms
