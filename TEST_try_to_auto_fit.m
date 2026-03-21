@@ -103,6 +103,7 @@ Harm_profile = "common"; % "common", "most_accurate"
 Time_printer();
 %--------------------------------
 
+
 %--------------------------------
 % Time_settings = struct('max', 1e6*Period); % FIXME
 Time_settings = struct('max', 100); % FIXME
@@ -338,8 +339,11 @@ clc
 disp(['Start final fit:' newline])
 
 
-Max_points = 100e3;
-Find_harms_num = [2 3 4 5 6]; % FIXME: use as function argument
+Max_points = 1000e3;
+% FIXME: use as function argument
+% FIXME: do it after harm estimation
+% FIXME: upgrade function make_fs_lower
+Find_harms_num = [2 3 4 5 6]; % FIXME: use incoming harms
 [T_arr, V1_arr, V2_arr, Fs] = make_fs_lower(T_arr, V1_arr, V2_arr, Fs, ...
     freq, Find_harms_num, Max_points);
 
