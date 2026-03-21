@@ -244,7 +244,13 @@ R_harm_err = Result.harm_err;
 
 disp([newline 'Harmonics:' newline '-----------------------'])
 if isempty(R_harm)
-    disp([newline 'No harmonic in result struct' newline])
+%     disp([newline 'No harmonic in result struct' newline])
+    for i = 1:numel(P_harm)
+        disp('NO harmonic:')
+        disp(['(for) Props harmonic:' '[' num2str(P_harm(i).n) ']'])
+        disp_harm_info(P_harm(i), Freq);
+        disp(' ')
+    end
     return
 else
 end
