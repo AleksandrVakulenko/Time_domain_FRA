@@ -28,7 +28,7 @@ clc
 Save_data_flag = false;
 freq = 1;
 Freq_dev = 0;
-Duration = 2;
+Duration = 10;
 Fs = 10e3;
 Profile_1 = 'weak';
 Profile_2 = 'weak';
@@ -66,165 +66,74 @@ test_gen.plot_test_signals(Synth_time, Synth_signal_1, Synth_signal_2);
 
 % FRA_dev = test_gen.FRA_dummy_dev(T_a, V, -I);
 
-%% Main part
+%% Main part (Data gathering)
 
 %--------------------------------
 Freq = freq;
-Period = 1/Freq;
+Period = 1/freq;
 Underrange_force = false;
 Fig = figure('position', [471 217 690 691]);
-Harm_num = [1 2 3];
+Harm_num = [1 2 3 4 5];
 MAX_CH1_LIMIT = 5;
 MAX_CH2_LIMIT = 5;
 Time_to_underrange = 0.1*Period; % [s]
 Overrange_tolerance = 0; % [%]
+Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
+Harm_profile = "common"; % "common", "most_accurate"
 %--------------------------------
 
-%--------------------------------
-Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
-Harm_profile = "common"; % "common", "most_accurate"
 [Times_conf, Time_printer] = get_time_config_Aster(Period, Harm_num, ...
     Time_profile, Harm_profile);
-Time_printer();
-%--------------------------------
-
+Time_printer(); % FIXME: debug
 
 %--------------------------------
-% Time_settings = struct('max', 1e6*Period); % FIXME
-Time_settings = struct('max', 100); % FIXME
+% FIXME: undone legacy code; update by Time_profile
+Accuracy_settings = struct();
 
-Accuracy_settings = struct(...
-    ...
-    );
-
-Harm_num(Harm_num == 1) = [];
-%--------------------------------
+% FIXME: debug
 if Time_to_underrange < 0.3
     Time_to_underrange = 0.3; % FIXME: magic constant
 end
 %--------------------------------
 
 
-% Shared data -------------------------
-T_arr = [];
-V1_arr = [];
-V2_arr = [];
+% ----------------------------------------------------------------
+Channel_settings_1.underrange_force = Underrange_force;
+Channel_settings_1.max_ch1_limit = MAX_CH1_LIMIT;
+Channel_settings_1.time_to_underrange = Time_to_underrange;
+Channel_settings_1.overrange_tolerance = Overrange_tolerance;
 
-% FIXME: need refactor
-est_cell_arr_1 = {empty_estimation(), empty_estimation(), empty_estimation()};
-est_cell_arr_2 = {empty_estimation(), empty_estimation(), empty_estimation()};
+Channel_settings_2.underrange_force = Underrange_force;
+Channel_settings_2.max_ch1_limit = MAX_CH2_LIMIT;
+Channel_settings_2.time_to_underrange = Time_to_underrange;
+Channel_settings_2.overrange_tolerance = Overrange_tolerance;
 
-Underrange_1 = true;
-Underrange_2 = true;
+Profile.times_conf = Times_conf;
 
-Overload_1 = struct('range', [], 'count', 0, 'volume', 0);
-Overload_2 = struct('range', [], 'count', 0, 'volume', 0);
-% -------------------------------------
-
-% Common data -------------------------
-stop = false;
-Exit_flag = 0;
-% -------------------------------------
+% ----------------------------------------------------------------
 
 
+%--------------------------------%--------------------------------%
 clc
 FRA_dev.initiate();
 FRA_dev.run();
-First_time = true;
-while ~stop
-    pause(0.001); %FIXME: for fast signal
-%     [T_part, V1_part] = FRA_dev.get_data_ch1();
-    [T_part, V1_part, V2_part] = FRA_dev.get_VV();
-    if isempty(T_part)
-        stop = true;
-    end
-    
-    if First_time
-        Time_shift = T_part(1);
-        First_time = false;
-    end
-    T_part = T_part - Time_shift;
 
-    T_arr = [T_arr T_part];
-    V1_arr = [V1_arr V1_part];
-    V2_arr = [V2_arr V2_part];
+[Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(FRA_dev, ...
+    Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig);
 
-    Time_passed = T_arr(end);
-    Periods_counter = Time_passed/Period;
-    
-    %--------------------------------
-    Overload_1.range = abs(V1_arr) > MAX_CH1_LIMIT*0.999; % FIXME: magic constant
-    Overload_1.count = numel(find(Overload_1.range));
-    Overload_1.volume = Overload_1.count/numel(V1_arr);
-    
-    Overload_2.range = abs(V2_arr) > MAX_CH2_LIMIT*0.999; % FIXME: magic constant
-    Overload_2.count = numel(find(Overload_2.range));
-    Overload_2.volume = Overload_2.count/numel(V2_arr);
-
-    % FIXME: debug print
-    if Overload_1.count > 0
-        disp(['Overload Ch 1: ' num2str(Overload_1.volume*100, '%0.2f') ' %'])
-    end
-    if Overload_2.count > 0
-        disp(['Overload Ch 2: ' num2str(Overload_2.volume*100, '%0.2f') ' %'])
-    end
-
-    Underrange_1 = check_underrange(V1_arr, Underrange_1, Underrange_force);
-    Underrange_2 = check_underrange(V2_arr, Underrange_2, Underrange_force);
-
-    if Underrange_1 && Time_passed > Time_to_underrange
-        Exit_flag = 101; % NOTE: EF 101: underrange ch1
-        break;
-    end
-
-    if Underrange_2 && Time_passed > Time_to_underrange
-        Exit_flag = 102; % NOTE: EF 102: underrange ch2
-        break;
-    end
-
-    if Time_passed > 0.3 && Overload_1.volume > Overrange_tolerance
-        Exit_flag = 201; % NOTE: EF 201: overrange
-        break;
-    end
-
-    if Time_passed > 0.3 && Overload_2.volume > Overrange_tolerance
-        Exit_flag = 202; % NOTE: EF 202: overrange
-        break;
-    end
-
-    if Time_passed > Time_settings.max
-        Exit_flag = 30; % NOTE: EF 3: Timeout_max
-        break;
-    end
-
-    if Periods_counter > 1.1
-        % FIXME: ude this or Time_settings.max ?
-    end
-
-    % FIXME: refactor this function
-    [est_cell_arr_1] = do_estimations(est_cell_arr_1, T_arr, V1_arr, ...
-        Freq, Periods_counter);
-
-    [est_cell_arr_2] = do_estimations(est_cell_arr_2, T_arr, V2_arr, ...
-        Freq, Periods_counter);
-    %--------------------------------
-
-
-    if ~isempty(Fig)
-        subplot(2, 1, 1)
-        cla
-        plot(T_arr, V1_arr);
-        title(['Ch 1 (PC: ' num2str(Periods_counter, '%0.3f') ')'])
-
-        subplot(2, 1, 2)
-        cla
-        plot(T_arr, V2_arr);
-        title('Ch 2')
-        drawnow
-    end
-end
 FRA_dev.stop();
 FRA_dev.terminate();
+%--------------------------------%--------------------------------%
+T_arr = Ch_data_1.time;
+V1_arr = Ch_data_1.voltage;
+Overload_1 = Ch_data_1.overload;
+est_cell_arr_1 = Ch_data_1.est_cell;
+
+% T_arr = Ch_data_2.time; % NOTE: same as in CH1
+V2_arr = Ch_data_2.voltage;
+Overload_2 = Ch_data_2.overload;
+est_cell_arr_2 = Ch_data_2.est_cell;
+%--------------------------------%--------------------------------%
 
 if Exit_flag == 0 % FIXME: debug
     disp(['Exit_flag: ' num2str(Exit_flag)]);
@@ -238,7 +147,8 @@ if Periods_counter > 1
     est_cell_arr_1 = finish_estimations(est_cell_arr_1, T_arr, V1_arr, Period);
     est_cell_arr_2 = finish_estimations(est_cell_arr_2, T_arr, V2_arr, Period);
 else
-    error('finish_estimations error: Periods_counter < 1')
+    % FIXME: debug
+    warning('finish_estimations problem: Periods_counter < 1')
 end
 
 Harm_num_1 = Harm_num;
@@ -259,9 +169,9 @@ if Exit_flag == 0 && Overload_1.count > 0
 end
 
 
-% FIXME: update (ADD SECOND CHANNEL)
-Exit_status = struct('flag', Exit_flag, 'overload_1_count', Overload_1.count, ...
-    'estimations_cell', est_cell_arr_1);
+% FIXME: undone
+% Exit_status = struct('flag', Exit_flag, 'overload_1_count', Overload_1.count, ...
+%     'estimations_cell', est_cell_arr_1);
 
 Estimations_1 = estimation_fix_wrapper(est_cell_arr_1, ...
     Periods_counter, freq, T_arr);
@@ -269,14 +179,10 @@ Estimations_2 = estimation_fix_wrapper(est_cell_arr_2, ...
     Periods_counter, freq, T_arr);
 
 
-%%
+%% Fitting part
 clc
 
-
 disp(['Start final fit:' newline])
-
-
-
 
 % FIXME undone section
 % "const" "linear" "poly2"
@@ -385,7 +291,7 @@ if ~no_estimations(Estimations)
     Noise_freq_low = freq*max(Harm_num);
     Noise_rms = noise_rms_calc(V_arr, Fs, Noise_freq_low);
 
-    Max_points = 10e3; % FIXME: magic constant
+    Max_points = 1000e3; % FIXME: magic constant
     % FIXME: upgrade function make_fs_lower
     % FIXME: make it single channel
     [T_arr, V_arr, ~, Fs2] = make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
@@ -742,8 +648,8 @@ Max_freq = Max_harm * freq;
 Filter_freq = Max_freq*2;
 Fs_new = Max_freq*4;
 
-if Fs_new < 10
-    Fs_new = 10; % FIXME: magic constant
+if Fs_new < 500
+    Fs_new = 500; % FIXME: magic constant
 end
 
 if Num > Max_points
@@ -906,3 +812,167 @@ est_cell_arr{1} = Estimations;
 end
 
 
+function [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(FRA_dev, ...
+    Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig)
+
+arguments
+    FRA_dev
+    Freq
+    Harm_num
+    Profile
+    Channel_settings_1
+    Channel_settings_2
+    Fig = []
+end
+
+Period = 1/Freq;
+Harm_num(Harm_num == 1) = [];
+
+% ----------------------------------------------------------------
+Underrange_force_1 = Channel_settings_1.underrange_force;
+MAX_CH1_LIMIT = Channel_settings_1.max_ch1_limit;
+Time_to_underrange_1 = Channel_settings_1.time_to_underrange;
+Overrange_tolerance_1 = Channel_settings_1.overrange_tolerance;
+
+Underrange_force_2 = Channel_settings_2.underrange_force;
+MAX_CH2_LIMIT = Channel_settings_2.max_ch1_limit;
+Time_to_underrange_2 = Channel_settings_2.time_to_underrange;
+Overrange_tolerance_2 = Channel_settings_2.overrange_tolerance;
+
+Times_conf = Profile.times_conf;
+
+% FIXME: update legacy code by Times_conf
+Max_time = Times_conf.max_fop*Times_conf.period;
+Time_settings = struct('max', Max_time); % FIXME
+% ----------------------------------------------------------------
+
+
+% Shared data -------------------------
+T_arr = [];
+V1_arr = [];
+V2_arr = [];
+
+% FIXME: need refactor
+est_cell_arr_1 = {empty_estimation(), empty_estimation(), empty_estimation()};
+est_cell_arr_2 = {empty_estimation(), empty_estimation(), empty_estimation()};
+
+Underrange_1 = true;
+Underrange_2 = true;
+
+Overload_1 = struct('range', [], 'count', 0, 'volume', 0);
+Overload_2 = struct('range', [], 'count', 0, 'volume', 0);
+% -------------------------------------
+
+
+% Common data -------------------------
+stop = false;
+Exit_flag = 0;
+First_time = true;
+% -------------------------------------
+while ~stop
+    %FIXME: debug for fast signal
+    pause(0.001);
+
+    [T_part, V1_part, V2_part] = FRA_dev.get_VV();
+
+    % FIXME: debug
+    if isempty(T_part)
+        stop = true;
+    end
+    
+    if First_time
+        Time_shift = T_part(1);
+        First_time = false;
+    end
+    T_part = T_part - Time_shift;
+
+    T_arr = [T_arr T_part];
+    V1_arr = [V1_arr V1_part];
+    V2_arr = [V2_arr V2_part];
+
+    Time_passed = T_arr(end);
+    Periods_counter = Time_passed/Period;
+    
+    %--------------------------------
+    Overload_1.range = abs(V1_arr) > MAX_CH1_LIMIT*0.999; % FIXME: magic constant
+    Overload_1.count = numel(find(Overload_1.range));
+    Overload_1.volume = Overload_1.count/numel(V1_arr);
+    
+    Overload_2.range = abs(V2_arr) > MAX_CH2_LIMIT*0.999; % FIXME: magic constant
+    Overload_2.count = numel(find(Overload_2.range));
+    Overload_2.volume = Overload_2.count/numel(V2_arr);
+
+    % FIXME: debug print
+    if Overload_1.count > 0
+        disp(['Overload Ch 1: ' num2str(Overload_1.volume*100, '%0.2f') ' %'])
+    end
+    if Overload_2.count > 0
+        disp(['Overload Ch 2: ' num2str(Overload_2.volume*100, '%0.2f') ' %'])
+    end
+
+    Underrange_1 = check_underrange(V1_arr, Underrange_1, Underrange_force_1);
+    Underrange_2 = check_underrange(V2_arr, Underrange_2, Underrange_force_2);
+
+    if Underrange_1 && Time_passed > Time_to_underrange_1
+        Exit_flag = 101; % NOTE: EF 101: underrange ch1
+        break;
+    end
+
+    if Underrange_2 && Time_passed > Time_to_underrange_2
+        Exit_flag = 102; % NOTE: EF 102: underrange ch2
+        break;
+    end
+
+    if Time_passed > 0.3 && Overload_1.volume > Overrange_tolerance_1
+        Exit_flag = 201; % NOTE: EF 201: overrange
+        break;
+    end
+
+    if Time_passed > 0.3 && Overload_2.volume > Overrange_tolerance_2
+        Exit_flag = 202; % NOTE: EF 202: overrange
+        break;
+    end
+
+    if Time_passed > Time_settings.max
+        Exit_flag = 30; % NOTE: EF 3: Timeout_max
+        break;
+    end
+
+    if Periods_counter > 1.1
+        % FIXME: ude this or Time_settings.max ?
+    end
+
+    % FIXME: refactor this function
+    [est_cell_arr_1] = do_estimations(est_cell_arr_1, T_arr, V1_arr, ...
+        Freq, Periods_counter);
+
+    [est_cell_arr_2] = do_estimations(est_cell_arr_2, T_arr, V2_arr, ...
+        Freq, Periods_counter);
+    %--------------------------------
+
+
+    if ~isempty(Fig)
+        subplot(2, 1, 1)
+        cla
+        plot(T_arr, V1_arr);
+        title(['Ch 1 (PC: ' num2str(Periods_counter, '%0.3f') ')'])
+
+        subplot(2, 1, 2)
+        cla
+        plot(T_arr, V2_arr);
+        title('Ch 2')
+        drawnow
+    end
+end
+
+Ch_data_1.time = T_arr;
+Ch_data_1.voltage = V1_arr;
+Ch_data_1.overload = Overload_1;
+Ch_data_1.est_cell = est_cell_arr_1;
+
+Ch_data_2.time = T_arr;
+Ch_data_2.voltage = V2_arr;
+Ch_data_2.overload = Overload_2;
+Ch_data_2.est_cell = est_cell_arr_2;
+
+end
