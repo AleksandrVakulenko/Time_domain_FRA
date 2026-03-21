@@ -142,12 +142,13 @@ switch Phi_type
         error('unreachable')
 end
 
-Freq_div_flag = true; % FIXME: debug
+Freq_div_flag = false; % FIXME: debug
+Freq_dev_range = [-200 200]; % FIXME: debug
 if Freq_div_flag
     F_dev_str = '*(1+q/1e6)'; % FIXME: add D (coeffname: q)
-    Lower = [Lower -500];
+    Lower = [Lower Freq_dev_range(1)];
     StartPoint = [StartPoint -150]; % FIXME: magic constant
-    Upper = [Upper +500];
+    Upper = [Upper Freq_dev_range(2)];
 else
     F_dev_str = '';
 end
@@ -161,9 +162,9 @@ if ~isempty(Harm_est)
         HarmN_eq = [HPref num2str(Hn) 'a' '*sin(2*pi*' ...
             num2str(Hn*Freq) F_dev_str '*x + ' HPref num2str(Hn) 'p' '/180*pi)'];
         Eq = [Eq ' + ' HarmN_eq];
-        Lower = [Lower Harm_est(i).amp*0.1 Harm_est(i).phi-45];
+        Lower = [Lower Harm_est(i).amp*0.01 Harm_est(i).phi-45];
         StartPoint = [StartPoint Harm_est(i).amp Harm_est(i).phi];
-        Upper = [Upper Harm_est(i).amp*10 Harm_est(i).phi+45];
+        Upper = [Upper Harm_est(i).amp*100 Harm_est(i).phi+45];
     end
 end
 
@@ -262,6 +263,10 @@ Result = struct(...
     'freq', Freq, ...
     'harm', harm_out, ...
     'harm_err', harm_err);
+
+% FIXME: debug
+figure
+plot(Time, Residuals)
 end
 
 

@@ -4,7 +4,7 @@ clc
 % % T_arr = T_arr;
 % % Residuals_in = Residuals;
 
-Show_channel = 2;
+Show_channel = 1;
 
 if  1 == Show_channel
     Data_time = Synth_time;
@@ -43,6 +43,8 @@ Noise_rms = noise_rms_calc(Data_signal, Fs, Noise_freq_low);
 [~, Amp, Phi, BG, Amp_err, Phi_err, BG_err] = ...
     fit_viewer.calc_fitted_signal(Result_in, T_arr_min);
 
+Result_in.f_dev_ppm
+Result_in.f_dev_ppm_err
 
 % Calc output values and errors ------------------------------------
 pps = [];

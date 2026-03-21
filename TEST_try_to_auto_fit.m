@@ -41,16 +41,16 @@
 clc
 
 Save_data_flag = false;
-freq = 1;
+freq = 0.1;
 Freq_dev = 0;
-Duration = 11;
+Duration = 15;
 Fs = 10e3;
 Profile_1 = 'weak';
 Profile_2 = 'weak';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits_1 = ["lownoise", "nobg", "lowharm"];
 Traits_2 = ["", "", ""];
-Seed = 'KRXSYO'; % QDNRSE
+Seed = 'PGMVNT'; % QDNRSE
 
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -296,10 +296,11 @@ disp(['Start final fit:' newline])
 
 % FIXME undone section
 % "const" "linear" "poly2"
-Properties_1.Amp_type = "const";
+Properties_1.Amp_type = "linear";
 Properties_1.BG_type = "poly2";
 Properties_1.Phi_type = "const";
-Properties_2.Amp_type = "const";
+
+Properties_2.Amp_type = "linear";
 Properties_2.BG_type = "poly2";
 Properties_2.Phi_type = "const";
 
@@ -407,6 +408,13 @@ if ~no_estimations(Estimations)
     % NOTE: fit with harmonics estimations
     [Result, Residuals, DEBUG] = any_sin_fit(T_arr, V_arr, freq, ...
         Estimations, Properties, Harm_est);
+
+    % NOTE: analize residuals here
+
+    % NOTE: fit residuals here to find lost harms
+
+    
+
 else
     Result = [];
     Residuals = [];
@@ -714,6 +722,10 @@ end
 Max_freq = Max_harm * freq;
 Filter_freq = Max_freq*2;
 Fs_new = Max_freq*4;
+
+if Fs_new < 10
+    Fs_new = 10; % FIXME: magic constant
+end
 
 if Num > Max_points
     [T_arr, V1_arr, V2_arr] = ...
