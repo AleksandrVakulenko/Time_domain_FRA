@@ -28,6 +28,7 @@ if ~isempty(Harm_num)
             Harm_est(k).n = hn;
             Harm_est(k).amp = Amp_DFT;
             Harm_est(k).phi = Phi_DFT;
+            Harm_est(k).status = 'est_1';
             disp('GOOD')
             disp(['noise  = ' num2str(nf_calc(hn*freq)) ' V'])
             disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...

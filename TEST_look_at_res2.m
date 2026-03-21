@@ -49,9 +49,10 @@ Phi_err_out = Output.phi_err;
 BG_err_out = Output.bg_err;
 T_out = Output.time;
 
-Freq_div = Result_in.f_dev_ppm;
-Freq_div_err = Result_in.f_dev_ppm_err;
-disp([num2str(Freq_div, '%0.1f') ' ± ' num2str(Freq_div_err, '%0.1f') ' ppm'])
+Freq_dev = Result_in.f_dev_ppm;
+Freq_dev_err = Result_in.f_dev_ppm_err;
+disp(['Δf = ' num2str(Freq_dev, '%0.1f') ' ± ' ...
+    num2str(Freq_dev_err, '%0.1f') ' ppm'])
 
 
 if Output.single_flag

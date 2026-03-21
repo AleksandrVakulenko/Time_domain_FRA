@@ -1,9 +1,14 @@
 
 
 function [Result, Residuals, DEBUG] = ...
-    any_sin_fit(Time, Signal, Freq, Estimations, Properties, Harm_est)
+    any_sin_fit(Time, Signal, Freq, Estimations, Properties, Harm_est, Settings)
 
 Period = 1/Freq;
+
+% FIXME: undone structure
+Freq_dev_flag = Settings.freq_dev_flag;
+Freq_dev_const = Settings.freq_dev_const;
+
 
 if ~isempty(Properties)
     [Amp_type, BG_type, Phi_type] = prop_parser(Properties);
@@ -44,7 +49,7 @@ disp(['BG type: ' char(BG_type)]);
 Est_time_norm = Est_time/Period;
 
 
-% D = 0; % FIXME: freq div start value
+% D = 0; % FIXME: freq dev start value
 % Lower = [-300];
 % StartPoint = [D];
 % Upper = [+300];
@@ -112,22 +117,22 @@ switch BG_type
         error('unreachable')
 end
 
-
+Phi_dev = 20; % FIXME: magic constant
 switch Phi_type
     case "const"
         Phi_str = fit_helper.func_constructor([], 'p');
         p3 = mean(Est_phi);
-        Lower = [Lower -180];
+        Lower = [Lower p3-Phi_dev];
         StartPoint = [StartPoint p3];
-        Upper = [Upper +180];
+        Upper = [Upper p3+Phi_dev];
     case "linear"
         Phi_str = fit_helper.func_constructor([X_arr(1) X_arr(3)], 'p');
         phi_poly = fit(Est_time_norm', Est_phi', 'poly1');
         p2 = feval(phi_poly, X_arr(1)/Period);
         p3 = feval(phi_poly, X_arr(3)/Period);
-        Lower = [Lower -180 -180];
+        Lower = [Lower p2-Phi_dev p3-Phi_dev];
         StartPoint = [StartPoint p2 p3];
-        Upper = [Upper +180 +180];
+        Upper = [Upper p2+Phi_dev p3+Phi_dev];
 
     case "poly2"
         Phi_str = fit_helper.func_constructor(X_arr, 'p');
@@ -135,22 +140,21 @@ switch Phi_type
         p1 = feval(phi_poly, X_arr(1)/Period); % FIXME: use feval once for all
         p2 = feval(phi_poly, X_arr(2)/Period);
         p3 = feval(phi_poly, X_arr(3)/Period);
-        Lower = [Lower -180 -180 -180];
+        Lower = [Lower p1-Phi_dev p2-Phi_dev p3-Phi_dev];
         StartPoint = [StartPoint p1 p2 p3];
-        Upper = [Upper +180 +180 +180];
+        Upper = [Upper p1+Phi_dev p2+Phi_dev p3+Phi_dev];
     otherwise
         error('unreachable')
 end
 
-Freq_div_flag = false; % FIXME: debug
-Freq_dev_range = [-200 200]; % FIXME: debug
-if Freq_div_flag
+Freq_dev_range = [-300 200]; % FIXME: debug
+if Freq_dev_flag
     F_dev_str = '*(1+q/1e6)'; % FIXME: add D (coeffname: q)
     Lower = [Lower Freq_dev_range(1)];
     StartPoint = [StartPoint -150]; % FIXME: magic constant
     Upper = [Upper Freq_dev_range(2)];
 else
-    F_dev_str = '';
+    F_dev_str = ['*(' num2str(1+Freq_dev_const/1e6) ')'];
 end
 
 Eq = [Amp_str ' * sin(2*pi*' num2str(Freq) F_dev_str '*x + ' Phi_str '/180*pi) + ' BG_str];
@@ -158,13 +162,23 @@ Eq = [Amp_str ' * sin(2*pi*' num2str(Freq) F_dev_str '*x + ' Phi_str '/180*pi) +
 HPref = 'r';
 if ~isempty(Harm_est)
     for i = 1:numel(Harm_est)
+        Status = Harm_est(i).status;
         Hn = Harm_est(i).n;
         HarmN_eq = [HPref num2str(Hn) 'a' '*sin(2*pi*' ...
             num2str(Hn*Freq) F_dev_str '*x + ' HPref num2str(Hn) 'p' '/180*pi)'];
         Eq = [Eq ' + ' HarmN_eq];
-        Lower = [Lower Harm_est(i).amp*0.01 Harm_est(i).phi-45];
-        StartPoint = [StartPoint Harm_est(i).amp Harm_est(i).phi];
-        Upper = [Upper Harm_est(i).amp*100 Harm_est(i).phi+45];
+        if Status == "est_1"
+            %FIXME: phi limits?
+            Lower = [Lower Harm_est(i).amp*0.05 Harm_est(i).phi-45];
+            StartPoint = [StartPoint Harm_est(i).amp Harm_est(i).phi];
+            Upper = [Upper Harm_est(i).amp*20 Harm_est(i).phi+45];
+        elseif Status == "fixed"
+            Lower = [Lower Harm_est(i).amp*0.8 Harm_est(i).phi-10];
+            StartPoint = [StartPoint Harm_est(i).amp Harm_est(i).phi];
+            Upper = [Upper Harm_est(i).amp*1.2 Harm_est(i).phi+10];
+        else
+            error("unreachable")
+        end
     end
 end
 
@@ -187,6 +201,7 @@ opts.Upper = Upper;
 % FIXME: debug section
 % NOTE: used in DEL_plot_fit_ST.m
 DEBUG.StartPoint = StartPoint;
+DEBUG.coeffnames = coeffnames(ft);
 DEBUG.X_arr = X_arr;
 
 [fitresult, gof, output] = fit(Time', Signal', ft, opts);
@@ -195,11 +210,11 @@ Residuals = output.residuals';
 
 Error_mult = 3; % NOTE: ± N*std
 
-if Freq_div_flag
+if Freq_dev_flag
     D = get_value(fitresult, 'q');
     D_err = get_error(fitresult, 'q')*Error_mult;
 else
-    D = 0;
+    D = Freq_dev_const;
     D_err = 0;
 end
 
@@ -241,9 +256,11 @@ if ~isempty(Harm_est)
         harm_out(i).n = hn;
         harm_out(i).amp = get_value(fitresult, [HPref num2str(hn) 'a']);
         harm_out(i).phi = get_value(fitresult, [HPref num2str(hn) 'p']);
+        harm_out(i).status = Harm_est(i).status;
         harm_err(i).n = hn;
         harm_err(i).amp = get_error(fitresult, [HPref num2str(hn) 'a'])*Error_mult;
         harm_err(i).phi = get_error(fitresult, [HPref num2str(hn) 'p'])*Error_mult;
+        harm_err(i).status = Harm_est(i).status;
     end
 else
     harm_out = [];
@@ -257,6 +274,7 @@ Result = struct(...
     'amp_poly_err', amp_poly_err, ...
     'phi_poly_err', phi_poly_err, ...
     'bg_poly_err', bg_poly_err, ...
+    'f_dev_flag', Freq_dev_flag, ...
     'f_dev_ppm', D, ...
     'f_dev_ppm_err', D_err, ...
     'fit_function', 'any_sin_fit_f2', ...
@@ -265,8 +283,8 @@ Result = struct(...
     'harm_err', harm_err);
 
 % FIXME: debug
-figure
-plot(Time, Residuals)
+% figure
+% plot(Time, Residuals)
 end
 
 

@@ -3,22 +3,22 @@ function [Out_values, base_values] = poly3_gen(Time, Init_value, V_rdiv_pmin, V_
 
 Duration = Time(end) - Time(1);
 
-Value_rel_div = V_rdiv_pmin^(Duration/60);
+Value_rel_dev = V_rdiv_pmin^(Duration/60);
 Value_abs_dev = V_adiv_pmin*Duration/60;
 
-if Value_rel_div > 3
-    Value_rel_div = 3;
+if Value_rel_dev > 3
+    Value_rel_dev = 3;
 end
 
-if Value_rel_div < 0.1
-    Value_rel_div = 0.1;
+if Value_rel_dev < 0.1
+    Value_rel_dev = 0.1;
 end
 
 Value_start = Init_value;
-Value_finish = Init_value*Value_rel_div + Value_abs_dev;
+Value_finish = Init_value*Value_rel_dev + Value_abs_dev;
 
 % Init_value
-% Init_value*Value_rel_div
+% Init_value*Value_rel_dev
 % Value_abs_dev
 
 Value = [Value_start Value_finish];

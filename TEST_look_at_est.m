@@ -59,7 +59,7 @@ bg_poly = fit(Est_time_norm', Est_bg', 'poly2');
 BG_fit = feval(bg_poly, Est_full_time_norm);
 
 
-figure('position', [360 205 882 784])
+% figure('position', [360 205 882 784])
 
 subplot(2, 2, 1)
 hold on

@@ -27,15 +27,15 @@ end
 
 Voltage_level = 2; % [V]
 Offset_level = 0; % [V]
-freq = 11; % [Hz]
-Meas_duration = 5; % [s]
+freq = 200; % [Hz]
+Meas_duration = 0.34; % [s]
 Cap_pred = 100e-9; % [F]
 
 
 Res_pred = 1/(2*pi*freq*Cap_pred); % [Ohm]
 Current_pred = Voltage_level/Res_pred; % [A]
 
-Current_pred = 2/1e6;
+Current_pred = 2/2e3;
 
 clc
 Gen = AFG1022_dev();
@@ -278,7 +278,7 @@ end
 
 function print_f_dev(f_dev, f_dev_err)
     disp(['Δf = ' num2str(f_dev, '%0.1f') ' ± ' ...
-        num2str(f_dev_err, '%0.1f') 'ppm'])
+        num2str(f_dev_err, '%0.1f') ' ppm'])
 end
 
 

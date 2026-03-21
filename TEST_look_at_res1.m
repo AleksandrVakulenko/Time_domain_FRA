@@ -57,15 +57,19 @@ Phi_err_out = Output.phi_err;
 BG_err_out = Output.bg_err;
 T_out = Output.time;
 
+Freq_dev = Result_in.f_dev_ppm;
+Freq_dev_err = Result_in.f_dev_ppm_err;
+disp(['Δf = ' num2str(Freq_dev, '%0.1f') ' ± ' ...
+    num2str(Freq_dev_err, '%0.1f') ' ppm'])
 
 if Output.single_flag
-    A_div = mean(abs(Props.amp - Amp_out)./Props.amp) * 100; % [%]
-    P_div = mean(abs(Props.phi - Phi_out)); % [deg]
-    C_div = mean(abs(Props.bg - BG_out)./Props.bg) * 100; % [%]
+    A_dev = mean(abs(Props.amp - Amp_out)./Props.amp) * 100; % [%]
+    P_dev = mean(abs(Props.phi - Phi_out)); % [deg]
+    C_dev = mean(abs(Props.bg - BG_out)./Props.bg) * 100; % [%]
     disp('Deviation from Props:')
-    disp(['A div : ' num2str(A_div, '%0.2f') ' %'])
-    disp(['P div : ' num2str(P_div, '%0.3f') ' deg'])
-    disp(['C div : ' num2str(C_div, '%0.2f') ' %'])
+    disp(['A div : ' num2str(A_dev, '%0.2f') ' %'])
+    disp(['P div : ' num2str(P_dev, '%0.3f') ' deg'])
+    disp(['C div : ' num2str(C_dev, '%0.2f') ' %'])
 
 
     disp([newline 'Calc values (mean):'])
@@ -81,11 +85,11 @@ if Output.single_flag
     disp(['P = ' num2str(mean(Props.phi)) ' [deg]']);
     disp(['C = ' num2str(mean(Props.bg)) ' [V]']);
 
-    SNR = 20*log10(Amp_out/Noise_rms);
+    SNR = Amp_out/Noise_rms;
+    SNR_dB = 20*log10(SNR);
     disp([newline 'Noise level:'])
     disp(['Noise amp = ' num2str(Noise_rms*1e3, '%0.2f') ' mV'])
-    disp(['SNR = ' num2str(Amp_out/Noise_rms, '%0.2f')])
-    disp(['SNR = ' num2str(SNR, '%0.2f') ' dB'])
+    disp(['SNR = ' num2str(SNR_dB, '%0.2f') ' dB (' num2str(SNR, '%0.2f') ')'])
 
 end
 %-------------------------------------------------------------------

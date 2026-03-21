@@ -7,50 +7,40 @@
 % 
 % TODO:
 %
-% 1) analize residuals more (for lost harms)
-% 2) use Estimations for Properties
-% 3) add input condition for harm measure or harm ignore
-% 4) do more estimations by DFT
+% 1) use Estimations for Properties
+% 2) add input condition for harm measure or harm ignore
+% 3) do more estimations by DFT
+% 4) use incoming estimations
 %  
-% 5) use incoming estimations
-% 6) pass f_dev from fit V1 to fit V2
-% 7) [sig_gen:] add underrange (span and mean) test signals
-% 8) update data viewer (to both test or real data)
+% 5) [sig_gen:] add underrange (span and mean) test signals
+% 6) update data viewer (to both test or real data)
+% 7) add absolute errors (hardware)
+% 8) Add non-realtime version of fit (just incoming estimations)
 %  
-% 9) add absolute errors (hardware)
-% 10) Add non-realtime version of fit (just incoming estimations)
+% 9) make Fern module
+% 10) place fft functions to its own lib
 % 11) 
 % 12) 
 %  
-% 13) place fft functions to its own lib
-% 14) make Fern module
-% 15) 
+% 13) DFT vs fft problem (calculating many DFTs) (where?)
+% 14) phase around -180[deg] problem
+% 15) Remember about f = 0 on fft calc data
 % 16) 
-%
-% 17) DFT vs fft problem (calculating many DFTs) (where?)
-% 18) phase around -180[deg] problem
-% 19) Remember about f = 0 on fft calc data
-% 20) 
 
-% TODO:
-% NOTE: (maybe) new way of fitting
-% 1) create sparse data with 1000-10000 points
-% 2) fit fundamental
-% 3) fit harms in residuals
 % ------------------------------------------------------------------------------
 clc
 
 Save_data_flag = false;
-freq = 0.1;
+freq = 1;
 Freq_dev = 0;
-Duration = 15;
+Duration = 2;
 Fs = 10e3;
 Profile_1 = 'weak';
 Profile_2 = 'weak';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits_1 = ["lownoise", "nobg", "lowharm"];
 Traits_2 = ["", "", ""];
-Seed = 'PGMVNT'; % QDNRSE
+Seed = ''; % QDNRSE
 
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -260,7 +250,6 @@ end
 Harm_num_1 = Harm_num;
 Harm_num_2 = Harm_num;
 
-
 if Overload_1.count > 0
     Harm_num_1 = [];
 end
@@ -293,31 +282,37 @@ clc
 disp(['Start final fit:' newline])
 
 
+
+
 % FIXME undone section
 % "const" "linear" "poly2"
 Properties_1.Amp_type = "linear";
 Properties_1.BG_type = "poly2";
 Properties_1.Phi_type = "const";
 
-Properties_2.Amp_type = "linear";
+Properties_2.Amp_type = "const";
 Properties_2.BG_type = "poly2";
 Properties_2.Phi_type = "const";
 
-
+Fit_settings_1.freq_dev_flag = true;
+Fit_settings_1.freq_dev_const = 0;
 
 disp('---- Channel 1: ----')
 Time_start_1_fit = tic;
 [Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr, V1_arr, Fs, freq, ...
-    Estimations_1, Properties_1, Harm_num_1);
+    Estimations_1, Properties_1, Harm_num_1, Fit_settings_1);
 Time_ch1_fit = toc(Time_start_1_fit);
-disp('--------------------')
+disp(['--------------------' newline])
 
-disp(' ')
+
+Fit_settings_2.freq_dev_flag = false;
+Fit_settings_2.freq_dev_const = Result_1.f_dev_ppm;
+
 
 disp('---- Channel 2: ----')
 Time_start_2_fit = tic;
 [Result_2, Residuals_2, DEBUG_2] = fit_channel(T_arr, V2_arr, Fs, freq, ...
-    Estimations_2, Properties_2, Harm_num_2);
+    Estimations_2, Properties_2, Harm_num_2, Fit_settings_2);
 Time_ch2_fit = toc(Time_start_2_fit);
 disp('--------------------')
 
@@ -383,7 +378,7 @@ end
 %%
 
 function [Result, Residuals, DEBUG] = fit_channel(T_arr, V_arr, Fs, freq, ...
-    Estimations, Properties, Harm_num)
+    Estimations, Properties, Harm_num, Fit_settings)
 
 if ~no_estimations(Estimations)
 
@@ -393,7 +388,10 @@ if ~no_estimations(Estimations)
         Harm_est = [];
     end
 
-    Max_points = 100e3; % FIXME: magic constant
+    Noise_freq_low = freq*max(Harm_num);
+    Noise_rms = noise_rms_calc(V_arr, Fs, Noise_freq_low);
+
+    Max_points = 10e3; % FIXME: magic constant
     % FIXME: upgrade function make_fs_lower
     % FIXME: make it single channel
     [T_arr, V_arr, ~, Fs2] = make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
@@ -407,14 +405,41 @@ if ~no_estimations(Estimations)
 
     % NOTE: fit with harmonics estimations
     [Result, Residuals, DEBUG] = any_sin_fit(T_arr, V_arr, freq, ...
-        Estimations, Properties, Harm_est);
+        Estimations, Properties, Harm_est, Fit_settings);
+    
+    DEBUG.Fs_new = Fs2;
+    DEBUG.T_arr_new = T_arr;
+
+    Refit_flag = false;
 
     % NOTE: analize residuals here
-
-    % NOTE: fit residuals here to find lost harms
-
+    if ~isempty(Harm_num)
+        Harm_est_2 = estimate_harms_from_res(T_arr, Residuals, freq, ...
+            Noise_rms, Harm_num);
+    else
+        Harm_est_2 = [];
+    end
     
-
+    if ~isempty(Harm_est_2)
+        Fitted_harm = Result.harm;
+        for i = 1:numel(Harm_est_2)
+            hn = Harm_est_2(i).n;
+            ind = find([Fitted_harm.n] == hn);
+            if ~isempty(ind)
+                disp([num2str(i) ' : ' num2str(ind)])
+                Fitted_harm(ind).amp = Fitted_harm(ind).amp + Harm_est_2(i).amp;
+                Fitted_harm(ind).phi = Harm_est_2(i).phi;
+            end
+        end
+        Refit_flag = true;
+    end
+    
+    % NOTE: fit residuals here to find lost harms
+    if Refit_flag
+        [Result, Residuals, DEBUG] = any_sin_fit(T_arr, V_arr, freq, ...
+            Estimations, Properties, Fitted_harm, Fit_settings);
+    end
+    
 else
     Result = [];
     Residuals = [];
