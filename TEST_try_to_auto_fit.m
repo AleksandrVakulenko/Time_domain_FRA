@@ -1,9 +1,4 @@
-% ------------------------------------------------------------------------------
-%
-%       ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂      ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂      ꧁⎝ 𓆩༺✧༻𓆪 ⎠꧂
-%
-%
-%                                ⎛⎝( ` ᢍ ´ )⎠⎞ᵐᵘʰᵃʰᵃ
+%                      
 % 
 % TODO:
 %
@@ -245,7 +240,6 @@ if Periods_counter > 1
 else
     error('finish_estimations error: Periods_counter < 1')
 end
-
 
 Harm_num_1 = Harm_num;
 Harm_num_2 = Harm_num;
