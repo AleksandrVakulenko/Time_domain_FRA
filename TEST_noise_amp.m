@@ -114,6 +114,9 @@ Freq_exclude = sort(Freq_exclude);
 
 
 Time_length = T_arr(end) - T_arr(1);
+if ~exist("Min_freq", "var")
+    Min_freq = [];
+end
 if isempty(Min_freq)
     Min_freq = 1/Time_length;
 end
@@ -153,7 +156,7 @@ fitres_bg = fit(Freq_log', Amp_log', 'poly1');
 
 hold on
 plot(Freq_list, Amp, 'o', 'markersize', 7, 'MarkerFaceColor', 'g')
-plot(fft_freq, fft_amp, '-b')
+% plot(fft_freq, fft_amp, '-b')
 % plot(freq_ext, Amp_ext, '.-r')
 set(gca, 'xscale', 'log')
 set(gca, 'yscale', 'log')

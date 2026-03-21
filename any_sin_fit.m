@@ -270,28 +270,10 @@ end
 
 
 function [Amp_type, BG_type, Phi_type] = prop_parser(Properties)
-    P = Properties;
-    
-    Amp_type = "poly2";
-    if P.const_amp > 10 && P.const_amp > P.linear_amp*2
-        Amp_type = "const";
-    elseif P.linear_amp > 10 
-        Amp_type = "linear";
-    end
-    
-    BG_type = "poly2";
-    if P.const_bg > 10 && P.const_bg > P.linear_bg*2
-        BG_type = "const";
-    elseif P.linear_bg > 10 
-        BG_type = "linear";
-    end
-    
-    Phi_type = "poly2";
-    if P.const_phase > 10 && P.const_phase > P.linear_phase*2
-        Phi_type = "const";
-    elseif P.linear_phase > 10 
-        Phi_type = "linear";
-    end
+    % FIXME: debug function
+    Amp_type = Properties.Amp_type;
+    BG_type = Properties.BG_type;
+    Phi_type = Properties.Phi_type;
 end
 
 
