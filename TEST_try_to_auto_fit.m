@@ -7,20 +7,20 @@
 % 
 % TODO:
 %
-% 1) test low freq signal with low period counter
-% 2) add input condition for harm measure or harm ignore
-% 3) do more estimations by DFT
-% 4) reverse properties set logic (from const to poly2)
+% 1) analize residuals more (for lost harms)
+% 2) use Estimations for Properties
+% 3) add input condition for harm measure or harm ignore
+% 4) do more estimations by DFT
 %  
-% 5) update data viewer (to both test or real data)
-% 6) [sig_gen:] add underrange (span and mean) test signals
-% 7) analize residuals more (for lost harms)
-% 8) use Estimations for Properties
+% 5) use incoming estimations
+% 6) pass f_dev from fit V1 to fit V2
+% 7) [sig_gen:] add underrange (span and mean) test signals
+% 8) update data viewer (to both test or real data)
 %  
-% 9) use incoming estimations
-% 10) pass f_dev from fit V1 to fit V2
-% 11) add absolute errors (hardware)
-% 12) Add non-realtime version of fit (just incoming estimations)
+% 9) add absolute errors (hardware)
+% 10) Add non-realtime version of fit (just incoming estimations)
+% 11) 
+% 12) 
 %  
 % 13) place fft functions to its own lib
 % 14) make Fern module
@@ -29,7 +29,7 @@
 %
 % 17) DFT vs fft problem (calculating many DFTs) (where?)
 % 18) phase around -180[deg] problem
-% 19) 
+% 19) Remember about f = 0 on fft calc data
 % 20) 
 
 % TODO:
@@ -41,16 +41,16 @@
 clc
 
 Save_data_flag = false;
-freq = 1;
+freq = 0.1;
 Freq_dev = 0;
-Duration = 11;
+Duration = 15;
 Fs = 10e3;
 Profile_1 = 'weak';
-Profile_2 = 'strong';
+Profile_2 = 'weak';
 % Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
 Traits_1 = ["lownoise", "nobg", "lowharm"];
 Traits_2 = ["", "", ""];
-Seed = 'KRXSYO'; % QDNRSE
+Seed = 'PGMVNT'; % QDNRSE
 
 % LLGUHH (small signal)
 % IOTSCV (Phase test)
@@ -107,9 +107,12 @@ Time_printer();
 %--------------------------------
 % Time_settings = struct('max', 1e6*Period); % FIXME
 Time_settings = struct('max', 100); % FIXME
+
 Accuracy_settings = struct(...
     ...
     );
+
+Harm_num(Harm_num == 1) = [];
 %--------------------------------
 if Time_to_underrange < 0.3
     Time_to_underrange = 0.3; % FIXME: magic constant
@@ -125,17 +128,6 @@ V2_arr = [];
 % FIXME: need refactor
 est_cell_arr_1 = {empty_estimation(), empty_estimation(), empty_estimation()};
 est_cell_arr_2 = {empty_estimation(), empty_estimation(), empty_estimation()};
-
-Basic_properties = struct(...
-    'const_bg', 100, ...
-    'linear_bg', 0, ...
-    'const_phase', 100, ...
-    'linear_phase', 0, ...
-    'const_amp', 100, ...
-    'linear_amp', 0);
-
-Properties_1 = Basic_properties;
-Properties_2 = Basic_properties;
 
 Underrange_1 = true;
 Underrange_2 = true;
@@ -225,11 +217,11 @@ while ~stop
     end
 
     % FIXME: refactor this function
-    [est_cell_arr_1, Properties_1] = do_estimations(est_cell_arr_1, ...
-        Properties_1, T_arr, V1_arr, Freq, Periods_counter);
+    [est_cell_arr_1] = do_estimations(est_cell_arr_1, T_arr, V1_arr, ...
+        Freq, Periods_counter);
 
-    [est_cell_arr_2, Properties_2] = do_estimations(est_cell_arr_2, ...
-        Properties_2, T_arr, V2_arr, Freq, Periods_counter);
+    [est_cell_arr_2] = do_estimations(est_cell_arr_2, T_arr, V2_arr, ...
+        Freq, Periods_counter);
     %--------------------------------
 
 
@@ -264,23 +256,17 @@ else
     error('finish_estimations error: Periods_counter < 1')
 end
 
-if any(Harm_num > 1)
-    Find_harms = true;
-else
-    Find_harms = false;
-end
 
-if Find_harms
-    Find_harms_1 = true;
-    Find_harms_2 = true;
-end
+Harm_num_1 = Harm_num;
+Harm_num_2 = Harm_num;
+
 
 if Overload_1.count > 0
-    Find_harms_1 = false;
+    Harm_num_1 = [];
 end
 
 if Overload_2.count > 0
-    Find_harms_2 = false;
+    Harm_num_2 = [];
 end
 
 if Exit_flag == 0 && Overload_1.count > 0
@@ -303,64 +289,38 @@ Estimations_2 = estimation_fix_wrapper(est_cell_arr_2, ...
 %%
 clc
 
-% if Periods_counter < 2
-%     Properties_1.const_amp = 11;
-%     Properties_1.const_bg = 0;
-%     Properties_1.const_phase = 11;
-%     Properties_1.linear_amp = 0;
-%     Properties_1.linear_bg = 11;
-%     Properties_1.linear_phase = 0;
-% end
-% Properties_1.linear_bg = 0;
-
-% -FIXME: debug-
-% Properties_1.const_bg = 11;
-% Properties_1.linear_bg = 0;
-% 
-% Properties_1.const_amp = 11;
-% Properties_1.linear_amp = 0;
-% 
-% Properties_1.const_phase = 11;
-% Properties_1.linear_phase = 0;
-% --------------
-
-% -FIXME: debug-
-% Properties_2.const_bg = 0;
-% Properties_2.linear_bg = 0;
-% 
-% Properties_2.const_amp = 11;
-% Properties_2.linear_amp = 0;
-% 
-% Properties_2.const_phase = 11;
-% Properties_2.linear_phase = 0;
-% --------------
-
 
 disp(['Start final fit:' newline])
 
 
-Max_points = 1000e3;
-% FIXME: use as function argument
-% FIXME: do it after harm estimation
-% FIXME: upgrade function make_fs_lower
-Find_harms_num = [2 3 4 5 6]; % FIXME: use incoming harms
-[T_arr, V1_arr, V2_arr, Fs] = make_fs_lower(T_arr, V1_arr, V2_arr, Fs, ...
-    freq, Find_harms_num, Max_points);
+% FIXME undone section
+% "const" "linear" "poly2"
+Properties_1.Amp_type = "linear";
+Properties_1.BG_type = "poly2";
+Properties_1.Phi_type = "const";
+
+Properties_2.Amp_type = "linear";
+Properties_2.BG_type = "poly2";
+Properties_2.Phi_type = "const";
+
 
 
 disp('---- Channel 1: ----')
 Time_start_1_fit = tic;
 [Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr, V1_arr, Fs, freq, ...
-    Estimations_1, Properties_1, Find_harms_1);
+    Estimations_1, Properties_1, Harm_num_1);
 Time_ch1_fit = toc(Time_start_1_fit);
+disp('--------------------')
 
-disp([newline '---- Channel 2: ----'])
+disp(' ')
+
+disp('---- Channel 2: ----')
 Time_start_2_fit = tic;
 [Result_2, Residuals_2, DEBUG_2] = fit_channel(T_arr, V2_arr, Fs, freq, ...
-    Estimations_2, Properties_2, Find_harms_2);
+    Estimations_2, Properties_2, Harm_num_2);
 Time_ch2_fit = toc(Time_start_2_fit);
+disp('--------------------')
 
-disp(['--------------------'])
 
 disp(' ')
 disp(['Time to fit 1: ' num2str(Time_ch1_fit, '%0.2f') ' s'])
@@ -422,71 +382,44 @@ end
 
 %%
 
-function [Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr, V_arr, Fs, freq, ...
-    Estimations_1, Properties_1, Find_harms_1)
+function [Result, Residuals, DEBUG] = fit_channel(T_arr, V_arr, Fs, freq, ...
+    Estimations, Properties, Harm_num)
 
-if ~no_estimations(Estimations_1)
+if ~no_estimations(Estimations)
 
-    if Find_harms_1
-        Harm_est_1 = estimate_harmonics(freq, T_arr, V_arr, Fs);
+    if ~isempty(Harm_num)
+        Harm_est = estimate_harmonics(T_arr, V_arr, Fs, freq, Harm_num);
     else
-        Harm_est_1 = [];
+        Harm_est = [];
+    end
+
+    Max_points = 100e3; % FIXME: magic constant
+    % FIXME: upgrade function make_fs_lower
+    % FIXME: make it single channel
+    [T_arr, V_arr, ~, Fs2] = make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
+        freq, Harm_num, Max_points);
+
+    if Fs2 ~= Fs % FIXME: debug print
+        disp(' ')
+        warning(['Sampling freq reduced: ' num2str(Fs) ' -> ' num2str(Fs2)])
+        disp(' ')
     end
 
     % NOTE: fit with harmonics estimations
-    [Result_1, Residuals_1, DEBUG_1] = any_sin_fit(T_arr, V_arr, freq, ...
-        Estimations_1, Properties_1, Harm_est_1);
+    [Result, Residuals, DEBUG] = any_sin_fit(T_arr, V_arr, freq, ...
+        Estimations, Properties, Harm_est);
+
+    % NOTE: analize residuals here
+
+    % NOTE: fit residuals here to find lost harms
+
+    
+
 else
-    Result_1 = [];
-    Residuals_1 = [];
-    DEBUG_1 = [];
+    Result = [];
+    Residuals = [];
+    DEBUG = [];
 end
-
-end
-
-
-
-function Properties = update_props(Properties, Amp_mean, BG_diff, Amp_diff)
-% FIXME: undone function
-    Value = abs(BG_diff/Amp_mean);
-    % disp([num2str(BG_diff) '    ' num2str(Amp_mean)])
-    % disp([num2str(Value*100, '%0.2f') ' %'])
-    if Value >= 0.2
-        Properties.linear_bg = 0;
-        Properties.const_bg = 0;
-    end
-    if Value < 0.2 && Value >= 0.1
-        Properties.linear_bg = Properties.linear_bg + 2;
-        Properties.const_bg = 0;
-    end
-    if Value < 0.1
-        Properties.linear_bg = Properties.linear_bg + 1;
-        Properties.const_bg = Properties.const_bg + 1;
-    end
-    if Value < 0.001
-        Properties.linear_bg = Properties.linear_bg - 1;
-        Properties.const_bg = Properties.const_bg + 2;
-    end
-
-    if ~isempty(Amp_diff)
-        Value2 = abs(Amp_diff/Amp_mean);
-        if Value2 >= 0.2
-            Properties.linear_amp = 0;
-            Properties.const_amp = 0;
-        end
-        if Value2 < 0.2 && Value2 >= 0.1
-            Properties.linear_amp = Properties.linear_amp + 2;
-            Properties.const_amp = 0;
-        end
-        if Value2 < 0.1
-            Properties.linear_amp = Properties.linear_amp + 1;
-            Properties.const_amp = Properties.const_amp + 1;
-        end
-        if Value2 < 0.001
-            Properties.linear_amp = Properties.linear_amp - 1;
-            Properties.const_amp = Properties.const_amp + 2;
-        end
-    end
 
 end
 
@@ -790,6 +723,10 @@ Max_freq = Max_harm * freq;
 Filter_freq = Max_freq*2;
 Fs_new = Max_freq*4;
 
+if Fs_new < 10
+    Fs_new = 10; % FIXME: magic constant
+end
+
 if Num > Max_points
     [T_arr, V1_arr, V2_arr] = ...
         fft_filter_dbl_ch(T_arr, V1_arr, V2_arr, freq, Fs, Filter_freq);
@@ -807,54 +744,8 @@ end
 end
 
 
-function Harm_est = estimate_harmonics(freq, T_arr, V_arr, Fs)
-
-% FIXME: use full data or cut data for harm find?
-[V_arr, F_lim] = apply_nuttall(V_arr, Fs, freq);
-% FIXME: debug print
-if ~isempty(F_lim)
-    disp(['Nuttall window is used' newline]);
-else
-    disp(['noise calc without window' newline])
-end
-
-% FIXME: unused variable
-[Noise_amp, nf_calc] = noise_amp_calc(freq, T_arr, V_arr, Fs, F_lim);
-
-HNR_min_dB = 10; % FIXME: magic constant "harm to noise ratio"
-
-k = 0;
-Harm_est = struct('n', [], 'amp', [], 'phi', []);
-for hn = 2:6
-    [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr, V_arr, hn*freq);
-    if Amp_DFT > 10^(HNR_min_dB/20)*nf_calc(hn*freq)
-        k = k + 1;
-        Harm_est(k).n = hn;
-        Harm_est(k).amp = Amp_DFT;
-        Harm_est(k).phi = Phi_DFT;
-        disp('GOOD')
-        disp(['noise  = ' num2str(nf_calc(hn*freq)) ' V'])
-        disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
-            '    ' newline ...
-            'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline])
-    else
-        disp('BAD')
-        disp(['noise  = ' num2str(nf_calc(hn*freq)) ' V'])
-        disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
-            '    ' newline ...
-            'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline])
-    end
-end
-if k == 0
-    Harm_est = [];
-end
-
-end
-
-
-
-function [est_cell_arr, Properties] = do_estimations(est_cell_arr, ...
-    Properties, T_arr, V_arr, Freq, Periods_counter)
+function [est_cell_arr] = do_estimations(est_cell_arr, T_arr, V_arr, ...
+    Freq, Periods_counter)
 
 Estimations = est_cell_arr{1};
 Estimations_low = est_cell_arr{2};
@@ -904,28 +795,15 @@ switch signal_per_duration(Periods_counter)
             Freq, Estimations);
         Estimations = [Estimations Result];
 
-        BG_diff = Result.z;
-        Amp_mean = Result.amp;
-        Properties = update_props(Properties, Amp_mean, BG_diff, []);
-
 
     case "long" % 2 : 10
-        [out_time1, out_sig1] = get_first_period(T_arr, V_arr, Period);
-        Result1 = simple_sin_fit_f(out_time1, out_sig1, ...
-            Freq, Estimations);
-
         Scale = Periods_counter/2; % FXIME: magic constant
-        [out_time2, out_sig2] = get_last_period(T_arr, V_arr, Period, Scale);
-        Result2 = simple_sin_fit_f(out_time2, out_sig2, ...
+        [out_time, out_sig] = get_last_period(T_arr, V_arr, Period, Scale);
+        Result = simple_sin_fit_f(out_time, out_sig, ...
             Freq, Estimations);
+        % Result = DFT_estimation(T_arr, V_arr, Period);
+        Estimations = [Estimations Result];
 
-        %             Result = DFT_estimation(T_arr, V_arr, Period);
-        Estimations = [Estimations Result2];
-
-        BG_diff = Result2.bg - Result1.bg;
-        Amp_mean = mean([Result2.amp Result1.amp]);
-        Amp_diff = Result2.amp - Result1.amp;
-        Properties = update_props(Properties, Amp_mean, BG_diff, Amp_diff);
 
 
     case "max" % 10 : inf

@@ -1,10 +1,11 @@
 
-% TODO:
-% 1) do more research for better use of windows
-
-
 % NOTE:
 % TEST for Noise_amp = noise_amp_calc(freq, Time, Signal, Fss)
+
+% FIXME: bad for noise amp calc !
+
+% TODO:
+% 1) do more research for better use of windows
 
 % NOTE: apply_nuttall() function could help in case of signal modulation
 

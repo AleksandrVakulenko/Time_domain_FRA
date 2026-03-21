@@ -1,3 +1,8 @@
+
+% FIXME: bad for noise amp calc
+
+% NOTE: fine for finding noise floor on fft
+
 function [Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fs, Min_freq)
 arguments
     freq

@@ -4,7 +4,7 @@ clc
 % % T_arr = T_arr;
 % % Residuals_in = Residuals;
 
-Show_channel = 2;
+Show_channel = 1;
 
 if  1 == Show_channel
     Data_time = Synth_time;
@@ -37,11 +37,14 @@ if ~isempty(Harm_y)
 end
 Residuals_in = Data_signal - ym;
 
-Noise_amp = noise_amp_calc(freq, Synth_time, Data_signal, Fs);
+Noise_freq_low = freq*max(Harm_num);
+Noise_rms = noise_rms_calc(Data_signal, Fs, Noise_freq_low);
 
 [~, Amp, Phi, BG, Amp_err, Phi_err, BG_err] = ...
     fit_viewer.calc_fitted_signal(Result_in, T_arr_min);
 
+Result_in.f_dev_ppm
+Result_in.f_dev_ppm_err
 
 % Calc output values and errors ------------------------------------
 pps = [];
@@ -78,10 +81,10 @@ if Output.single_flag
     disp(['P = ' num2str(mean(Props.phi)) ' [deg]']);
     disp(['C = ' num2str(mean(Props.bg)) ' [V]']);
 
-    SNR = 20*log10(Amp_out/Noise_amp);
+    SNR = 20*log10(Amp_out/Noise_rms);
     disp([newline 'Noise level:'])
-    disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
-    disp(['SNR = ' num2str(Amp_out/Noise_amp, '%0.2f')])
+    disp(['Noise amp = ' num2str(Noise_rms*1e3, '%0.2f') ' mV'])
+    disp(['SNR = ' num2str(Amp_out/Noise_rms, '%0.2f')])
     disp(['SNR = ' num2str(SNR, '%0.2f') ' dB'])
 
 end
@@ -107,6 +110,7 @@ title('Signal')
 subplot(2, 1, 2)
 plot(T_arr_print, Residuals_in, '-b')
 yline(std(Residuals_in)*2)
+yline(Noise_rms)
 title('Residuals')
 
 
