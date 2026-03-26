@@ -12,7 +12,13 @@ arguments
     Min_freq = [];
 end
 
+
 [Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
+
+if isempty(Signal)
+    % FIXME: bad code
+    error('Signal length is less than 1 period')
+end
 
 % NOISE FIND FULL FREQ --------------------
 

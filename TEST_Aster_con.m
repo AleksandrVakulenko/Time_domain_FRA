@@ -22,7 +22,7 @@ end
 
 
 
-%% Get data from Sater
+%% Get data from Aster
 % FIXME: [in Aster_dev:] read_data forces dev to measure single point
 
 Voltage_level = 2; % [V]
