@@ -1,3 +1,12 @@
+
+%% Fern load
+
+Fern.load('aDevice')
+Fern.load('FRA_tools')
+Fern.load('Common') 
+
+
+%%
 % 
 % last date: 2026.03.27               
 % 
