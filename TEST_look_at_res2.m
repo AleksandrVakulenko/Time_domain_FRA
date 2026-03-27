@@ -23,8 +23,6 @@ T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
 [ym, Amp_full, Phi_full, BG_full] = fit_viewer.calc_fitted_signal(Result_in, T_arr);
 
-Harm_disp(Result_in);
-
 Harm_y = Harm_calc(Result_in, T_arr);
 if ~isempty(Harm_y)
     ym = ym + Harm_y;
@@ -73,6 +71,10 @@ if Output.single_flag
 end
 %-------------------------------------------------------------------
 
+
+disp([newline '     Harmonics:' newline '-----------------------'])
+Harm_disp(Result_in);
+disp(['-----------------------'])
 
 % Residuals = V_arr-ym;
 

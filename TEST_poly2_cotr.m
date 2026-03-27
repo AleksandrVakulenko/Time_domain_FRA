@@ -27,13 +27,13 @@ x = linspace(x1 - 2, x3 + 2, 1000);
 
 switch Value
     case 1
-        [Eq1, Type] = fit_helper.func_constructor([x1], 'a');
+        [Eq1, Type] = fit_core.func_constructor([x1], 'a');
         title('no params')
     case 2
-        [Eq1, Type] = fit_helper.func_constructor([x1 x2], 'a');
+        [Eq1, Type] = fit_core.func_constructor([x1 x2], 'a');
         title('2 point line')
     case 3
-        [Eq1, Type] = fit_helper.func_constructor([x1 x2 x3], 'a');
+        [Eq1, Type] = fit_core.func_constructor([x1 x2 x3], 'a');
         title('3 point ploy2')
     otherwise
         error('Wrong Value')

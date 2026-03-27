@@ -28,7 +28,7 @@ y = sin(2*pi*x + Phi/180*pi) + 1;
 Noise = 2*(rand(size(x))-0.5)*0.07;
 y = y + Noise;
 
-[Phase, Status] = fit_helper.estimate_phi_part_sin(x, y, Period);
+[Phase, Status] = fit_core.estimate_phi_part_sin(x, y, Period);
 
 disp(' ')
 disp(['Phi: ' num2str(Phi)])

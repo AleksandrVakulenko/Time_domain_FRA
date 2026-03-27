@@ -15,6 +15,7 @@ if ~isempty(Harm_num)
     end
 
     % NOTE: do not use for noise amp calc
+    
     [~, nf_calc] = noise_amp_calc(freq, T_arr, V_arr, Fs, F_lim);
 
     HNR_min_dB = 10; % FIXME: magic constant "harm to noise ratio"

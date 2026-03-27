@@ -47,7 +47,7 @@ clc
 Time = Synth_time;
 Signal = Signal_w;
 
-[Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
+[Time, Signal] = fit_core.signal_cut_by_n_periods(Time, Signal, freq);
 
 % For Nuttall window
 Fs = 10e3; % [1/s]
@@ -86,7 +86,7 @@ Time = Synth_time;
 % Signal = Synth_signal + pinknoise(size(Synth_signal));
 Signal = Synth_signal;
 
-[Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
+[Time, Signal] = fit_core.signal_cut_by_n_periods(Time, Signal, freq);
 
 [Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fs);
 disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
@@ -113,7 +113,7 @@ clc
 Time = Synth_time;
 Signal = Win;
 
-[Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
+[Time, Signal] = fit_core.signal_cut_by_n_periods(Time, Signal, freq);
 [fft_amp, fft_freq, ~, ~] = fft_calc(Signal, Fs);
 
 

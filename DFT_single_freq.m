@@ -1,3 +1,6 @@
+
+% FIXME: move to Fern::FRA_tools
+
 function [Amp, Phi, Mean] = DFT_single_freq(T_arr, V_arr, Freq)
     Period = 1./Freq;
     Length = T_arr(end) - T_arr(1);
