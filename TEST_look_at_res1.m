@@ -4,7 +4,7 @@ clc
 % % T_arr = T_arr;
 % % Residuals_in = Residuals;
 
-Show_channel = 1;
+Show_channel = 2;
 
 if  1 == Show_channel
     Data_time = Synth_time;
@@ -73,12 +73,12 @@ if Output.single_flag
 
 
     disp([newline 'Calc values (mean):'])
-    Str = err_str(Amp_out, Amp_err_out);
-    disp(['A = ' Str ' [V]'])
-    Str = err_str(Phi_out, Phi_err_out);
-    disp(['P = ' Str ' [deg]'])
-    Str = err_str(BG_out, BG_err_out);
-    disp(['C = ' Str ' [V]'])
+    Str = err_str(Amp_out, Amp_err_out, 'V');
+    disp(['A = ' Str])
+    Str = err_str(Phi_out, Phi_err_out, 'deg');
+    disp(['P = ' Str])
+    Str = err_str(BG_out, BG_err_out, 'V');
+    disp(['C = ' Str])
 
     disp([newline 'Real values (mean):'])
     disp(['A = ' num2str(mean(Props.amp)) ' [V]']);
@@ -268,15 +268,15 @@ else
             disp([' Right harmonic: [' num2str(hn) ']'])
 
             if ~isnan(R_harm_err(ind).amp)
-                Str = err_str(R_harm(ind).amp, R_harm_err(ind).amp);
-                disp(['A = ' Str ' [V]'])
+                Str = err_str(R_harm(ind).amp, R_harm_err(ind).amp, 'V');
+                disp(['A = ' Str])
             else
                 disp(['A = ' num2str(R_harm(ind).amp) ' ± NaN [V]'])
             end
 
             if ~isnan(R_harm_err(ind).phi)
-                Str = err_str(R_harm(ind).phi, R_harm_err(ind).phi);
-                disp(['P = ' Str ' [deg]'])
+                Str = err_str(R_harm(ind).phi, R_harm_err(ind).phi, 'deg');
+                disp(['P = ' Str])
             else
                 disp(['A = ' num2str(R_harm(ind).phi) ' ± NaN [deg]'])
             end

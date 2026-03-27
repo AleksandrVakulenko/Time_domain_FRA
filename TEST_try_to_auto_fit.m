@@ -144,6 +144,9 @@ else
     end
 end
 
+Time_length = Ch_data_1.time(end) - Ch_data_1.time(1);
+Periods_counter = Time_length/Period;
+
 if Periods_counter > 1
     est_cell_arr_1 = finish_estimations(est_cell_arr_1, T_arr, V1_arr, Period);
     est_cell_arr_2 = finish_estimations(est_cell_arr_2, T_arr, V2_arr, Period);
