@@ -1,55 +1,61 @@
-%                      
-% 
-% TODO:
-%
-% -) investigate "underrange" function behavior
-% -) Aster connection error (add delay and retry)
-%
-% 0) add data saver function
-% 1) use Estimations for Properties
-% 2) add input condition for harm measure or harm ignore
-% 3) do more estimations by DFT
-% 4) use incoming estimations
-%  
-% 5) [sig_gen:] add underrange (span and mean) test signals
-% 6) update data viewer (to both test or real data)
-% 7) add absolute errors (hardware)
-% 8) Add non-realtime version of fit (just incoming estimations)
-%  
-% 9) make Fern module
-% 10) place fft functions to its own lib
-% 11) 
-% 12) 
-%  
-% 13) DFT vs fft problem (calculating many DFTs) (where?)
-% 14) phase around -180[deg] problem
-% 15) Remember about f = 0 on fft calc data
-% 16) 
 
 % ------------------------------------------------------------------------------
 clc
 
-Gen_Voltage_level = 1; % [V]
-Gen_Offset_level = 0; % [V]
-Gen_freq = 0.2; % [Hz]
-
 Save_data_flag = false;
+freq = 1;
+Freq_dev = 0;
+Duration = 10;
+Fs = 10e3;
+Profile_1 = 'weak';
+Profile_2 = 'weak';
+% Traits = ["nobg", "zerophi", 'nonoise', "lownoise", "constphi"];
+Traits_1 = ["lownoise", "nobg", "lowharm"];
+Traits_2 = ["", "", ""];
+Seed = ''; % QDNRSE
 
+% LLGUHH (small signal)
+% IOTSCV (Phase test)
+% VHJLJS (O_O)
+% HDNPYV
+% QDQFFM
+% CUSAIQ ???
+% AQIOEZ overload test
+% YYSRCS
+% BTSISX window demo / f = 1, D = 11, weak weak, use S2
+
+[Synth_time, Synth_signal_1, Props_1, Noise_1] = test_gen.gen_synth_sig(freq, ...
+    Freq_dev, Duration, Profile_1, Traits_1, Seed, Fs, 10);
+
+Seed_2 = [char(Props_1.seed) 'A'];
+
+[~, Synth_signal_2, Props_2, Noise_2] = test_gen.gen_synth_sig(freq, ...
+    Freq_dev, Duration, Profile_2, Traits_2, Seed_2, Fs);
+
+disp(['Seed: ' char(Props_1.seed)]);
+
+Synth_signal_1 = test_gen.signal_digitizer(Synth_signal_1, 10, 18-1);
+Synth_signal_2 = test_gen.signal_digitizer(Synth_signal_2, 6, 18-1);
+
+FRA_dev = test_gen.FRA_dummy_dev(Synth_time, Synth_signal_1, Synth_signal_2);
+
+test_gen.plot_test_signals(Synth_time, Synth_signal_1, Synth_signal_2);
+
+% FRA_dev = test_gen.FRA_dummy_dev(T_a, V, -I);
 
 %% Main part (Data gathering)
 
 %--------------------------------
-freq = Gen_freq;
 Freq = freq;
 Period = 1/freq;
 Underrange_force = false;
 Fig = figure('position', [471 217 690 691]);
-Harm_num = [1 2 3];
+Harm_num = [1 2 3 4 5];
 MAX_CH1_LIMIT = 5;
 MAX_CH2_LIMIT = 5;
 Time_to_underrange = 0.1*Period; % [s]
 Overrange_tolerance = 0; % [%]
-Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 Harm_profile = "common"; % "common", "most_accurate"
 %--------------------------------
 
@@ -86,61 +92,14 @@ Profile.times_conf = Times_conf;
 
 %--------------------------------%--------------------------------%
 clc
+FRA_dev.initiate();
+FRA_dev.run();
 
-Gen = AFG1022_dev();
-Gen.set_func("sin");
-Gen.set_amp(Gen_Voltage_level, "amp");
-Gen.set_freq(Gen_freq);
-Gen.set_offset(Gen_Offset_level);
-Gen.initiate();
-Aster = Aster_dev(3);
-Aster.set_connection_mode("I2V");
-Aster.initiate();
-[flag, R_Scale, Aster_Range] = Aster_set_range(Aster, 1);
+[Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(FRA_dev, ...
+    Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig);
 
-FRA_dev = Aster;
-Try_num = 0;
-stop = false;
-while ~stop
-    Try_num = Try_num + 1;
-    disp(['Try num = ' num2str(Try_num)])
-
-    Aster.CMD_data_stream(1);
-
-    [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(FRA_dev, ...
-        Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig);
-
-    Aster.CMD_data_stream(0);
-    
-    disp(['Exit flag: ' num2str(Exit_flag)])
-
-    if Exit_flag == 0
-        stop = true;
-    elseif Exit_flag == 102
-        Aster_Range = Aster_Range + 1;
-        [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Aster_Range);
-        if ~flag
-            stop = true;
-        end
-    elseif Exit_flag == 202
-        Aster_Range = Aster_Range - 1;
-        [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Aster_Range);
-        if ~flag
-            stop = true;
-        end
-    elseif Exit_flag == 30
-        stop = true;
-    end
-end
-
-Aster.terminate();
-Gen.terminate();
-delete(Aster);
-delete(Gen);
-
-
-%
-
+FRA_dev.stop();
+FRA_dev.terminate();
 %--------------------------------%--------------------------------%
 T_arr = Ch_data_1.time;
 V1_arr = Ch_data_1.voltage;
@@ -160,6 +119,9 @@ else
         disp(['Exit_flag: ' num2str(Exit_flag)]);
     end
 end
+
+Time_length = Ch_data_1.time(end) - Ch_data_1.time(1);
+Periods_counter = Time_length/Period;
 
 if Periods_counter > 1
     est_cell_arr_1 = finish_estimations(est_cell_arr_1, T_arr, V1_arr, Period);
@@ -196,8 +158,8 @@ Estimations_1 = estimation_fix_wrapper(est_cell_arr_1, ...
 Estimations_2 = estimation_fix_wrapper(est_cell_arr_2, ...
     Periods_counter, freq, T_arr);
 
-%
-% Fitting part
+
+%% Fitting part
 clc
 
 disp(['Start final fit:' newline])
@@ -301,16 +263,11 @@ function [Result, Residuals, DEBUG] = fit_channel(T_arr, V_arr, Fs, freq, ...
 if ~no_estimations(Estimations)
 
     if ~isempty(Harm_num)
-        try % FIXME: debug
-            Harm_est = estimate_harmonics(T_arr, V_arr, Fs, freq, Harm_num);
-        catch
-            Harm_est = [];
-        end
+        Harm_est = estimate_harmonics(T_arr, V_arr, Fs, freq, Harm_num);
     else
         Harm_est = [];
     end
 
-    % FIXME: check Harm_num here?
     Noise_freq_low = freq*max(Harm_num);
     Noise_rms = noise_rms_calc(V_arr, Fs, Noise_freq_low);
 
@@ -343,7 +300,7 @@ if ~no_estimations(Estimations)
         Harm_est_2 = [];
     end
     
-    if ~isempty(Harm_est_2) && ~isempty(Result.harm)
+    if ~isempty(Harm_est_2)
         Fitted_harm = Result.harm;
         for i = 1:numel(Harm_est_2)
             hn = Harm_est_2(i).n;
@@ -771,19 +728,12 @@ function Underrange = check_underrange(V_arr, Underrange, Underrange_force)
 if Underrange
     [Mean, Span, ~, ~] = singal_stats(V_arr);
     if Underrange_force
-        Underrange_level = 0.0001*5; % FIXME: magic constant
+        Underrange_level = 0.001*5; % FIXME: magic constant
     else
-        Underrange_level = 0.002*5; % FIXME: magic constant
+        Underrange_level = 0.0001*5; % FIXME: magic constant
     end
-    % FIXME: bad (maybe) condition
     Cond1 = abs(Mean) < Underrange_level;
     Cond2 = Span < Underrange_level;
-
-%     disp(['und_lvl: ' num2str(Underrange_level) newline ...
-%         '  Mean = ' num2str(abs(Mean)) ' V' newline ...
-%         '  Span = ' num2str(Span) ' V' newline ...
-%         'C1 = ' num2str(Cond1) ' C2 = ' num2str(Cond2) newline])
-
     if ~Cond1 && ~Cond2
         Underrange = false;
     end
@@ -904,7 +854,6 @@ while ~stop
     pause(0.001);
 
     [T_part, V1_part, V2_part] = FRA_dev.get_VV();
-    V2_part = -V2_part; % NOTE: Aster ch2 inv
 
     % FIXME: debug
     if isempty(T_part)
