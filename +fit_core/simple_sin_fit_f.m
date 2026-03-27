@@ -1,3 +1,6 @@
+
+
+
 function Result = ... % simple_sin_fit_f
     simple_sin_fit_f(Time, Signal, Freq, Estimations)
     
@@ -6,9 +9,9 @@ function Result = ... % simple_sin_fit_f
     Mid_time = (End_time + Start_time)/2;
     
     if numel(Estimations) ~= 1
-        
         Estimations = combining_estimations(Estimations);
     end
+    % FIXME: ??? wtf
     Start_Amp = Estimations(1).amp;
     Start_Phi = Estimations(1).phi;
     Start_BG = Estimations(1).bg;
@@ -46,13 +49,20 @@ function Result = ... % simple_sin_fit_f
     A_err = CI(1);
     C_err = CI(2);
     P_err = CI(3);
-    
-    Result = struct(...
-        'amp', A, 'phi', P, 'bg', C, 'f_dev', NaN, ...
-        'a_err', A_err, 'p_err', P_err, 'c_err', C_err, 'fd_err', NaN, ...
-        'fitres', fitresult, ...
-        't_min', Start_time, 't_max', End_time, ...
-        'z', Z, 'status', 'ok');
+
+    Result = fit_core.Estimation;
+    Result.amp = A;
+    Result.phi = P;
+    Result.bg = C;
+    Result.a_err = A_err;
+    Result.p_err = P_err;
+    Result.c_err = C_err;
+    Result.fitres = fitresult;
+    Result.t_min = Start_time;
+    Result.t_max = End_time;
+    Result.z = Z;
+    Result.status = "ok";
+    Result.source = "simplefit";
 
 end
 

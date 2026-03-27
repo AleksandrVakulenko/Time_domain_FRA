@@ -146,6 +146,8 @@ end
 % Cap_err = 1/(6.28*freq*Res_i^2)*Res_err;
 
 Zfull = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
+
+
 [C_par, R_par] = RC_calc_parallel(Zfull, freq);
 [C_ser, R_ser] = RC_calc_series(Zfull, freq);
 

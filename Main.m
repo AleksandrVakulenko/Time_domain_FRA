@@ -5,11 +5,11 @@ clc
 
 Gen_Voltage_level = 1; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 20; % [Hz]
+Gen_freq = 1; % [Hz]
 
 Save_data_flag = false;
 
-Fs = 10e3;
+Fs = 10e3; % FIXME: get from device!
 
 %% Main part (Data gathering)
 
@@ -73,59 +73,72 @@ Aster.set_connection_mode("I2V");
 Aster.initiate();
 [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, 1);
 
-FRA_dev = Aster;
-Try_num = 0;
-stop = false;
-while ~stop
-    Try_num = Try_num + 1;
-    disp(['Try num = ' num2str(Try_num)])
-
-    Aster.CMD_data_stream(1);
-
-    [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(FRA_dev, ...
-        Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig);
-
-    Aster.CMD_data_stream(0);
+ERR = [];
+try
+    FRA_dev = Aster;
+    Try_num = 0;
+    stop = false;
+    while ~stop
+        Try_num = Try_num + 1;
+        disp(['Try num = ' num2str(Try_num)])
     
-    disp(['Exit flag: ' num2str(Exit_flag)])
-
-    if Exit_flag == 0
-        stop = true;
-    elseif Exit_flag == 102
-        Aster_Range = Aster_Range + 1;
-        [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Aster_Range);
-        if ~flag
+        Aster.CMD_data_stream(1);
+    
+        [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(FRA_dev, ...
+            Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig);
+    
+        Aster.CMD_data_stream(0);
+        
+        disp(['Exit flag: ' num2str(Exit_flag)])
+    
+        if Exit_flag == 0
+            stop = true;
+        elseif Exit_flag == 102
+            Aster_Range = Aster_Range + 1;
+            [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Aster_Range);
+            if ~flag
+                stop = true;
+            end
+        elseif Exit_flag == 202
+            Aster_Range = Aster_Range - 1;
+            [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Aster_Range);
+            if ~flag
+                stop = true;
+            end
+        elseif Exit_flag == 30
             stop = true;
         end
-    elseif Exit_flag == 202
-        Aster_Range = Aster_Range - 1;
-        [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Aster_Range);
-        if ~flag
-            stop = true;
-        end
-    elseif Exit_flag == 30
-        stop = true;
     end
+catch ERR
+    Aster.terminate();
+    Gen.terminate();
+    delete(Aster);
+    delete(Gen);
+    disp('ERR finish // devices closed')
+    rethrow(ERR)
 end
 
-Aster.terminate();
-Gen.terminate();
-delete(Aster);
-delete(Gen);
+if isempty(ERR)
+    Aster.terminate();
+    Gen.terminate();
+    delete(Aster);
+    delete(Gen);
+    disp('OK finish')
+end
 
-
-%%
+%
+% FIT PART
 
 %--------------------------------%--------------------------------%
 T_arr = Ch_data_1.time;
 V1_arr = Ch_data_1.voltage;
 Overload_1 = Ch_data_1.overload;
-est_cell_arr_1 = Ch_data_1.est_cell;
+Estimations_1 = Ch_data_1.estimations;
 
 % T_arr = Ch_data_2.time; % NOTE: same as in CH1
 V2_arr = Ch_data_2.voltage;
 Overload_2 = Ch_data_2.overload;
-est_cell_arr_2 = Ch_data_2.est_cell;
+Estimations_2 = Ch_data_2.estimations;
 %--------------------------------%--------------------------------%
 
 if Exit_flag == 0 % FIXME: debug
@@ -142,8 +155,8 @@ Periods_counter = Time_length/Period;
 
 
 if Periods_counter > 1
-    est_cell_arr_1 = finish_estimations(est_cell_arr_1, T_arr, V1_arr, Period);
-    est_cell_arr_2 = finish_estimations(est_cell_arr_2, T_arr, V2_arr, Period);
+    Estimations_1 = finish_estimations(Estimations_1, T_arr, V1_arr, Period);
+    Estimations_2 = finish_estimations(Estimations_2, T_arr, V2_arr, Period);
 else
     % FIXME: debug
     warning('finish_estimations problem: Periods_counter < 1')
@@ -167,18 +180,14 @@ if Exit_flag == 0 && Overload_1.count > 0
 end
 
 
-% FIXME: undone
-% Exit_status = struct('flag', Exit_flag, 'overload_1_count', Overload_1.count, ...
-%     'estimations_cell', est_cell_arr_1);
-
-Estimations_1 = estimation_fix_wrapper(est_cell_arr_1, ...
-    Periods_counter, freq, T_arr);
-Estimations_2 = estimation_fix_wrapper(est_cell_arr_2, ...
-    Periods_counter, freq, T_arr);
+Estimations_1 = estimation_fix_wrapper(Estimations_1, ...
+    Periods_counter, freq);
+Estimations_2 = estimation_fix_wrapper(Estimations_2, ...
+    Periods_counter, freq);
 
 %
 % Fitting part
-clc
+% clc
 
 disp(['Start final fit:' newline])
 
@@ -354,43 +363,21 @@ end
 
 
 
-
-
-function Result = empty_estimation()
-    Result = struct(...
-        'amp', NaN, 'phi', NaN, 'bg', NaN, 'f_dev', NaN, ...
-        'a_err', NaN, 'p_err', NaN, 'c_err', NaN, 'fd_err', NaN, ...
-        'fitres', NaN, ...
-        't_min', NaN, 't_max', NaN, ...
-        'z', NaN, ...
-        'status', "empty");
-end
-
-
-function Result = fit_mimic(Start_Amp, Start_Phi, Start_BG)
-    Result = struct(...
-        'amp', Start_Amp, 'phi', Start_Phi, 'bg', Start_BG, 'f_dev', NaN, ...
-        'a_err', NaN, 'p_err', NaN, 'c_err', NaN, 'fd_err', NaN, ...
-        'fitres', NaN, ...
-        't_min', NaN, 't_max', NaN, ...
-        'z', NaN, ...
-        'status', "mimic");
-end
-
-
-function Result = ... % do_initial_estimation
-    do_initial_estimation(T_arr, V_arr, Period)
-
+function Result = do_initial_estimation(T_arr, V_arr, Period)
     [Mean, Span, ~, ~] = fit_core.singal_stats(V_arr);
     
     Start_Phi = fit_core.estimate_phi_part_sin(T_arr, V_arr, Period);
     if isempty(Start_Phi)
         Start_Phi = 0;
     end
-    
-    Result = fit_mimic(Span, Start_Phi, Mean);
-end
 
+    Result = fit_core.Estimation;
+    Result.amp = Span;
+    Result.phi = Start_Phi;
+    Result.bg = Mean;
+    Result.status = "ok";
+    Result.source = "initial";
+end
 
 
 
@@ -398,18 +385,12 @@ end
 
 
 function status = no_estimations(Estimations)
-    if numel(Estimations) == 1 && Estimations(1).status == "empty"
-        status = true;
-    else
-        status = false;
-    end
+if class(Estimations) ~= "fit_core.Estimation"
+    error('wrong class')
 end
-
-
-
-
-
-
+status = numel(Estimations) == 0 || ...
+    (numel(Estimations) == 1 && Estimations(1).status == "empty");
+end
 
 
 function Result = DFT_estimation(Time, Signal, Period)
@@ -419,12 +400,17 @@ function Result = DFT_estimation(Time, Signal, Period)
 
     [Amp_DFT, Phi_DFT, Mean] = DFT_single_freq(Time, Signal, Freq);
 
-    Result = struct(...
-        'amp', Amp_DFT, 'phi', Phi_DFT, 'bg', Mean, 'f_dev', NaN, ...
-        'a_err', NaN, 'p_err', NaN, 'c_err', NaN, 'fd_err', NaN, ...
-        'fitres', NaN, ...
-        't_min', Start_time, 't_max', End_time, ...
-        'z', 0, 'status', 'ok');
+    Result = fit_core.Estimation;
+    Result.amp = Amp_DFT;
+    Result.phi = Phi_DFT;
+    Result.bg = Mean;
+    % FIXME: add f_dev
+    % FIXME: add errors
+    Result.t_min = Start_time;
+    Result.t_max = End_time;
+    Result.z = 0;
+    Result.status = "ok";
+    Result.source = "DFT";
 end
 
 
@@ -459,12 +445,18 @@ end
 
 
 
-function Estimations = estimation_fix_wrapper(est_cell_arr, Periods_counter, ...
-    freq, T_arr)
+function Estimations = estimation_fix_wrapper(Estimations_all, Periods_counter, ...
+    freq)
 
-Estimations = est_cell_arr{1};
-Estimations_low = est_cell_arr{2};
-Estimations_extra = est_cell_arr{3};
+Legacy_status = [Estimations_all.legacy_status];
+
+est_range_norm = Legacy_status == "";
+est_range_low = Legacy_status == "low";
+est_range_extra = Legacy_status == "extra";
+
+Estimations = Estimations_all(est_range_norm);
+Estimations_low = Estimations_all(est_range_low);
+Estimations_extra = Estimations_all(est_range_extra);
 
 Estimations = estimation_fix(Estimations, Estimations_low, ...
     Estimations_extra, Periods_counter, freq);
@@ -475,6 +467,16 @@ end
 % FIXME: what if empty estimations?
 function Estimations = estimation_fix(Estimations, Estimations_low, ...
     Estimations_extra, Periods_counter, freq)
+% 
+% disp('-----------')
+% % FIXME: nyan
+% Estimations
+% no_estimations(Estimations)
+% [Estimations.legacy_status]
+% [Estimations_low.legacy_status]
+% [Estimations_extra.legacy_status]
+% disp('-----------')
+
 Period = 1/freq;
 % NOTE: delete early estimations
 Est_time_min = [Estimations.t_max];
@@ -510,12 +512,9 @@ end
 
 
 
-function [est_cell_arr] = do_estimations(est_cell_arr, T_arr, V_arr, ...
+function [Estimations] = do_estimations(Estimations, T_arr, V_arr, ...
     Freq, Periods_counter)
 
-Estimations = est_cell_arr{1};
-Estimations_low = est_cell_arr{2};
-Estimations_extra = est_cell_arr{3};
 Period = 1/Freq;
 
 % FIXME: do we need this?
@@ -533,27 +532,31 @@ switch signal_per_duration(Periods_counter)
         % pause(0.05*Period)
 
     case "get_lucky" % 0.45 : 0.5
-        if no_estimations(Estimations_extra)
+        if no_estimations(Estimations)
             Init_values = do_initial_estimation(T_arr, V_arr, Period);
             Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Init_values);
-            Estimations_extra = Result;
+            Result.legacy_status = "extra";
+            Estimations = Result;
         else
             Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
-                Freq, Estimations_extra);
-            Estimations_extra = [Estimations_extra Result];
+                Freq, Estimations);
+            Result.legacy_status = "extra";
+            Estimations = [Estimations Result];
         end
 
     case "min" % 0.5 : 1.0
-        if no_estimations(Estimations_low)
+        if no_estimations(Estimations)
             Init_values = do_initial_estimation(T_arr, V_arr, Period);
             Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Init_values);
-            Estimations_low = Result;
+            Result.legacy_status = "low";
+            Estimations = Result;
         else
             Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
-                Freq, Estimations_low);
-            Estimations_low = [Estimations_low Result];
+                Freq, Estimations);
+            Result.legacy_status = "low";
+            Estimations = [Estimations Result];
         end
 
     case "single" % 1.0 : 2
@@ -579,8 +582,6 @@ switch signal_per_duration(Periods_counter)
         Estimations = [Estimations Result];
 
 end
-
-est_cell_arr = {Estimations, Estimations_low, Estimations_extra};
 
 end
 
@@ -612,12 +613,15 @@ end
 end
 
 
-function est_cell_arr = finish_estimations(est_cell_arr, T_arr, V_arr, Period)
+function Estimations_all = finish_estimations(Estimations_all, T_arr, V_arr, Period)
 
 Time_passed = T_arr(end)-T_arr(1);
 Periods_counter = Time_passed/Period;
 
-Estimations = est_cell_arr{1};
+legacy_status = [Estimations_all.legacy_status];
+est_range = legacy_status == "";
+Estimations = Estimations_all(est_range);
+Estimations_all(est_range) = [];
 
 if Periods_counter >= 1
     [out_time1, out_sig1] = fit_core.get_one_period(T_arr, V_arr, Period, "first");
@@ -655,8 +659,7 @@ else
     Estimations(end).status = 'fixed';
 end
 
-
-est_cell_arr{1} = Estimations;
+Estimations_all = [Estimations_all Estimations];
 end
 
 
@@ -701,8 +704,8 @@ V1_arr = [];
 V2_arr = [];
 
 % FIXME: need refactor
-est_cell_arr_1 = {empty_estimation(), empty_estimation(), empty_estimation()};
-est_cell_arr_2 = {empty_estimation(), empty_estimation(), empty_estimation()};
+Estimations_1 = fit_core.Estimation;
+Estimations_2 = fit_core.Estimation;
 
 Underrange_1 = true;
 Underrange_2 = true;
@@ -792,10 +795,10 @@ while ~stop
     end
 
     % FIXME: refactor this function
-    [est_cell_arr_1] = do_estimations(est_cell_arr_1, T_arr, V1_arr, ...
+    Estimations_1 = do_estimations(Estimations_1, T_arr, V1_arr, ...
         Freq, Periods_counter);
 
-    [est_cell_arr_2] = do_estimations(est_cell_arr_2, T_arr, V2_arr, ...
+    Estimations_2 = do_estimations(Estimations_2, T_arr, V2_arr, ...
         Freq, Periods_counter);
     %--------------------------------
 
@@ -817,11 +820,11 @@ end
 Ch_data_1.time = T_arr;
 Ch_data_1.voltage = V1_arr;
 Ch_data_1.overload = Overload_1;
-Ch_data_1.est_cell = est_cell_arr_1;
+Ch_data_1.estimations = Estimations_1;
 
 Ch_data_2.time = T_arr;
 Ch_data_2.voltage = V2_arr;
 Ch_data_2.overload = Overload_2;
-Ch_data_2.est_cell = est_cell_arr_2;
+Ch_data_2.estimations = Estimations_2;
 
 end

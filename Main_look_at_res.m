@@ -62,10 +62,10 @@ if Output.single_flag
     Str = err_str(BG_out, BG_err_out);
     disp(['C = ' Str ' [V]'])
 
-    SNR = 20*log10(Amp_out/Noise_amp);
+    SNR = 20*log10(Amp_out/Noise_rms);
     disp([newline 'Noise level:'])
-    disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
-    disp(['SNR = ' num2str(Amp_out/Noise_amp, '%0.2f')])
+    disp(['Noise amp = ' num2str(Noise_rms*1e3, '%0.2f') ' mV'])
+    disp(['SNR = ' num2str(Amp_out/Noise_rms, '%0.2f')])
     disp(['SNR = ' num2str(SNR, '%0.2f') ' dB'])
 
 end
