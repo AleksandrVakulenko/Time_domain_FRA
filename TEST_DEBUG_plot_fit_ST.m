@@ -1,5 +1,5 @@
 
-% NOTE: 'DEBUG' is from any_sin_fit()
+% NOTE: 'DEBUG' is from fit_core::any_sin_fit()
 
 % FIXME: use amp, phi, bg types for start point parsing
 

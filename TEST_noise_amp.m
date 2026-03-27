@@ -48,7 +48,7 @@ else
 end
 
 
-[Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
+[Time, Signal] = fit_core.signal_cut_by_n_periods(Time, Signal, freq);
 
 [Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fss, F_lim);
 disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])

@@ -1,5 +1,5 @@
 
-% NOTE: TEST script for estimate_harms_from_res()
+% NOTE: TEST script for fit_core::estimate_harms_from_res()
 
 clc
 
@@ -30,7 +30,7 @@ clc
 % Harm_est
 % 
 
-Harm_est = estimate_harms_from_res(T_arr_new, Residuals_new, freq, ...
+Harm_est = fit_core.estimate_harms_from_res(T_arr_new, Residuals_new, freq, ...
     Noise_rms, Harm_num)
 
 

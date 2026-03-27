@@ -13,7 +13,7 @@ arguments
 end
 
 
-[Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq);
+[Time, Signal] = fit_core.signal_cut_by_n_periods(Time, Signal, freq);
 
 if isempty(Signal)
     % FIXME: bad code

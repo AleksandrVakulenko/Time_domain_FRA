@@ -305,7 +305,7 @@ if ~no_estimations(Estimations)
     end
 
     % NOTE: fit with harmonics estimations
-    [Result, Residuals, DEBUG] = any_sin_fit(T_arr, V_arr, freq, ...
+    [Result, Residuals, DEBUG] = fit_core.any_sin_fit(T_arr, V_arr, freq, ...
         Estimations, Properties, Harm_est, Fit_settings);
     
     DEBUG.Fs_new = Fs2;
@@ -315,7 +315,7 @@ if ~no_estimations(Estimations)
 
     % NOTE: analize residuals here
     if ~isempty(Harm_num)
-        Harm_est_2 = estimate_harms_from_res(T_arr, Residuals, freq, ...
+        Harm_est_2 = fit_core.estimate_harms_from_res(T_arr, Residuals, freq, ...
             Noise_rms, Harm_num);
     else
         Harm_est_2 = [];
@@ -337,7 +337,7 @@ if ~no_estimations(Estimations)
     
     % NOTE: fit residuals here to find lost harms
     if Refit_flag
-        [Result, Residuals, DEBUG] = any_sin_fit(T_arr, V_arr, freq, ...
+        [Result, Residuals, DEBUG] = fit_core.any_sin_fit(T_arr, V_arr, freq, ...
             Estimations, Properties, Fitted_harm, Fit_settings);
     end
     
@@ -355,7 +355,7 @@ function Result = ... % do_initial_estimation
 
     [Mean, Span, ~, ~] = singal_stats(V_arr);
     
-    Start_Phi = fit_helper.estimate_phi_part_sin(T_arr, V_arr, Period);
+    Start_Phi = fit_core.estimate_phi_part_sin(T_arr, V_arr, Period);
     if isempty(Start_Phi)
         Start_Phi = 0;
     end
@@ -655,7 +655,7 @@ end
 
 if Num > Max_points
     [T_arr, V1_arr, V2_arr] = ...
-        fft_filter_dbl_ch(T_arr, V1_arr, V2_arr, freq, Fs, Filter_freq);
+        fit_core.fft_filter_dbl_ch(T_arr, V1_arr, V2_arr, freq, Fs, Filter_freq);
 
     T_arr_new = T_arr(1) : 1/Fs_new : T_arr(end);
     V1_arr_new = interp1(T_arr, V1_arr, T_arr_new);
