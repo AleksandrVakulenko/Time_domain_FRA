@@ -1,5 +1,10 @@
 
+
+% NOTE: could be outdated
+
+
 % ------------------------------------------------------------------------------
+
 clc
 
 Save_data_flag = false;
@@ -274,7 +279,7 @@ if ~no_estimations(Estimations)
     Max_points = 1000e3; % FIXME: magic constant
     % FIXME: upgrade function make_fs_lower
     % FIXME: make it single channel
-    [T_arr, V_arr, ~, Fs2] = make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
+    [T_arr, V_arr, ~, Fs2] = fit_core.make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
         freq, Harm_num, Max_points);
 
     if Fs2 ~= Fs % FIXME: debug print
@@ -332,7 +337,7 @@ end
 function Result = ... % do_initial_estimation
     do_initial_estimation(T_arr, V_arr, Period)
 
-    [Mean, Span, ~, ~] = singal_stats(V_arr);
+    [Mean, Span, ~, ~] = fit_core.singal_stats(V_arr);
     
     Start_Phi = fit_core.estimate_phi_part_sin(T_arr, V_arr, Period);
     if isempty(Start_Phi)
@@ -384,100 +389,7 @@ function Result = combining_estimations(Estimations)
 end
 
 
-% FIXME: unite "get_first_period" and "get_last_period"
-function [out_time, out_sig] = get_last_period(Time, Signal, Period, Scale)
-arguments
-    Time
-    Signal
-    Period
-    Scale = 1
-end
-    % Scale = 1.3;
-    if Scale > 2
-        Scale = 2;
-    end
-    Length = Time(end) - Time(1);
-    if Length <= Period*Scale
-        out_time = Time;
-        out_sig = Signal;
-    else
-        range = Time >= (Time(end) - Period*Scale);
-        out_time = Time(range);
-        out_sig = Signal(range);
-    end
-end
 
-
-function [out_time, out_sig] = get_first_period(Time, Signal, Period)
-    Scale = 1.1;
-    Length = Time(end) - Time(1);
-    if Length <= Period*Scale
-        out_time = Time;
-        out_sig = Signal;
-    else
-        range = Time <= Time(1) + Period*Scale;
-        out_time = Time(range);
-        out_sig = Signal(range);
-    end
-end
-
-
-function Result = ... % simple_sin_fit_f
-    simple_sin_fit_f(Time, Signal, Freq, Estimations)
-    
-    Start_time = Time(1);
-    End_time = Time(end);
-    Mid_time = (End_time + Start_time)/2;
-    
-    if numel(Estimations) ~= 1
-        Estimations = combining_estimations(Estimations);
-    end
-    Start_Amp = Estimations(1).amp;
-    Start_Phi = Estimations(1).phi;
-    Start_BG = Estimations(1).bg;
-    
-    Eq = [ 'A*sin(2*pi*' num2str(Freq) '*x+P/180*pi) + C + Z*x' ];
-    
-    ft = fittype(Eq, 'independent', 'x', 'dependent', 'y');
-    opts = fitoptions('Method', 'NonlinearLeastSquares');
-    opts.Display = 'Off';
-    opts.TolX = 1e-6; % FIXME: default
-    opts.TolFun = 1e-6; % default
-    
-    A = Start_Amp;
-    P = Start_Phi;
-    C = Start_BG;
-    %                     A     C     P      Z
-    opts.Lower      =  [   0   -5   -180   -inf ];
-    opts.StartPoint =  [   A    C      P      0 ];
-    opts.Upper      =  [  10   +5   +180   +inf ];
-    
-    [fitresult, gof] = fit(Time', Signal', ft, opts);
-    
-    % FIXME: do we need to check quality? (use gof somehow)
-    
-    A = fitresult.A;
-    P = fitresult.P;
-    C = fitresult.C;
-    Z = fitresult.Z;
-
-    C = C + Z*Mid_time;
-
-    CI = confint(fitresult);
-    CI = (CI(2, :) - CI(1, :))/2;
-    
-    A_err = CI(1);
-    C_err = CI(2);
-    P_err = CI(3);
-    
-    Result = struct(...
-        'amp', A, 'phi', P, 'bg', C, 'f_dev', NaN, ...
-        'a_err', A_err, 'p_err', P_err, 'c_err', C_err, 'fd_err', NaN, ...
-        'fitres', fitresult, ...
-        't_min', Start_time, 't_max', End_time, ...
-        'z', Z, 'status', 'ok');
-
-end
 
 
 function Result = DFT_estimation(Time, Signal, Period)
@@ -535,15 +447,6 @@ function state = signal_per_duration(Periods_counter)
     end
 end
 
-
-function [Mean, Span, Min, Max] = singal_stats(Signal)
-    Signal = medfilt1(Signal);
-    
-    Min = min(Signal);
-    Max = max(Signal);
-    Mean = mean(Signal);
-    Span = abs(Max-Min);
-end
 
 
 %FIXME: unused - use or delete
@@ -609,44 +512,6 @@ else
 end
 end
 
-%FIXME: UNDODE function
-function [T_arr_new, V1_arr_new, V2_arr_new, Fs_new] = make_fs_lower(T_arr, ...
-    V1_arr, V2_arr, Fs, freq, Find_harms_num, Max_points)
-
-Period = 1/freq;
-Time_length = T_arr(end) - T_arr(1);
-Period_counter = Time_length/Period;
-Num = numel(T_arr);
-
-if ~isempty(Find_harms_num)
-    Max_harm = max(Find_harms_num);
-else
-    Max_harm = 1;
-end
-
-Max_freq = Max_harm * freq;
-Filter_freq = Max_freq*2;
-Fs_new = Max_freq*4;
-
-if Fs_new < 500
-    Fs_new = 500; % FIXME: magic constant
-end
-
-if Num > Max_points
-    [T_arr, V1_arr, V2_arr] = ...
-        fit_core.fft_filter_dbl_ch(T_arr, V1_arr, V2_arr, freq, Fs, Filter_freq);
-
-    T_arr_new = T_arr(1) : 1/Fs_new : T_arr(end);
-    V1_arr_new = interp1(T_arr, V1_arr, T_arr_new);
-    V2_arr_new = interp1(T_arr, V2_arr, T_arr_new);
-else
-    T_arr_new = T_arr;
-    V1_arr_new = V1_arr;
-    V2_arr_new = V2_arr;
-    Fs_new = Fs;
-end
-
-end
 
 
 function [est_cell_arr] = do_estimations(est_cell_arr, T_arr, V_arr, ...
@@ -660,7 +525,7 @@ Period = 1/Freq;
 % FIXME: do we need this?
 if no_estimations(Estimations) && Periods_counter > 1.0
     Init_values = do_initial_estimation(T_arr, V_arr, Period);
-    Result = simple_sin_fit_f(T_arr, V_arr, ...
+    Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
         Freq, Init_values);
     Estimations = Result;
 end
@@ -674,11 +539,11 @@ switch signal_per_duration(Periods_counter)
     case "get_lucky" % 0.45 : 0.5
         if no_estimations(Estimations_extra)
             Init_values = do_initial_estimation(T_arr, V_arr, Period);
-            Result = simple_sin_fit_f(T_arr, V_arr, ...
+            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Init_values);
             Estimations_extra = Result;
         else
-            Result = simple_sin_fit_f(T_arr, V_arr, ...
+            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Estimations_extra);
             Estimations_extra = [Estimations_extra Result];
         end
@@ -686,25 +551,25 @@ switch signal_per_duration(Periods_counter)
     case "min" % 0.5 : 1.0
         if no_estimations(Estimations_low)
             Init_values = do_initial_estimation(T_arr, V_arr, Period);
-            Result = simple_sin_fit_f(T_arr, V_arr, ...
+            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Init_values);
             Estimations_low = Result;
         else
-            Result = simple_sin_fit_f(T_arr, V_arr, ...
+            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Estimations_low);
             Estimations_low = [Estimations_low Result];
         end
 
     case "single" % 1.0 : 2
-        Result = simple_sin_fit_f(T_arr, V_arr, ...
+        Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
             Freq, Estimations);
         Estimations = [Estimations Result];
 
 
     case "long" % 2 : 10
         Scale = Periods_counter/2; % FXIME: magic constant
-        [out_time, out_sig] = get_last_period(T_arr, V_arr, Period, Scale);
-        Result = simple_sin_fit_f(out_time, out_sig, ...
+        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, "last", Scale);
+        Result = fit_core.simple_sin_fit_f(out_time, out_sig, ...
             Freq, Estimations);
         % Result = DFT_estimation(T_arr, V_arr, Period);
         Estimations = [Estimations Result];
@@ -713,7 +578,7 @@ switch signal_per_duration(Periods_counter)
 
     case "max" % 10 : inf
         Scale = 5; % FIXME: magic constant
-        [out_time, out_sig] = get_last_period(T_arr, V_arr, Period, Scale);
+        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, "last", Scale);
         Result = DFT_estimation(out_time, out_sig, Period);
         Estimations = [Estimations Result];
 
@@ -726,7 +591,7 @@ end
 
 function Underrange = check_underrange(V_arr, Underrange, Underrange_force)
 if Underrange
-    [Mean, Span, ~, ~] = singal_stats(V_arr);
+    [Mean, Span, ~, ~] = fit_core.singal_stats(V_arr);
     if Underrange_force
         Underrange_level = 0.001*5; % FIXME: magic constant
     else
@@ -752,8 +617,8 @@ Periods_counter = Time_passed/Period;
 Estimations = est_cell_arr{1};
 
 if Periods_counter >= 1
-    [out_time1, out_sig1] = get_first_period(T_arr, V_arr, Period);
-    [out_time2, out_sig2] = get_last_period(T_arr, V_arr, Period, 1.1);
+    [out_time1, out_sig1] = fit_core.get_one_period(T_arr, V_arr, Period, "first");
+    [out_time2, out_sig2] = fit_core.get_one_period(T_arr, V_arr, Period, "last", 1.1);
 
     Result1 = DFT_estimation(out_time1, out_sig1, Period);
     Result1.t_min = 0;

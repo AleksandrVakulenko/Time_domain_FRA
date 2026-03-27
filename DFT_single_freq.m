@@ -9,13 +9,13 @@ function [Amp, Phi, Mean] = DFT_single_freq(T_arr, V_arr, Freq)
     % hold on
     % plot(T_arr, V_arr, 'xb')
     
-    Periods_counter = Length/Period;
-    if Periods_counter < 1
+    Periods_counter = Length/Period
+    if Periods_counter < 0.98 % FIXME: magic constant
         Amp = NaN;
         Phi = NaN;
         Mean = NaN;
         flag = 2;
-    elseif Periods_counter < 0.98 % FIXME: magic constant
+    elseif Periods_counter < 1
         flag = 1;
     else
         flag = 0;
@@ -23,7 +23,7 @@ function [Amp, Phi, Mean] = DFT_single_freq(T_arr, V_arr, Freq)
 
     % FIXME: flag unused
     if flag == 0 || flag == 1
-        Periods_counter = floor(Periods_counter);
+        Periods_counter = round(Periods_counter);
         Length_max = Periods_counter*Period;
         T_max = T_arr(1) + Length_max;
         range = T_arr < T_max;
