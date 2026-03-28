@@ -30,7 +30,7 @@ end
 Residuals_in = Data_signal - ym;
 
 Noise_freq_low = freq*max(Harm_num);
-Noise_rms = noise_rms_calc(Data_signal, Fs, Noise_freq_low);
+Noise_rms = fit_core.noise_rms_calc(Data_signal, Fs, Noise_freq_low);
 
 [~, Amp, Phi, BG, Amp_err, Phi_err, BG_err] = ...
     fit_viewer.calc_fitted_signal(Result_in, T_arr_min);

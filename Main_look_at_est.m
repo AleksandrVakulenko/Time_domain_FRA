@@ -22,11 +22,6 @@ else
 end
 
 
-Source = [Estimations_in.source];
-range_DFT = Source == "DFT";
-range_fit = Source == "simplefit";
-% Estimations_in(range_DFT) = [];
-Estimations_in(range_fit) = [];
 
 % Estimations_in = Estimations_extra;
 % Estimations_in = Estimations_low;
@@ -64,7 +59,7 @@ bg_poly = fit(Est_time_norm', Est_bg', 'poly2');
 BG_fit = feval(bg_poly, Est_full_time_norm);
 
 
-figure('position', [360 205 882 784])
+% figure('position', [360 205 882 784])
 
 subplot(2, 2, 1)
 hold on

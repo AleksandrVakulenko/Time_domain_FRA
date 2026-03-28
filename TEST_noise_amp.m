@@ -1,6 +1,6 @@
 
 % NOTE:
-% TEST for Noise_amp = noise_amp_calc(freq, Time, Signal, Fss)
+% TEST for Noise_amp = fit_core.noise_amp_calc(freq, Time, Signal, Fss)
 
 % FIXME: bad for noise amp calc !
 
@@ -50,7 +50,7 @@ end
 
 [Time, Signal] = fit_core.signal_cut_by_n_periods(Time, Signal, freq);
 
-[Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fss, F_lim);
+[Noise_amp, noise_floor] = fit_core.noise_amp_calc(freq, Time, Signal, Fss, F_lim);
 disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
 
 
@@ -243,4 +243,38 @@ function Amp = find_spectrum_amps(Time, Signal, Freq_list)
         end
         Amp(i) = max(Amp_part);
     end
+end
+
+
+% NOTE: SHARED with same in fit_core.noise_amp_calc.m
+function [Bad_num, new_freq_list] = exclude_bad_freq(freq_list, exclude_list)
+
+% % freq_list = [328.3291  350.9986 373.3524];
+% % exclude_list = [308 350 352];
+% freq_list = Freq_list;
+% exclude_list = Freq_exclude;
+% Signal_f = freq_list;
+% Bad_harms = exclude_list;
+% 
+% Diff = (Signal_f - Bad_harms')./repmat(Bad_harms, numel(Signal_f), 1)';
+% 
+% ind = find(abs(Diff) < 0.03) % FIXME: magic constant
+% 
+% [~, j] = ind2sub(size(Diff), ind);
+% 
+% 
+
+Signal_f = freq_list;
+Bad_harms = exclude_list;
+
+Diff = (Signal_f - Bad_harms')./repmat(Bad_harms, numel(Signal_f), 1)';
+
+ind = find(abs(Diff) < 0.03); % FIXME: magic constant
+[~, j] = ind2sub(size(Diff), ind);
+
+Bad_num = unique(j);
+
+new_freq_list = freq_list;
+new_freq_list(Bad_num) = [];
+
 end

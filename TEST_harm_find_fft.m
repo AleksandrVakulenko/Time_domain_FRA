@@ -54,7 +54,7 @@ Fs = 10e3; % [1/s]
 F_lim = Fs*(10.^(-1*log10(numel(Signal)) + 0.765));
 %
 
-[Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fs, F_lim);
+[Noise_amp, noise_floor] = fit_core.noise_amp_calc(freq, Time, Signal, Fs, F_lim);
 disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
 
 
@@ -88,7 +88,7 @@ Signal = Synth_signal;
 
 [Time, Signal] = fit_core.signal_cut_by_n_periods(Time, Signal, freq);
 
-[Noise_amp, noise_floor] = noise_amp_calc(freq, Time, Signal, Fs);
+[Noise_amp, noise_floor] = fit_core.noise_amp_calc(freq, Time, Signal, Fs);
 disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
 
 

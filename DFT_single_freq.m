@@ -9,7 +9,7 @@ function [Amp, Phi, Mean] = DFT_single_freq(T_arr, V_arr, Freq)
     % hold on
     % plot(T_arr, V_arr, 'xb')
     
-    Periods_counter = Length/Period
+    Periods_counter = Length/Period;
     if Periods_counter < 0.98 % FIXME: magic constant
         Amp = NaN;
         Phi = NaN;

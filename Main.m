@@ -5,7 +5,7 @@ clc
 
 Gen_Voltage_level = 1; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 1; % [Hz]
+Gen_freq = 0.5; % [Hz]
 
 Save_data_flag = false;
 
@@ -150,17 +150,15 @@ else
 end
 
 
-Time_length = Ch_data_1.time(end) - Ch_data_1.time(1);
+Time_length = T_arr(end) - T_arr(1);
 Periods_counter = Time_length/Period;
 
+Estimations_1 = fit_core.finish_estimations(Estimations_1, T_arr, V1_arr, Period);
+Estimations_2 = fit_core.finish_estimations(Estimations_2, T_arr, V2_arr, Period);
 
-if Periods_counter > 1
-    Estimations_1 = finish_estimations(Estimations_1, T_arr, V1_arr, Period);
-    Estimations_2 = finish_estimations(Estimations_2, T_arr, V2_arr, Period);
-else
-    % FIXME: debug
-    warning('finish_estimations problem: Periods_counter < 1')
-end
+Estimations_1 = estimation_fix(Estimations_1, Periods_counter, freq);
+Estimations_2 = estimation_fix(Estimations_2, Periods_counter, freq);
+
 
 Harm_num_1 = Harm_num;
 Harm_num_2 = Harm_num;
@@ -179,11 +177,6 @@ if Exit_flag == 0 && Overload_1.count > 0
 %     V1_arr = V1_arr(~Overload_1.range);
 end
 
-
-Estimations_1 = estimation_fix_wrapper(Estimations_1, ...
-    Periods_counter, freq);
-Estimations_2 = estimation_fix_wrapper(Estimations_2, ...
-    Periods_counter, freq);
 
 %
 % Fitting part
@@ -291,7 +284,7 @@ if ~isempty(Estimations)
 
     if ~isempty(Harm_num)
         try % FIXME: debug
-            Harm_est = estimate_harmonics(T_arr, V_arr, Fs, freq, Harm_num);
+            Harm_est = fit_core.estimate_harmonics(T_arr, V_arr, Fs, freq, Harm_num);
         catch
             Harm_est = [];
         end
@@ -301,7 +294,7 @@ if ~isempty(Estimations)
 
     % FIXME: check Harm_num here?
     Noise_freq_low = freq*max(Harm_num);
-    Noise_rms = noise_rms_calc(V_arr, Fs, Noise_freq_low);
+    Noise_rms = fit_core.noise_rms_calc(V_arr, Fs, Noise_freq_low);
 
     Max_points = 1000e3; % FIXME: magic constant
     % FIXME: upgrade function make_fs_lower
@@ -380,25 +373,7 @@ function Result = do_initial_estimation(T_arr, V_arr, Period)
 end
 
 
-function Result = DFT_estimation(Time, Signal, Period)
-    Start_time = Time(1);
-    End_time = Time(end);
-    Freq = 1/Period;
 
-    [Amp_DFT, Phi_DFT, Mean] = DFT_single_freq(Time, Signal, Freq);
-
-    Result = fit_core.Estimation;
-    Result.amp = Amp_DFT;
-    Result.phi = Phi_DFT;
-    Result.bg = Mean;
-    % FIXME: add f_dev
-    % FIXME: add errors
-    Result.t_min = Start_time;
-    Result.t_max = End_time;
-    Result.z = 0;
-    Result.status = "ok";
-    Result.source = "DFT";
-end
 
 
 function state = signal_per_duration(Periods_counter)
@@ -431,7 +406,7 @@ end
 
 
 
-function Estimations = estimation_fix_wrapper(Estimations_all, Periods_counter, ...
+function Estimations = estimation_fix(Estimations_all, Periods_counter, ...
     freq)
 
 Legacy_status = [Estimations_all.legacy_status];
@@ -444,15 +419,6 @@ Estimations = Estimations_all(est_range_norm);
 Estimations_low = Estimations_all(est_range_low);
 Estimations_extra = Estimations_all(est_range_extra);
 
-Estimations = estimation_fix(Estimations, Estimations_low, ...
-    Estimations_extra, Periods_counter, freq);
-
-end
-
-
-% FIXME: what if empty estimations?
-function Estimations = estimation_fix(Estimations, Estimations_low, ...
-    Estimations_extra, Periods_counter, freq)
 % 
 % disp('-----------')
 % % FIXME: nyan
@@ -493,24 +459,19 @@ elseif isempty(Estimations) && ~isempty(Estimations_low)
 else
     disp([newline '! OK, we have something ! (˶ᵔ ᵕ ᵔ˶) ‹𝟹' newline])
 end
+
 end
 
 
 
 
 function [Estimations] = do_estimations(Estimations, T_arr, V_arr, ...
-    Freq, Periods_counter, Times_conf)
+    Freq, Periods_counter)
 
-Min_FOP = Times_conf.min_fop;
-Max_FOP = Times_conf.max_fop;
-Period = Times_conf.period;
-Time_profile = Times_conf.time_profile;
-
-flag_DFT_possible = Periods_counter > 1;
-
+Period = 1/Freq;
 
 % FIXME: do we need this?
-if isempty(Estimations) && Periods_counter > 1.0
+if isempty(Estimations) && Periods_counter >= 1.0
     Init_values = do_initial_estimation(T_arr, V_arr, Period);
     Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
         Freq, Init_values);
@@ -519,11 +480,13 @@ end
 
 switch signal_per_duration(Periods_counter)
     case "invalid" % 0 : 0.45
+        disp("invalid") % FIXME: debug
         % DO SOMETHING:
         % - noise analysis
         % pause(0.05*Period)
 
     case "get_lucky" % 0.45 : 0.5
+        disp("get_lucky") % FIXME: debug
         if isempty(Estimations)
             Init_values = do_initial_estimation(T_arr, V_arr, Period);
             Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
@@ -538,6 +501,7 @@ switch signal_per_duration(Periods_counter)
         end
 
     case "min" % 0.5 : 1.0
+        disp("min") % FIXME: debug
         if isempty(Estimations)
             Init_values = do_initial_estimation(T_arr, V_arr, Period);
             Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
@@ -552,25 +516,29 @@ switch signal_per_duration(Periods_counter)
         end
 
     case "single" % 1.0 : 2
+        disp("single") % FIXME: debug
         Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
             Freq, Estimations);
-        Estimations = [Estimations Result];
+        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
+            "last", 1.05);
+        Result2 = fit_core.DFT_estimation(out_time, out_sig, Period);
+        Estimations = [Estimations Result Result2];
 
 
     case "long" % 2 : 10
-        Scale = Periods_counter/2; % FXIME: magic constant
-        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, "last", Scale);
-        Result = fit_core.simple_sin_fit_f(out_time, out_sig, ...
+        disp("long") % FIXME: debug
+        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
+            "last", 1.05);
+        Result1 = fit_core.simple_sin_fit_f(out_time, out_sig, ...
             Freq, Estimations);
-        % Result = DFT_estimation(T_arr, V_arr, Period);
-        Estimations = [Estimations Result];
-
+        Result2 = fit_core.DFT_estimation(out_time, out_sig, Period);
+        Estimations = [Estimations Result1 Result2];
 
 
     case "max" % 10 : inf
-        Scale = 5; % FIXME: magic constant
-        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, "last", Scale);
-        Result = DFT_estimation(out_time, out_sig, Period);
+        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
+            "last", 1.05);
+        Result = fit_core.DFT_estimation(out_time, out_sig, Period);
         Estimations = [Estimations Result];
 
 end
@@ -605,54 +573,7 @@ end
 end
 
 
-function Estimations_all = finish_estimations(Estimations_all, T_arr, V_arr, Period)
 
-Time_passed = T_arr(end)-T_arr(1);
-Periods_counter = Time_passed/Period;
-
-legacy_status = [Estimations_all.legacy_status];
-est_range = legacy_status == "";
-Estimations = Estimations_all(est_range);
-Estimations_all(est_range) = [];
-
-if Periods_counter >= 1
-    [out_time1, out_sig1] = fit_core.get_one_period(T_arr, V_arr, Period, "first");
-    [out_time2, out_sig2] = fit_core.get_one_period(T_arr, V_arr, Period, "last", 1.1);
-
-    Result1 = DFT_estimation(out_time1, out_sig1, Period);
-    Result1.t_min = 0;
-    Result1.t_max = 0;
-    Result1.status = 'fixed';
-
-    if ~isnan(Result1.amp)
-        Estimations = [Estimations Result1];
-    else
-        error('err EF2'); % FIXME: undone
-    end
-
-    Result2 = DFT_estimation(out_time2, out_sig2, Period);
-    Result2.t_min = T_arr(end);
-    Result2.t_max = T_arr(end);
-    Result2.status = 'fixed';
-
-    if ~isnan(Result1.amp)
-        Estimations = [Estimations Result2];
-    else
-        error('err EF4'); % FIXME: undone
-    end
-
-else
-    % FIXME: do something else
-    Estimations(1).t_min = 0;
-    Estimations(1).t_max = 0;
-    Estimations(1).status = 'fixed';
-    Estimations(end).t_min = T_arr(end);
-    Estimations(end).t_max = T_arr(end);
-    Estimations(end).status = 'fixed';
-end
-
-Estimations_all = [Estimations_all Estimations];
-end
 
 
 function [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(FRA_dev, ...
@@ -684,9 +605,28 @@ Overrange_tolerance_2 = Channel_settings_2.overrange_tolerance;
 
 Times_conf = Profile.times_conf;
 
-% FIXME: update legacy code by Times_conf
-Max_time = Times_conf.max_fop*Times_conf.period;
-Time_settings = struct('max', Max_time); % FIXME
+
+
+% ----------------------------------------------------------------
+Min_FOP = Times_conf.min_fop;
+Max_FOP = Times_conf.max_fop;
+Period = Times_conf.period;
+Time_profile = Times_conf.time_profile;
+
+Max_time = Max_FOP*Period;
+Min_time = Min_FOP*Period;
+
+if Max_time < 0.25 % [s]
+    Strategy = struct('do_estimations', false, ...
+                      'do_pre_fit', false);
+elseif Max_time < 1 % [s]
+    Strategy = struct('do_estimations', true, ...
+                      'do_pre_fit', false);
+else % Max_time >= 1 [s]
+    Strategy = struct('do_estimations', true, ...
+                      'do_pre_fit', true);
+end
+
 % ----------------------------------------------------------------
 
 
@@ -738,11 +678,12 @@ while ~stop
     Periods_counter = Time_passed/Period;
     
     %--------------------------------
-    Overload_1.range = abs(V1_arr) > MAX_CH1_LIMIT*0.999; % FIXME: magic constant
+    OV_scale = 0.999; % FIXME: magic constant
+    Overload_1.range = abs(V1_arr) > MAX_CH1_LIMIT * OV_scale;
     Overload_1.count = numel(find(Overload_1.range));
     Overload_1.volume = Overload_1.count/numel(V1_arr);
     
-    Overload_2.range = abs(V2_arr) > MAX_CH2_LIMIT*0.999; % FIXME: magic constant
+    Overload_2.range = abs(V2_arr) > MAX_CH2_LIMIT * OV_scale;
     Overload_2.count = numel(find(Overload_2.range));
     Overload_2.volume = Overload_2.count/numel(V2_arr);
 
@@ -777,23 +718,27 @@ while ~stop
         break;
     end
 
-    if Time_passed > Time_settings.max
+    if Time_passed > Max_time
         Exit_flag = 30; % NOTE: EF 3: Timeout_max
         break;
     end
 
-    if Periods_counter > 1.1
-        % FIXME: ude this or Time_settings.max ?
+    if Strategy.do_estimations
+        Estimations_1 = do_estimations(Estimations_1, T_arr, V1_arr, ...
+            Freq, Periods_counter);
+
+        Estimations_2 = do_estimations(Estimations_2, T_arr, V2_arr, ...
+            Freq, Periods_counter);
     end
-
-    % FIXME: refactor this function
-    Estimations_1 = do_estimations(Estimations_1, T_arr, V1_arr, ...
-        Freq, Periods_counter, Times_conf);
-
-    Estimations_2 = do_estimations(Estimations_2, T_arr, V2_arr, ...
-        Freq, Periods_counter, Times_conf);
     %--------------------------------
 
+    if Time_passed > 0.9 * Min_time && Strategy.do_pre_fit
+        % FIXME: do full fit here and save results
+    end
+
+    if Time_passed > Min_time
+        % FIXME: do full fit here and save results
+    end
 
     if ~isempty(Fig)
         subplot(2, 1, 1)

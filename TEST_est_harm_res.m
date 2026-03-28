@@ -4,7 +4,7 @@
 clc
 
 Noise_freq_low = freq*max(Harm_num)
-Noise_rms = noise_rms_calc(Data_signal, Fs, Noise_freq_low)
+Noise_rms = fit_core.noise_rms_calc(Data_signal, Fs, Noise_freq_low)
 
 
 %%

@@ -40,4 +40,6 @@ Fern.load('Common')
 % 23) DFT vs fft problem (calculating many DFTs) (where?)
 % 24) phase around -180[deg] problem
 % 25) Remember about f = 0 on fft calc data
-% 26) 
+% 26) Add DAC propertie of having simultaneous sampling
+% 
+% 27) 

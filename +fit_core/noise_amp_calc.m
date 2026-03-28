@@ -87,7 +87,22 @@ end
 
 
 
+function [Bad_num, new_freq_list] = exclude_bad_freq(freq_list, exclude_list)
 
+Signal_f = freq_list;
+Bad_harms = exclude_list;
+
+Diff = (Signal_f - Bad_harms')./repmat(Bad_harms, numel(Signal_f), 1)';
+
+ind = find(abs(Diff) < 0.03); % FIXME: magic constant
+[~, j] = ind2sub(size(Diff), ind);
+
+Bad_num = unique(j);
+
+new_freq_list = freq_list;
+new_freq_list(Bad_num) = [];
+
+end
 
 
 
