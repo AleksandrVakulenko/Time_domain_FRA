@@ -287,7 +287,7 @@ end
 function [Result, Residuals, DEBUG] = fit_channel(T_arr, V_arr, Fs, freq, ...
     Estimations, Properties, Harm_num, Fit_settings)
 
-if ~no_estimations(Estimations)
+if ~isempty(Estimations)
 
     if ~isempty(Harm_num)
         try % FIXME: debug
@@ -380,19 +380,6 @@ function Result = do_initial_estimation(T_arr, V_arr, Period)
 end
 
 
-
-
-
-
-function status = no_estimations(Estimations)
-if class(Estimations) ~= "fit_core.Estimation"
-    error('wrong class')
-end
-status = numel(Estimations) == 0 || ...
-    (numel(Estimations) == 1 && Estimations(1).status == "empty");
-end
-
-
 function Result = DFT_estimation(Time, Signal, Period)
     Start_time = Time(1);
     End_time = Time(end);
@@ -412,7 +399,6 @@ function Result = DFT_estimation(Time, Signal, Period)
     Result.status = "ok";
     Result.source = "DFT";
 end
-
 
 
 function state = signal_per_duration(Periods_counter)
@@ -471,7 +457,7 @@ function Estimations = estimation_fix(Estimations, Estimations_low, ...
 % disp('-----------')
 % % FIXME: nyan
 % Estimations
-% no_estimations(Estimations)
+% isempty(Estimations)
 % [Estimations.legacy_status]
 % [Estimations_low.legacy_status]
 % [Estimations_extra.legacy_status]
@@ -497,11 +483,11 @@ end
 Estimations(range & ~range2) = [];
 
 % NOTE: Replce estimations (is none) by bad estimations
-if no_estimations(Estimations) && no_estimations(Estimations_low) && ...
-        ~no_estimations(Estimations_extra)
+if isempty(Estimations) && isempty(Estimations_low) && ...
+        ~isempty(Estimations_extra)
     disp([newline '! YOLO FIT ! („• ֊ •„)' newline])
     Estimations = Estimations_extra;
-elseif no_estimations(Estimations) && ~no_estimations(Estimations_low)
+elseif isempty(Estimations) && ~isempty(Estimations_low)
     disp([newline '! FIT by bad estimations ! ⸜(｡˃ ᵕ ˂ )⸝♡' newline])
     Estimations = Estimations_low;
 else
@@ -513,12 +499,18 @@ end
 
 
 function [Estimations] = do_estimations(Estimations, T_arr, V_arr, ...
-    Freq, Periods_counter)
+    Freq, Periods_counter, Times_conf)
 
-Period = 1/Freq;
+Min_FOP = Times_conf.min_fop;
+Max_FOP = Times_conf.max_fop;
+Period = Times_conf.period;
+Time_profile = Times_conf.time_profile;
+
+flag_DFT_possible = Periods_counter > 1;
+
 
 % FIXME: do we need this?
-if no_estimations(Estimations) && Periods_counter > 1.0
+if isempty(Estimations) && Periods_counter > 1.0
     Init_values = do_initial_estimation(T_arr, V_arr, Period);
     Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
         Freq, Init_values);
@@ -532,7 +524,7 @@ switch signal_per_duration(Periods_counter)
         % pause(0.05*Period)
 
     case "get_lucky" % 0.45 : 0.5
-        if no_estimations(Estimations)
+        if isempty(Estimations)
             Init_values = do_initial_estimation(T_arr, V_arr, Period);
             Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Init_values);
@@ -546,7 +538,7 @@ switch signal_per_duration(Periods_counter)
         end
 
     case "min" % 0.5 : 1.0
-        if no_estimations(Estimations)
+        if isempty(Estimations)
             Init_values = do_initial_estimation(T_arr, V_arr, Period);
             Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Init_values);
@@ -704,8 +696,8 @@ V1_arr = [];
 V2_arr = [];
 
 % FIXME: need refactor
-Estimations_1 = fit_core.Estimation;
-Estimations_2 = fit_core.Estimation;
+Estimations_1 = fit_core.Estimation.empty;
+Estimations_2 = fit_core.Estimation.empty;
 
 Underrange_1 = true;
 Underrange_2 = true;
@@ -796,10 +788,10 @@ while ~stop
 
     % FIXME: refactor this function
     Estimations_1 = do_estimations(Estimations_1, T_arr, V1_arr, ...
-        Freq, Periods_counter);
+        Freq, Periods_counter, Times_conf);
 
     Estimations_2 = do_estimations(Estimations_2, T_arr, V2_arr, ...
-        Freq, Periods_counter);
+        Freq, Periods_counter, Times_conf);
     %--------------------------------
 
 

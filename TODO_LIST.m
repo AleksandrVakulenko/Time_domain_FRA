@@ -5,34 +5,39 @@ Fern.load('aDevice')
 Fern.load('FRA_tools')
 Fern.load('Common') 
 
-
 %%
-% 
 % last date: 2026.03.27               
 % 
 % TODO:
+% 
+% 1) upgrade estimations in data gathering
+% 2) do more estimations by DFT
+% 3) use different strategy for different periods
+% 4) Add non-realtime version of fit (use non real-time estimations)
+% 5) Add non-realtime version of fit (just incoming estimations)
+% 6) Add pref for accuracy, and measure accuracy somehow
+% 7) Use pre-fit to finish earlier
+% 
+% 8) investigate "underrange" function behavior
+% 9) Aster connection error (add delay and retry)
 %
-% -) investigate "underrange" function behavior
-% -) Aster connection error (add delay and retry)
-%
-% 0) add data saver function
-% 1) use Estimations for Properties
-% 2) add input condition for harm measure or harm ignore
-% 3) do more estimations by DFT
-% 4) use incoming estimations
+% 10) use incoming estimations
+% 11) use Estimations for Properties
+% 12) add input condition for harm measure or harm ignore
+% 13) update data viewer (to both test or real data)
+% 14) add data saver function
 %  
-% 5) [sig_gen:] add underrange (span and mean) test signals
-% 6) update data viewer (to both test or real data)
-% 7) add absolute errors (hardware)
-% 8) Add non-realtime version of fit (just incoming estimations)
+% 15) add absolute errors (hardware)
+% 16) add more errors calculation (for colplex numbers)
+% 17) upgrade synth test
+% 18) [sig_gen:] add underrange (span and mean) test signals
 %  
-% 9) make Fern module
-% 10) place fft functions to its own lib
-% 11) 
-% 12) 
+% 19) do functions structure refactor
+% 20) make Fern module
+% 21) place fft functions to its own lib
+% 22) 
 %  
-% 13) DFT vs fft problem (calculating many DFTs) (where?)
-% 14) phase around -180[deg] problem
-% 15) Remember about f = 0 on fft calc data
-% 16) 
-
+% 23) DFT vs fft problem (calculating many DFTs) (where?)
+% 24) phase around -180[deg] problem
+% 25) Remember about f = 0 on fft calc data
+% 26) 
