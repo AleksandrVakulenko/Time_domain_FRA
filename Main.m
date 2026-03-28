@@ -48,11 +48,13 @@ Channel_settings_1.underrange_force = Underrange_force;
 Channel_settings_1.max_ch1_limit = MAX_CH1_LIMIT;
 Channel_settings_1.time_to_underrange = Time_to_underrange;
 Channel_settings_1.overrange_tolerance = Overrange_tolerance;
+Channel_settings_1.fs = Fs;
 
 Channel_settings_2.underrange_force = Underrange_force;
 Channel_settings_2.max_ch1_limit = MAX_CH2_LIMIT;
 Channel_settings_2.time_to_underrange = Time_to_underrange;
 Channel_settings_2.overrange_tolerance = Overrange_tolerance;
+Channel_settings_2.fs = Fs;
 
 Profile.times_conf = Times_conf;
 
@@ -133,12 +135,12 @@ end
 T_arr = Ch_data_1.time;
 V1_arr = Ch_data_1.voltage;
 Overload_1 = Ch_data_1.overload;
-Estimations_1 = Ch_data_1.estimations;
 
-% T_arr = Ch_data_2.time; % NOTE: same as in CH1
+% T_arr_2 = Ch_data_2.time; % NOTE: same as in CH1
 V2_arr = Ch_data_2.voltage;
 Overload_2 = Ch_data_2.overload;
-Estimations_2 = Ch_data_2.estimations;
+
+
 %--------------------------------%--------------------------------%
 
 if Exit_flag == 0 % FIXME: debug
@@ -150,26 +152,7 @@ else
 end
 
 
-Time_length = T_arr(end) - T_arr(1);
-Periods_counter = Time_length/Period;
 
-Estimations_1 = fit_core.finish_estimations(Estimations_1, T_arr, V1_arr, Period);
-Estimations_2 = fit_core.finish_estimations(Estimations_2, T_arr, V2_arr, Period);
-
-Estimations_1 = estimation_fix(Estimations_1, Periods_counter, freq);
-Estimations_2 = estimation_fix(Estimations_2, Periods_counter, freq);
-
-
-Harm_num_1 = Harm_num;
-Harm_num_2 = Harm_num;
-
-if Overload_1.count > 0
-    Harm_num_1 = [];
-end
-
-if Overload_2.count > 0
-    Harm_num_2 = [];
-end
 
 if Exit_flag == 0 && Overload_1.count > 0
     error('FIXME: undone function')
@@ -194,12 +177,91 @@ Properties_2.Amp_type = "const";
 Properties_2.BG_type = "poly2";
 Properties_2.Phi_type = "const";
 
+[Result_1, Residuals_1, DEBUG_1, Result_2, Residuals_2, DEBUG_2] = ...
+    fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
+    Harm_num);
+
+
+
+
+disp([newline 'Finish'])
+
+% FIXME: undone
+% if Save_data_flag
+%     Savedata = struct( ...
+%         'time', T_arr, ...
+%         'ch1', V1_arr, ...
+%         'ch2', [], ...
+%         'harm_est_1', Harm_est_1, ...
+%         'harm_est_2', [], ...
+%         'estimations', Estimations_1, ...
+%         'result', Result_1, ...
+%         'freq', Freq, ...
+%         'Synth_time', Synth_time, ... % FIXME: debug (must be replaced)
+%         'Synth_signal', Synth_signal, ... % FIXME: debug (must be replaced)
+%         'Props', Props ... % FIXME: debug (must be replaced)
+%         );
+%     
+%     Info = whos('Savedata');
+%     Size = Info.bytes/1024;
+%     if Size < 10e3
+%         disp(['File size: ' num2str(Size, '%.1f') ' kB']);
+%     else
+%         disp(['File size: ' num2str(Size/1024, '%.1f') ' MB']);
+%     end
+% end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%
+
+function [Result_1, Residuals_1, DEBUG_1, Result_2, Residuals_2, DEBUG_2] = ...
+    fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
+    Harm_num)
+
+T_arr_1 = Ch_data_1.time;
+V1_arr = Ch_data_1.voltage;
+Overload_1 = Ch_data_1.overload;
+Fs = Ch_data_1.fs;
+Period = Ch_data_1.time_conf.period;
+freq = 1/Period;
+
+T_arr_2 = Ch_data_2.time; % NOTE: same as in CH1
+V2_arr = Ch_data_2.voltage;
+Overload_2 = Ch_data_2.overload;
+
+Harm_num_1 = Harm_num;
+Harm_num_2 = Harm_num;
+
+if Overload_1.count > 0
+    Harm_num_1 = [];
+end
+
+if Overload_2.count > 0
+    Harm_num_2 = [];
+end
+
+Estimations_1 = fit_core.estimation_processing(Ch_data_1);
+Estimations_2 = fit_core.estimation_processing(Ch_data_2);
+
 Fit_settings_1.freq_dev_flag = true;
 Fit_settings_1.freq_dev_const = 0;
 
 disp('---- Channel 1: ----')
 Time_start_1_fit = tic;
-[Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr, V1_arr, Fs, freq, ...
+[Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr_1, V1_arr, Fs, freq, ...
     Estimations_1, Properties_1, Harm_num_1, Fit_settings_1);
 Time_ch1_fit = toc(Time_start_1_fit);
 disp(['--------------------' newline])
@@ -211,7 +273,7 @@ Fit_settings_2.freq_dev_const = Result_1.f_dev_ppm;
 
 disp('---- Channel 2: ----')
 Time_start_2_fit = tic;
-[Result_2, Residuals_2, DEBUG_2] = fit_channel(T_arr, V2_arr, Fs, freq, ...
+[Result_2, Residuals_2, DEBUG_2] = fit_channel(T_arr_2, V2_arr, Fs, freq, ...
     Estimations_2, Properties_2, Harm_num_2, Fit_settings_2);
 Time_ch2_fit = toc(Time_start_2_fit);
 disp('--------------------')
@@ -235,47 +297,10 @@ else
     disp('OK fit on ch2')
 end
 
-disp([newline 'Finish'])
-
-if Save_data_flag
-    Savedata = struct( ...
-        'time', T_arr, ...
-        'ch1', V1_arr, ...
-        'ch2', [], ...
-        'harm_est_1', Harm_est_1, ...
-        'harm_est_2', [], ...
-        'estimations', Estimations_1, ...
-        'result', Result_1, ...
-        'freq', Freq, ...
-        'Synth_time', Synth_time, ... % FIXME: debug (must be replaced)
-        'Synth_signal', Synth_signal, ... % FIXME: debug (must be replaced)
-        'Props', Props ... % FIXME: debug (must be replaced)
-        );
-    
-    Info = whos('Savedata');
-    Size = Info.bytes/1024;
-    if Size < 10e3
-        disp(['File size: ' num2str(Size, '%.1f') ' kB']);
-    else
-        disp(['File size: ' num2str(Size/1024, '%.1f') ' MB']);
-    end
 end
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-%%
 
 function [Result, Residuals, DEBUG] = fit_channel(T_arr, V_arr, Fs, freq, ...
     Estimations, Properties, Harm_num, Fit_settings)
@@ -356,21 +381,7 @@ end
 
 
 
-function Result = do_initial_estimation(T_arr, V_arr, Period)
-    [Mean, Span, ~, ~] = fit_core.singal_stats(V_arr);
-    
-    Start_Phi = fit_core.estimate_phi_part_sin(T_arr, V_arr, Period);
-    if isempty(Start_Phi)
-        Start_Phi = 0;
-    end
 
-    Result = fit_core.Estimation;
-    Result.amp = Span;
-    Result.phi = Start_Phi;
-    Result.bg = Mean;
-    Result.status = "ok";
-    Result.source = "initial";
-end
 
 
 
@@ -406,61 +417,7 @@ end
 
 
 
-function Estimations = estimation_fix(Estimations_all, Periods_counter, ...
-    freq)
 
-Legacy_status = [Estimations_all.legacy_status];
-
-est_range_norm = Legacy_status == "";
-est_range_low = Legacy_status == "low";
-est_range_extra = Legacy_status == "extra";
-
-Estimations = Estimations_all(est_range_norm);
-Estimations_low = Estimations_all(est_range_low);
-Estimations_extra = Estimations_all(est_range_extra);
-
-% 
-% disp('-----------')
-% % FIXME: nyan
-% Estimations
-% isempty(Estimations)
-% [Estimations.legacy_status]
-% [Estimations_low.legacy_status]
-% [Estimations_extra.legacy_status]
-% disp('-----------')
-
-Period = 1/freq;
-% NOTE: delete early estimations
-Est_time_min = [Estimations.t_max];
-Est_time_max = [Estimations.t_max];
-
-Est_status = "";
-for i = 1:numel(Estimations)
-    Est_status(i) = string(Estimations(i).status);
-end
-range2 = Est_status == "fixed";
-
-if Periods_counter > 2
-    range = Est_time_min < Period & Est_time_max < Period;
-else
-    range = Est_time_max < Period*0.5;
-end
-
-Estimations(range & ~range2) = [];
-
-% NOTE: Replce estimations (is none) by bad estimations
-if isempty(Estimations) && isempty(Estimations_low) && ...
-        ~isempty(Estimations_extra)
-    disp([newline '! YOLO FIT ! („• ֊ •„)' newline])
-    Estimations = Estimations_extra;
-elseif isempty(Estimations) && ~isempty(Estimations_low)
-    disp([newline '! FIT by bad estimations ! ⸜(｡˃ ᵕ ˂ )⸝♡' newline])
-    Estimations = Estimations_low;
-else
-    disp([newline '! OK, we have something ! (˶ᵔ ᵕ ᵔ˶) ‹𝟹' newline])
-end
-
-end
 
 
 
@@ -472,7 +429,7 @@ Period = 1/Freq;
 
 % FIXME: do we need this?
 if isempty(Estimations) && Periods_counter >= 1.0
-    Init_values = do_initial_estimation(T_arr, V_arr, Period);
+    Init_values = fit_core.do_initial_estimation(T_arr, V_arr, Period);
     Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
         Freq, Init_values);
     Estimations = Result;
@@ -488,7 +445,7 @@ switch signal_per_duration(Periods_counter)
     case "get_lucky" % 0.45 : 0.5
         disp("get_lucky") % FIXME: debug
         if isempty(Estimations)
-            Init_values = do_initial_estimation(T_arr, V_arr, Period);
+            Init_values = fit_core.do_initial_estimation(T_arr, V_arr, Period);
             Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Init_values);
             Result.legacy_status = "extra";
@@ -503,7 +460,7 @@ switch signal_per_duration(Periods_counter)
     case "min" % 0.5 : 1.0
         disp("min") % FIXME: debug
         if isempty(Estimations)
-            Init_values = do_initial_estimation(T_arr, V_arr, Period);
+            Init_values = fit_core.do_initial_estimation(T_arr, V_arr, Period);
             Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Init_values);
             Result.legacy_status = "low";
@@ -597,6 +554,7 @@ Underrange_force_1 = Channel_settings_1.underrange_force;
 MAX_CH1_LIMIT = Channel_settings_1.max_ch1_limit;
 Time_to_underrange_1 = Channel_settings_1.time_to_underrange;
 Overrange_tolerance_1 = Channel_settings_1.overrange_tolerance;
+Fs = Channel_settings_1.fs; % NOTE: ch2 fs same as ch1
 
 Underrange_force_2 = Channel_settings_2.underrange_force;
 MAX_CH2_LIMIT = Channel_settings_2.max_ch1_limit;
@@ -758,10 +716,14 @@ Ch_data_1.time = T_arr;
 Ch_data_1.voltage = V1_arr;
 Ch_data_1.overload = Overload_1;
 Ch_data_1.estimations = Estimations_1;
+Ch_data_1.time_conf = Times_conf;
+Ch_data_1.fs = Fs;
 
 Ch_data_2.time = T_arr;
 Ch_data_2.voltage = V2_arr;
 Ch_data_2.overload = Overload_2;
 Ch_data_2.estimations = Estimations_2;
+Ch_data_2.time_conf = Times_conf;
+Ch_data_2.fs = Fs;
 
 end
