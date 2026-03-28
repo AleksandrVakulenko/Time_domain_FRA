@@ -1,6 +1,6 @@
 
 Synth_flag = false;
-Show_channel = 2;
+Show_channel = 1;
 
 if Synth_flag
     Props_in_1 = Props_1;
@@ -11,11 +11,11 @@ else
 end
 
 if Show_channel == 1
-    Estimations_in = Estimations_1;
+    Estimations_in = Result_1.estimations;
     Props = Props_in_1;
 elseif Show_channel == 2
 
-    Estimations_in = Estimations_2;
+    Estimations_in = Result_2.estimations;
     Props = Props_in_2;
 else
     error('wrong channel number')

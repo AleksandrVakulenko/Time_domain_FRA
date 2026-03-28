@@ -6,18 +6,22 @@ clc
 
 Show_channel = 2;
 
-Data_time = T_arr;
+
 
 if  1 == Show_channel
-    Data_signal = V1_arr;
+    Ch_data = Ch_data_1;
     Result_in = Result_1;
 elseif Show_channel == 2
-    Data_signal = V2_arr;
+    Ch_data = Ch_data_2;
     Result_in = Result_2;
 else
     error('wrong channel number')
 end
 
+T_arr = Ch_data.time;
+Data_signal = Ch_data.voltage;
+
+Data_time = T_arr;
 
 T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
@@ -37,7 +41,7 @@ Noise_rms = fit_core.noise_rms_calc(Data_signal, Fs, Noise_freq_low);
 
 
 % Calc output values and errors ------------------------------------
-pps = [];
+pps = [0];
 Output = fit_viewer.calc_output(Result_in, pps);
 Amp_out = Output.amp;
 Phi_out = Output.phi;
@@ -92,6 +96,7 @@ title('Signal')
 subplot(2, 1, 2)
 plot(T_arr, Residuals_in, '-b')
 yline(std(Residuals_in)*2)
+yline(Noise_rms, '-r')
 title('Residuals')
 
 

@@ -5,7 +5,7 @@ clc
 
 Gen_Voltage_level = 1; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 0.5; % [Hz]
+Gen_freq = 2.5; % [Hz]
 
 Save_data_flag = false;
 
@@ -70,10 +70,12 @@ Gen.set_amp(Gen_Voltage_level, "amp");
 Gen.set_freq(Gen_freq);
 Gen.set_offset(Gen_Offset_level);
 Gen.initiate();
+
 Aster = Aster_dev(3);
 Aster.set_connection_mode("I2V");
 Aster.initiate();
 [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, 1);
+
 
 ERR = [];
 try
@@ -93,6 +95,7 @@ try
         
         disp(['Exit flag: ' num2str(Exit_flag)])
     
+        % FIXME: use all possible exit codes
         if Exit_flag == 0
             stop = true;
         elseif Exit_flag == 102
@@ -128,20 +131,7 @@ if isempty(ERR)
     disp('OK finish')
 end
 
-%
-% FIT PART
 
-%--------------------------------%--------------------------------%
-T_arr = Ch_data_1.time;
-V1_arr = Ch_data_1.voltage;
-Overload_1 = Ch_data_1.overload;
-
-% T_arr_2 = Ch_data_2.time; % NOTE: same as in CH1
-V2_arr = Ch_data_2.voltage;
-Overload_2 = Ch_data_2.overload;
-
-
-%--------------------------------%--------------------------------%
 
 if Exit_flag == 0 % FIXME: debug
     disp(['Exit_flag: ' num2str(Exit_flag)]);
@@ -152,23 +142,20 @@ else
 end
 
 
-
-
-if Exit_flag == 0 && Overload_1.count > 0
-    error('FIXME: undone function')
-%     T_arr = T_arr(~Overload_1.range);
-%     V1_arr = V1_arr(~Overload_1.range);
-end
-
-
 %
 % Fitting part
-% clc
 
-disp(['Start final fit:' newline])
 
 % FIXME undone section
 % "const" "linear" "poly2"
+% Properties_1.Amp_type = "const";
+% Properties_1.BG_type = "const";
+% Properties_1.Phi_type = "const";
+% 
+% Properties_2.Amp_type = "const";
+% Properties_2.BG_type = "const";
+% Properties_2.Phi_type = "const";
+
 Properties_1.Amp_type = "linear";
 Properties_1.BG_type = "poly2";
 Properties_1.Phi_type = "const";
@@ -181,10 +168,15 @@ Properties_2.Phi_type = "const";
     fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
     Harm_num);
 
+% FIXME: use acuracy profile
+Target.amp_err_prc = 1.0; % [%]
+Target.phi_err_deg = 0.5; % [deg]
 
+[Score1, Score2, Best_flag, Max_score] = ...
+    fit_viewer.score_calc(Result_1, Result_2, Target);
 
-
-disp([newline 'Finish'])
+disp([newline 'Scores:' newline 'Ch1: ' num2str(Score1) newline ...
+    'Ch2: ' num2str(Score2)])
 
 % FIXME: undone
 % if Save_data_flag
@@ -259,6 +251,8 @@ Estimations_2 = fit_core.estimation_processing(Ch_data_2);
 Fit_settings_1.freq_dev_flag = true;
 Fit_settings_1.freq_dev_const = 0;
 
+disp(['Start final fit:' newline])
+
 disp('---- Channel 1: ----')
 Time_start_1_fit = tic;
 [Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr_1, V1_arr, Fs, freq, ...
@@ -279,11 +273,13 @@ Time_ch2_fit = toc(Time_start_2_fit);
 disp('--------------------')
 
 
-disp(' ')
+disp([newline 'Finish' newline])
 disp(['Time to fit 1: ' num2str(Time_ch1_fit, '%0.2f') ' s'])
 disp(['Time to fit 2: ' num2str(Time_ch2_fit, '%0.2f') ' s'])
 disp(['Time full: ' num2str(Time_ch1_fit + Time_ch2_fit, '%0.2f') ' s' newline])
 
+Result_1.estimations = Estimations_1;
+Result_2.estimations = Estimations_2;
 
 if isempty(Result_1)
     disp('No result on ch 1')

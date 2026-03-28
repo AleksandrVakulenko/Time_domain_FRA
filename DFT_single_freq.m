@@ -11,9 +11,7 @@ function [Amp, Phi, Mean] = DFT_single_freq(T_arr, V_arr, Freq)
     
     Periods_counter = Length/Period;
     if Periods_counter < 0.98 % FIXME: magic constant
-        Amp = NaN;
-        Phi = NaN;
-        Mean = NaN;
+        error('DFT ERROR') % FIXME
         flag = 2;
     elseif Periods_counter < 1
         flag = 1;

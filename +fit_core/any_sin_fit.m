@@ -188,10 +188,9 @@ end
 
 ft = fittype(Eq, 'independent', 'x', 'dependent', 'y');
 opts = fitoptions('Method', 'NonlinearLeastSquares');
-opts.Display = 'Off';
 opts.TolX = 1e-12; % FIXME: default
 opts.TolFun = 1e-12; % default
-opts.Display = 'Off';
+opts.Display = 'off';
 
 % FIXME: debug, comment or delete 3 lines
 % disp(Eq)

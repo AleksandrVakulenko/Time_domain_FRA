@@ -3,6 +3,8 @@ function Harm_est = estimate_harms_from_res(T_arr, Residuals, freq, ...
 
 Sense_level_dB = +2; % [dB] FIXME: magic constant
 
+Harm_num(Harm_num == 1) = [];
+
 Harm_amp_arr = zeros(size(Harm_num));
 Harm_amp_arr_dB = zeros(size(Harm_num));
 Harm_phi_arr = zeros(size(Harm_num));
