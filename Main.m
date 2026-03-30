@@ -5,13 +5,16 @@ clc
 
 Gen_Voltage_level = 1; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 2.5; % [Hz]
+Gen_freq = 1; % [Hz]
 
 Save_data_flag = false;
 
 Fs = 10e3; % FIXME: get from device!
 
 %% Main part (Data gathering)
+
+% !!!
+% FIXME (nyan): why last fit is longe then try to fit inside gathering?
 
 %--------------------------------
 freq = Gen_freq;
@@ -20,12 +23,15 @@ Period = 1/freq;
 Underrange_force = false;
 Fig = figure('position', [471 217 690 691]);
 Harm_num = [1 2 3];
-MAX_CH1_LIMIT = 5;
+MAX_CH1_LIMIT = 10;
 MAX_CH2_LIMIT = 5;
 Time_to_underrange = 0.1*Period; % [s]
 Overrange_tolerance = 0; % [%]
-Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 Harm_profile = "common"; % "common", "most_accurate"
+% FIXME: set by Time_profile or something else like it
+Amp_err_prc = 0.05; % [%]
+Phi_err_deg = 0.01; % [deg]
 %--------------------------------
 
 [Times_conf, Time_printer] = get_time_config_Aster(Period, Harm_num, ...
@@ -33,8 +39,8 @@ Harm_profile = "common"; % "common", "most_accurate"
 Time_printer(); % FIXME: debug
 
 %--------------------------------
-% FIXME: undone legacy code; update by Time_profile
-Accuracy_settings = struct();
+Accuracy_conf = struct('amp_err_prc', Amp_err_prc, ...
+                       'phi_err_deg', Phi_err_deg);
 
 % FIXME: debug
 if Time_to_underrange < 0.3
@@ -57,6 +63,7 @@ Channel_settings_2.overrange_tolerance = Overrange_tolerance;
 Channel_settings_2.fs = Fs;
 
 Profile.times_conf = Times_conf;
+Profile.accuracy_conf = Accuracy_conf;
 
 % ----------------------------------------------------------------
 
@@ -144,6 +151,9 @@ end
 
 %
 % Fitting part
+
+
+Period_counter = Ch_data_1.period_counter;
 
 
 % FIXME undone section
@@ -317,7 +327,7 @@ if ~isempty(Estimations)
     Noise_freq_low = freq*max(Harm_num);
     Noise_rms = fit_core.noise_rms_calc(V_arr, Fs, Noise_freq_low);
 
-    Max_points = 1000e3; % FIXME: magic constant
+    Max_points = 100e3; % FIXME: magic constant nyan
     % FIXME: upgrade function make_fs_lower
     % FIXME: make it single channel
     [T_arr, V_arr, ~, Fs2] = fit_core.make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
@@ -505,7 +515,7 @@ if Underrange
     if Underrange_force
         Underrange_level = 0.0001*5; % FIXME: magic constant
     else
-        Underrange_level = 0.002*5; % FIXME: magic constant
+        Underrange_level = 0.04; % FIXME: magic constant
     end
     % FIXME: bad (maybe) condition
     Cond1 = abs(Mean) < Underrange_level;
@@ -558,8 +568,7 @@ Time_to_underrange_2 = Channel_settings_2.time_to_underrange;
 Overrange_tolerance_2 = Channel_settings_2.overrange_tolerance;
 
 Times_conf = Profile.times_conf;
-
-
+Accuracy_conf = Profile.accuracy_conf;
 
 % ----------------------------------------------------------------
 Min_FOP = Times_conf.min_fop;
@@ -605,6 +614,7 @@ Overload_2 = struct('range', [], 'count', 0, 'volume', 0);
 stop = false;
 Exit_flag = 0;
 First_time = true;
+Fit_local_timer = [];
 % -------------------------------------
 while ~stop
     %FIXME: debug for fast signal
@@ -690,8 +700,69 @@ while ~stop
         % FIXME: do full fit here and save results
     end
 
-    if Time_passed > Min_time
+    Fit_time_step = 0.1*Period;
+    if Fit_time_step > 10
+        Fit_time_step = 10;
+    end
+    if Fit_time_step < 1
+        Fit_time_step = 1;
+    end
+    if Time_passed > Min_time && ...
+            ( isempty(Fit_local_timer) || (~isempty(Fit_local_timer) && ...
+            toc(Fit_local_timer) > Fit_time_step) )
         % FIXME: do full fit here and save results
+        
+        Fit_local_timer = tic;
+        
+        % FIXME: nyan
+        % Error in Main>data_gathering_loop (line 741)
+        %    fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2,
+        %    ...
+        % Insufficient data.
+        % You need at least 3 data points to fit this model.
+
+        Ch_data_1.time = T_arr;
+        Ch_data_1.voltage = V1_arr;
+        Ch_data_1.overload = Overload_1;
+        Ch_data_1.estimations = Estimations_1;
+        Ch_data_1.time_conf = Times_conf;
+        Ch_data_1.accuracy_conf = Accuracy_conf;
+        Ch_data_1.fs = Fs;
+        Ch_data_1.period_counter = Periods_counter;
+
+        Ch_data_2.time = T_arr;
+        Ch_data_2.voltage = V2_arr;
+        Ch_data_2.overload = Overload_2;
+        Ch_data_2.estimations = Estimations_2;
+        Ch_data_2.time_conf = Times_conf;
+        Ch_data_2.accuracy_conf = Accuracy_conf;
+        Ch_data_2.fs = Fs;
+        Ch_data_2.period_counter = Periods_counter;
+        % nyan
+        Properties_1.Amp_type = "linear";
+        Properties_1.BG_type = "poly2";
+        Properties_1.Phi_type = "const";
+
+        Properties_2.Amp_type = "const";
+        Properties_2.BG_type = "poly2";
+        Properties_2.Phi_type = "const";
+
+        try % nyan
+            [Result_1, ~, ~, Result_2, ~, ~] = ...
+                fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
+                Harm_num);
+
+            [Score1, Score2, ~, ~] = ...
+                fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
+
+            disp([newline 'Scores:' newline 'Ch1: ' num2str(Score1) newline ...
+                'Ch2: ' num2str(Score2)])
+            if Score1 > 0 && Score2 > 0
+                stop = true;
+            end
+        catch
+            warning('fit error')
+        end
     end
 
     if ~isempty(Fig)
@@ -713,13 +784,17 @@ Ch_data_1.voltage = V1_arr;
 Ch_data_1.overload = Overload_1;
 Ch_data_1.estimations = Estimations_1;
 Ch_data_1.time_conf = Times_conf;
+Ch_data_1.accuracy_conf = Accuracy_conf;
 Ch_data_1.fs = Fs;
+Ch_data_1.period_counter = Periods_counter;
 
 Ch_data_2.time = T_arr;
 Ch_data_2.voltage = V2_arr;
 Ch_data_2.overload = Overload_2;
 Ch_data_2.estimations = Estimations_2;
 Ch_data_2.time_conf = Times_conf;
+Ch_data_2.accuracy_conf = Accuracy_conf;
 Ch_data_2.fs = Fs;
+Ch_data_2.period_counter = Periods_counter;
 
 end
