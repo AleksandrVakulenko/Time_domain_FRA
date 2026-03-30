@@ -13,8 +13,15 @@ freq = 1/Period;
 Time_length_1 = T_arr_1(end) - T_arr_1(1);
 Periods_counter_1 = Time_length_1/Period;
 
-Estimations_1 = finish_estimations(Estimations_1, T_arr_1, V1_arr, Period);
-Estimations_1 = estimation_fix(Estimations_1, Periods_counter_1, freq);
+range = [Estimations_1.source] == "fit_res";
+if any(range)
+    Estimations_1 = Estimations_1(range);
+    disp(['use new type of estimation processing with: ' ...
+        num2str(numel(find(range))) ' fit estimations'])
+else
+    Estimations_1 = finish_estimations(Estimations_1, T_arr_1, V1_arr, Period);
+    Estimations_1 = estimation_fix(Estimations_1, Periods_counter_1, freq);
+end
 
 end
 

@@ -5,7 +5,7 @@ clc
 
 Gen_Voltage_level = 1; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 2; % [Hz]
+Gen_freq = 0.5; % [Hz]
 
 Save_data_flag = false;
 
@@ -28,12 +28,12 @@ Harm_num = [1 2 3];
 MAX_CH1_LIMIT = 10;
 MAX_CH2_LIMIT = 5;
 Time_to_underrange = 0.1*Period; % [s]
-Overrange_tolerance = 0; % [%]
-Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
+Overrange_tolerance = 0.2; % [%]
+Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
 Harm_profile = "common"; % "common", "most_accurate"
 % FIXME: set by Time_profile or something else like it
-Amp_err_prc = 0.05; % [%]
-Phi_err_deg = 0.01; % [deg]
+Amp_err_prc = 0.10; % [%]
+Phi_err_deg = 0.1; % [deg]
 %--------------------------------
 
 [Times_conf, Time_printer] = get_time_config_Aster(Period, Harm_num, ...
@@ -111,7 +111,7 @@ try
         Aster.CMD_data_stream(0);
         
         disp(['Exit flag: ' num2str(Exit_flag)])
-    
+        
         % FIXME: use all possible exit codes
         if Exit_flag == 0
             stop = true;
@@ -184,9 +184,11 @@ Properties_2.Amp_type = "const";
 Properties_2.BG_type = "poly2";
 Properties_2.Phi_type = "const";
 
+Max_points = 10e3;
+
 [Result_1, Residuals_1, DEBUG_1, Result_2, Residuals_2, DEBUG_2] = ...
     fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
-    Harm_num);
+    Harm_num, Max_points);
 
 % FIXME: use acuracy profile
 Target.amp_err_prc = 1.0; % [%]
@@ -241,7 +243,7 @@ disp([newline 'Scores:' newline 'Ch1: ' num2str(Score1) newline ...
 
 function [Result_1, Residuals_1, DEBUG_1, Result_2, Residuals_2, DEBUG_2] = ...
     fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
-    Harm_num)
+    Harm_num, Max_points)
 
 T_arr_1 = Ch_data_1.time;
 V1_arr = Ch_data_1.voltage;
@@ -270,6 +272,7 @@ Estimations_2 = fit_core.estimation_processing(Ch_data_2);
 
 Fit_settings_1.freq_dev_flag = true;
 Fit_settings_1.freq_dev_const = 0;
+Fit_settings_1.max_points = Max_points;
 
 disp(['Start final fit:' newline])
 
@@ -280,10 +283,9 @@ Time_start_1_fit = tic;
 Time_ch1_fit = toc(Time_start_1_fit);
 disp(['--------------------' newline])
 
-
 Fit_settings_2.freq_dev_flag = false;
 Fit_settings_2.freq_dev_const = Result_1.f_dev_ppm;
-
+Fit_settings_2.max_points = Max_points;
 
 disp('---- Channel 2: ----')
 Time_start_2_fit = tic;
@@ -337,7 +339,7 @@ if ~isempty(Estimations)
     Noise_freq_low = freq*max(Harm_num);
     Noise_rms = fit_core.noise_rms_calc(V_arr, Fs, Noise_freq_low);
 
-    Max_points = 100e3; % FIXME: magic constant nyan
+    Max_points = Fit_settings.max_points; % FIXME: magic constant nyan
     % FIXME: upgrade function make_fs_lower
     % FIXME: make it single channel
     [T_arr, V_arr, ~, Fs2] = fit_core.make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
@@ -712,7 +714,7 @@ while ~stop
     if Fit_time_step < 1
         Fit_time_step = 1;
     end
-    if Time_passed > Min_time && ...
+    if true && Time_passed > Min_time && ...
             ( isempty(Fit_local_timer) || (~isempty(Fit_local_timer) && ...
             toc(Fit_local_timer) > Fit_time_step) )
         % FIXME: do full fit here and save results
@@ -755,18 +757,23 @@ while ~stop
         try % nyan
             [Result_1, ~, ~, Result_2, ~, ~] = ...
                 fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
-                Harm_num);
+                Harm_num, 10e3);
 
             [Score1, Score2, ~, ~] = ...
                 fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
 
             disp([newline 'Scores:' newline 'Ch1: ' num2str(Score1) newline ...
                 'Ch2: ' num2str(Score2)])
+
+            Estimations_1 = fit_core.result2estimation(Result_1);
+            Estimations_2 = fit_core.result2estimation(Result_2);
+
             if Score1 > 0 && Score2 > 0
                 stop = true;
             end
-        catch
+        catch err
             warning('fit error')
+            rethrow(err);
         end
     end
 

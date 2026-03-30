@@ -6,7 +6,26 @@
 classdef Result_type
 
 properties (Access = public)
-    
+    amp_poly
+    phi_poly
+    bg_poly
+
+    amp_poly_err
+    phi_poly_err
+    bg_poly_err
+
+    f_dev_flag logical
+    f_dev_ppm double
+    f_dev_ppm_err double
+
+    fit_function string
+    freq double
+
+    harm
+    harm_err
+
+    estimations fit_core.Estimation
+
 end
 
 end

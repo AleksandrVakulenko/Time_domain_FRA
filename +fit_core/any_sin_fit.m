@@ -22,6 +22,7 @@ else
     BG_type = "const";
 end
 
+% FIXME: sometimes we need 3 point !
 if numel(Estimations) > 1
     Est_time = ([Estimations.t_max] + [Estimations.t_min])/2;
     Est_amp = [Estimations.amp];
@@ -207,7 +208,9 @@ DEBUG.StartPoint = StartPoint;
 DEBUG.coeffnames = coeffnames(ft);
 DEBUG.X_arr = X_arr;
 
+disp('--- Main fit call ---') % FIXME: debug
 [fitresult, gof, output] = fit(Time', Signal', ft, opts);
+disp('--- Main fit call end ---') % FIXME: debug
 
 Residuals = output.residuals';
 
@@ -270,20 +273,22 @@ else
     harm_err = [];
 end
 
-Result = struct(...
-    'amp_poly', amp_poly_out, ...
-    'phi_poly', phi_poly_out, ...
-    'bg_poly', bg_poly_out, ...
-    'amp_poly_err', amp_poly_err, ...
-    'phi_poly_err', phi_poly_err, ...
-    'bg_poly_err', bg_poly_err, ...
-    'f_dev_flag', Freq_dev_flag, ...
-    'f_dev_ppm', D, ...
-    'f_dev_ppm_err', D_err, ...
-    'fit_function', 'any_sin_fit', ...
-    'freq', Freq, ...
-    'harm', harm_out, ...
-    'harm_err', harm_err);
+Result = fit_core.Result_type;
+Result.amp_poly = amp_poly_out;
+Result.phi_poly = phi_poly_out;
+Result.bg_poly = bg_poly_out;
+Result.amp_poly_err = amp_poly_err;
+Result.phi_poly_err = phi_poly_err;
+Result.bg_poly_err = bg_poly_err;
+Result.f_dev_flag = Freq_dev_flag;
+Result.f_dev_ppm = D;
+Result.f_dev_ppm_err = D_err;
+Result.fit_function = "any_sin_fit";
+Result.freq = Freq;
+Result.harm = harm_out;
+Result.harm_err = harm_err;
+Result.estimations = fit_core.Estimation.empty();
+
 
 % FIXME: debug
 % figure

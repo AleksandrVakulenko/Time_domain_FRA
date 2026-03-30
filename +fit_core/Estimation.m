@@ -28,8 +28,8 @@ properties (Access = public)
         = "empty"
     legacy_status string {mustBeMember(legacy_status, ["", "low", "extra"])} ...
         = ""
-    source string {mustBeMember(source, ["", "initial", "DFT", "simplefit"])} ...
-        = ""
+    source string {mustBeMember(source, ["", "initial", "DFT", "simplefit", ...
+        "fit_res"])} = ""
 
     fitres cfit = cfit
 end

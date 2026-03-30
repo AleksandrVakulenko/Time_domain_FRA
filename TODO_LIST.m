@@ -10,24 +10,24 @@ Fern.load('Common')
 % 
 % TODO:
 % 
-% 1) Add data type for fit result
-% 2) Convert fit result to estimation
-% 3) Add Fs lowering setting to fit function
-% 4) Add accuracy setting to fit function
-% 5) Use prefit result as estimations
-% 6) refactor estimations fix
-% 7) add options to dont use prefit
+% 1) Add accuracy setting to fit function
+% 2) refactor estimations fix
+% 3) add options to dont use prefit
+% 4) use different strategy for different periods
+% 5) Add non-realtime version of fit (use non real-time estimations)
+% 6) use incoming estimations
+% 7) 
 % 
 % 
-% 8) use different strategy for different periods
-% 9) Add non-realtime version of fit (use non real-time estimations)
-% 10) Add non-realtime version of fit (just incoming estimations)
-% 11) use Estimations for Properties
+% 8) Add non-realtime version of fit (just incoming estimations)
+% 9) use Estimations for Properties
+% 10) 
+% 11) 
 %
-% 12) use incoming estimations
-% 13) add input condition for harm measure or harm ignore
-% 14) investigate "underrange" function behavior
-% 15) update data viewer (to both test or real data)
+% 12) add input condition for harm measure or harm ignore
+% 13) investigate "underrange" function behavior
+% 14) update data viewer (to both test or real data)
+% 15) 
 %
 % 16) add data saver function
 % 17) add absolute errors (hardware)

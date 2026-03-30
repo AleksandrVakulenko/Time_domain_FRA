@@ -1,6 +1,6 @@
 
 Synth_flag = false;
-Show_channel = 1;
+Show_channel = 2;
 
 if Synth_flag
     Props_in_1 = Props_1;
