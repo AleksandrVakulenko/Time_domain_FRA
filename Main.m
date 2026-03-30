@@ -5,11 +5,13 @@ clc
 
 Gen_Voltage_level = 1; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 1; % [Hz]
+Gen_freq = 2; % [Hz]
 
 Save_data_flag = false;
 
 Fs = 10e3; % FIXME: get from device!
+
+Aster_addr = 3;
 
 %% Main part (Data gathering)
 
@@ -71,14 +73,22 @@ Profile.accuracy_conf = Accuracy_conf;
 %--------------------------------%--------------------------------%
 clc
 
+% Gen = SR860_dev(5);
 Gen = AFG1022_dev();
-Gen.set_func("sin");
-Gen.set_amp(Gen_Voltage_level, "amp");
-Gen.set_freq(Gen_freq);
-Gen.set_offset(Gen_Offset_level);
+
+if class(Gen) == "SR860_dev"
+    Gen.set_gen_config(Gen_Voltage_level, Gen_freq, Gen_Offset_level);
+elseif class(Gen) == "AFG1022_dev"
+    Gen.set_func("sin");
+    Gen.set_amp(Gen_Voltage_level, "amp");
+    Gen.set_freq(Gen_freq);
+    Gen.set_offset(Gen_Offset_level);
+else
+    error('Wong gen class')
+end
 Gen.initiate();
 
-Aster = Aster_dev(3);
+Aster = Aster_dev(Aster_addr);
 Aster.set_connection_mode("I2V");
 Aster.initiate();
 [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, 1);
@@ -443,13 +453,11 @@ end
 
 switch signal_per_duration(Periods_counter)
     case "invalid" % 0 : 0.45
-        disp("invalid") % FIXME: debug
         % DO SOMETHING:
         % - noise analysis
         % pause(0.05*Period)
 
     case "get_lucky" % 0.45 : 0.5
-        disp("get_lucky") % FIXME: debug
         if isempty(Estimations)
             Init_values = fit_core.do_initial_estimation(T_arr, V_arr, Period);
             Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
@@ -464,7 +472,6 @@ switch signal_per_duration(Periods_counter)
         end
 
     case "min" % 0.5 : 1.0
-        disp("min") % FIXME: debug
         if isempty(Estimations)
             Init_values = fit_core.do_initial_estimation(T_arr, V_arr, Period);
             Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
@@ -479,7 +486,6 @@ switch signal_per_duration(Periods_counter)
         end
 
     case "single" % 1.0 : 2
-        disp("single") % FIXME: debug
         Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
             Freq, Estimations);
         [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
@@ -489,7 +495,6 @@ switch signal_per_duration(Periods_counter)
 
 
     case "long" % 2 : 10
-        disp("long") % FIXME: debug
         [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
             "last", 1.05);
         Result1 = fit_core.simple_sin_fit_f(out_time, out_sig, ...
