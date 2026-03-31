@@ -3,9 +3,9 @@
 %% ------------------------------
 clc
 
-Gen_Voltage_level = 1; % [V]
+Gen_Voltage_level = 0.5; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 10; % [Hz]
+Gen_freq = 1; % [Hz]
 
 Save_data_flag = false;
 
@@ -24,12 +24,12 @@ Freq = freq;
 Period = 1/freq;
 Underrange_force = false;
 Fig = figure('position', [471 217 690 691]);
-Harm_num = [1 2 3];
+Harm_num = [1 2 3 4 5 6 7];
 MAX_CH1_LIMIT = 10;
 MAX_CH2_LIMIT = 5;
 Time_to_underrange = 0.1*Period; % [s]
 Overrange_tolerance = 0.2; % [%]
-Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 Harm_profile = "common"; % "common", "most_accurate"
 %--------------------------------
 
@@ -637,6 +637,7 @@ else % Max_time >= 1 [s]
                       'do_pre_fit', true);
 end
 
+Prefit_max_points = 10e3; % FIXME: magic constant
 % ----------------------------------------------------------------
 
 
@@ -654,6 +655,11 @@ Underrange_2 = true;
 
 Overload_1 = struct('range', [], 'count', 0, 'volume', 0);
 Overload_2 = struct('range', [], 'count', 0, 'volume', 0);
+
+Prefit_need_1 = true;
+Prefit_need_2 = true;
+Prefit_ready_1 = false;
+Prefit_ready_2 = false;
 % -------------------------------------
 
 
@@ -774,23 +780,51 @@ while ~stop
         Properties_2.Phi_type = "const";
 
         try % nyan
-            Max_points = 10e3; % FIXME: magic constant
-            [Result_1, ~, ~, Result_2, ~, ~] = ...
-                fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
-                Harm_num, Max_points);
-
-            [Score1, Score2, ~, ~] = ...
-                fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
-
-            disp(['--- Scores: ---' newline 'Ch1: ' num2str(Score1) newline ...
-                'Ch2: ' num2str(Score2) newline '---------------'])
-
-            Estimations_1 = fit_core.result2estimation(Result_1);
-            Estimations_2 = fit_core.result2estimation(Result_2);
-
-            if Score1 > 0 && Score2 > 0
-                stop = true;
+            
+            if Prefit_need_1 && ~Prefit_ready_1
+                disp('PREFIT CHANNEL 1') % FIXME: debug
+                [Result_1] = fit_one_channels(Ch_data_1, Properties_1, ...
+                    Harm_num, Prefit_max_points);
+                [Score_1, ~] = fit_viewer.score_calc_ch(Result_1, Accuracy_conf);
+                Estimations_1 = fit_core.result2estimation(Result_1);
+                if Score_1 > 0
+                    Prefit_ready_1 = true;
+                end
+                disp(['Score: ' num2str(Score_1)]); % FIXME: debug
             end
+
+            if Prefit_need_2 && ~Prefit_ready_2
+                disp('PREFIT CHANNEL 2') % FIXME: debug
+                [Result_2] = fit_one_channels(Ch_data_2, Properties_2, ...
+                    Harm_num, Prefit_max_points);
+                [Score_2, ~] = fit_viewer.score_calc_ch(Result_2, Accuracy_conf);
+                Estimations_2 = fit_core.result2estimation(Result_2);
+                if Score_2 > 0
+                    Prefit_ready_2 = true;
+                end
+                disp(['Score: ' num2str(Score_2)]); % FIXME: debug
+            end
+
+            if Prefit_need_1 && Prefit_need_2 && Prefit_ready_1 && Prefit_ready_2
+                disp('PREFIT CHANNEL 1 AND 2') % FIXME: debug
+                [Result_1, ~, ~, Result_2, ~, ~] = ...
+                    fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
+                    Harm_num, Prefit_max_points);
+
+                [Score_1, Score2, ~, ~] = ...
+                    fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
+
+                disp(['--- Scores: ---' newline 'Ch1: ' num2str(Score_1) newline ...
+                    'Ch2: ' num2str(Score2) newline '---------------'])
+
+                Estimations_1 = fit_core.result2estimation(Result_1);
+                Estimations_2 = fit_core.result2estimation(Result_2);
+
+                if Score_1 > 0 && Score2 > 0
+                    stop = true;
+                end
+            end
+
         catch err
             warning('fit error')
             rethrow(err);

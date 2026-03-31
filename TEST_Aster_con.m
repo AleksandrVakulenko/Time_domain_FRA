@@ -21,17 +21,17 @@ end
 %% Get data from Aster
 % FIXME: [in Aster_dev:] read_data forces dev to measure single point
 
-Voltage_level = 2; % [V]
+Voltage_level = 0.5; % [V]
 Offset_level = 0; % [V]
-freq = 200; % [Hz]
-Meas_duration = 0.34; % [s]
+freq = 4; % [Hz]
+Meas_duration = 12; % [s]
 Cap_pred = 100e-9; % [F]
 
 
 Res_pred = 1/(2*pi*freq*Cap_pred); % [Ohm]
 Current_pred = Voltage_level/Res_pred; % [A]
 
-Current_pred = 2/2e3;
+Current_pred = Voltage_level/1.25e3;
 
 clc
 Gen = AFG1022_dev();
