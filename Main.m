@@ -5,7 +5,7 @@ clc
 
 Gen_Voltage_level = 0.5; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 1; % [Hz]
+Gen_freq = 0.1; % [Hz]
 
 Save_data_flag = false;
 
@@ -24,12 +24,12 @@ Freq = freq;
 Period = 1/freq;
 Underrange_force = false;
 Fig = figure('position', [471 217 690 691]);
-Harm_num = [1 2 3 4 5 6 7];
+Harm_num = [1];
 MAX_CH1_LIMIT = 10;
 MAX_CH2_LIMIT = 5;
 Time_to_underrange = 0.1*Period; % [s]
 Overrange_tolerance = 0.2; % [%]
-Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
 Harm_profile = "common"; % "common", "most_accurate"
 %--------------------------------
 
@@ -87,7 +87,7 @@ Gen.initiate();
 Aster = Aster_dev(Aster_addr);
 Aster.set_connection_mode("I2V");
 Aster.initiate();
-[flag, R_Scale, Aster_Range] = Aster_set_range(Aster, 1);
+[flag, R_Scale, Aster_Range] = Aster_set_range(Aster, 5);
 
 
 ERR = [];
@@ -366,9 +366,7 @@ if ~isempty(Estimations)
         Harm_est = [];
     end
 
-    % FIXME: check Harm_num here?
-    Noise_freq_low = freq*max(Harm_num);
-    Noise_rms = fit_core.noise_rms_calc(V_arr, Fs, Noise_freq_low);
+    Noise_rms = fit_core.noise_rms_calc(V_arr, Fs, freq, Harm_num);
 
     Max_points = Fit_settings.max_points;
     % FIXME: upgrade function make_fs_lower

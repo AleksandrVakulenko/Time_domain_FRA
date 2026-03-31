@@ -10,6 +10,8 @@ Fern.load('Common')
 % 
 % TODO:
 % 
+% 0) Use residuals to estimate max possible quality
+% 
 % 1) Add accuracy setting to fit function
 % 2) refactor estimations fix
 % 3) add options to dont use prefit

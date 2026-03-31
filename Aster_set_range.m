@@ -21,12 +21,12 @@ else
     disp([newline 'Aster range switched to: ' num2str(Range) newline])
 
     if Range == 5
-        disp('Wait 5 sec ...')
-        pause(5)
+        disp('Wait 1 sec ...')
+        pause(1)
         disp('Ready')
     elseif Range == 6
-        disp('Wait 10 sec ...')
-        pause(10)
+        disp('Wait 5 sec ...')
+        pause(5)
         disp('Ready')
     else
         pause(0.2);
