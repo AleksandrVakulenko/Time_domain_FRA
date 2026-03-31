@@ -1,6 +1,6 @@
 
 
-function [Times_conf, printer] = get_time_config_Aster(Period, Harm_num, ...
+function [Times_conf, printer, Accuracy_conf] = get_time_config_Aster(Period, Harm_num, ...
     Time_profile, Harm_profile)
 arguments
     Period double
@@ -18,15 +18,28 @@ end
 switch Time_profile
     case "ultra_fast"
         Times_conf_basic = get_time_conf_ultra_fast(Period, Harm_num);
+        Amp_err_prc = 1; % [%]
+        Phi_err_deg = 0.5; % [deg]
     case "common"
         Times_conf_basic = get_time_conf_common(Period, Harm_num);
+        Amp_err_prc = 0.5; % [%]
+        Phi_err_deg = 0.2; % [deg]
     case "fine"
         Times_conf_basic = get_time_conf_fine(Period, Harm_num);
+        Amp_err_prc = 0.10; % [%]
+        Phi_err_deg = 0.1; % [deg]
     case "most_accurate"
         Times_conf_basic = get_time_conf_most_accurate(Period, Harm_num);
+        Amp_err_prc = 0.05; % [%]
+        Phi_err_deg = 0.05; % [deg]
     otherwise
         error("impossible code execution")
 end
+
+
+Accuracy_conf = struct('amp_err_prc', Amp_err_prc, ...
+                       'phi_err_deg', Phi_err_deg);
+
 
 Min_meas_time = Times_conf_basic.min_meas_time;
 Min_fop = Times_conf_basic.min_fop;

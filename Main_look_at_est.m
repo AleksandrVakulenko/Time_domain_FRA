@@ -66,7 +66,7 @@ hold on
 if Synth_flag
     plot(Est_time, Props_amp, '.b')
 end
-plot(Est_time, Est_amp, '.r')
+plot(Est_time, Est_amp, '.r', 'MarkerSize', 15)
 plot(Est_full_time, Amp_fit, '.-k')
 % errorbar(Est_time, Est_amp, Est_amperr, '.')
 ylabel('Amp')
@@ -77,7 +77,7 @@ hold on
 if Synth_flag
     plot(Est_time, Props_phi, '.b')
 end
-plot(Est_time, Est_phi, '.r')
+plot(Est_time, Est_phi, '.r', 'MarkerSize', 15)
 plot(Est_full_time, Phi_fit, '.-k')
 % errorbar(Est_time, Est_phi, Est_phierr, '.')
 ylabel('Phi, [deg]')
@@ -87,7 +87,7 @@ hold on
 if Synth_flag
     plot(Est_time, Props_bg, '.b')
 end
-plot(Est_time, Est_bg, '.r')
+plot(Est_time, Est_bg, '.r', 'MarkerSize', 15)
 plot(Est_full_time, BG_fit, '.-k')
 % errorbar(Est_time, Est_bg, Est_bgerr, '.')
 ylabel('bg')

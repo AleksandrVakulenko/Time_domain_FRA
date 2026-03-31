@@ -22,28 +22,42 @@ else
     BG_type = "const";
 end
 
-% FIXME: sometimes we need 3 point !
-if numel(Estimations) > 1
+
+Amp = [Estimations.amp];
+Phi = [Estimations.phi];
+BG = [Estimations.bg];
+
+if numel(Estimations) > 2
     Est_time = ([Estimations.t_max] + [Estimations.t_min])/2;
-    Est_amp = [Estimations.amp];
-    Est_phi = [Estimations.phi];
-    Est_bg = [Estimations.bg];
+    Est_amp = Amp;
+    Est_phi = Phi;
+    Est_bg = BG;
+elseif numel(Estimations) == 2
+    Est_time = [Time(1) mean([Time(1) Time(end)]) Time(end)];
+    Est_amp = [Amp(1) mean([Amp(1) Amp(2)]) Amp(2)];
+    Est_phi = [Phi(1) mean([Phi(1) Phi(2)]) Phi(2)];
+    Est_bg = [BG(1) mean([BG(1) BG(2)]) BG(2)];
+    Amp_type = "const";
+    Phi_type = "const";
+    BG_type = "const";
 elseif numel(Estimations) == 1
-    Est_time = [Time(1) Time(2)];
-    Est_amp = [Estimations.amp Estimations.amp];
-    Est_phi = [Estimations.phi Estimations.phi];
-    Est_bg = [Estimations.bg Estimations.bg];
+    Est_time = [Time(1) mean([Time(1) Time(end)]) Time(end)];
+    Est_amp = [Amp Amp Amp];
+    Est_phi = [Phi Phi Phi];
+    Est_bg = [BG BG BG];
+    Amp_type = "const";
+    Phi_type = "const";
+    BG_type = "const";
+elseif numel(Estimations) == 0
+    Est_time = [Time(1) mean([Time(1) Time(end)]) Time(end)];
+    Est_amp = [0 0 0];
+    Est_phi = [0 0 0];
+    Est_bg = [0 0 0];
     Amp_type = "const";
     Phi_type = "const";
     BG_type = "const";
 else
-    Est_time = [Time(1) Time(2)];
-    Est_amp = 0;
-    Est_phi = 0;
-    Est_bg = 0;
-    Amp_type = "const";
-    Phi_type = "const";
-    BG_type = "const";
+    error('unreachable')
 end
 
 % FIXME: debug print
@@ -62,8 +76,7 @@ Lower = [];
 StartPoint = [];
 Upper = [];
 
-X_arr = [Time(1), Time(round(end/2)), Time(end)];
-
+X_arr = [Time(1) mean([Time(1) Time(end)]) Time(end)];
 
 switch Amp_type
     case "const"
@@ -208,9 +221,9 @@ DEBUG.StartPoint = StartPoint;
 DEBUG.coeffnames = coeffnames(ft);
 DEBUG.X_arr = X_arr;
 
-disp('--- Main fit call ---') % FIXME: debug
+% disp('--- Main fit call ---') % FIXME: debug
 [fitresult, gof, output] = fit(Time', Signal', ft, opts);
-disp('--- Main fit call end ---') % FIXME: debug
+% disp('--- Main fit call end ---') % FIXME: debug
 
 Residuals = output.residuals';
 

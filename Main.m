@@ -5,7 +5,7 @@ clc
 
 Gen_Voltage_level = 1; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 0.5; % [Hz]
+Gen_freq = 10; % [Hz]
 
 Save_data_flag = false;
 
@@ -15,8 +15,8 @@ Aster_addr = 3;
 
 %% Main part (Data gathering)
 
-% !!!
-% FIXME (nyan): why last fit is longe then try to fit inside gathering?
+
+Full_main_time_counter = tic;
 
 %--------------------------------
 freq = Gen_freq;
@@ -31,18 +31,14 @@ Time_to_underrange = 0.1*Period; % [s]
 Overrange_tolerance = 0.2; % [%]
 Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
 Harm_profile = "common"; % "common", "most_accurate"
-% FIXME: set by Time_profile or something else like it
-Amp_err_prc = 0.10; % [%]
-Phi_err_deg = 0.1; % [deg]
 %--------------------------------
 
-[Times_conf, Time_printer] = get_time_config_Aster(Period, Harm_num, ...
+[Times_conf, Time_printer, Accuracy_conf] = get_time_config_Aster(Period, Harm_num, ...
     Time_profile, Harm_profile);
 Time_printer(); % FIXME: debug
 
 %--------------------------------
-Accuracy_conf = struct('amp_err_prc', Amp_err_prc, ...
-                       'phi_err_deg', Phi_err_deg);
+
 
 % FIXME: debug
 if Time_to_underrange < 0.3
@@ -200,6 +196,13 @@ Target.phi_err_deg = 0.5; % [deg]
 disp([newline 'Scores:' newline 'Ch1: ' num2str(Score1) newline ...
     'Ch2: ' num2str(Score2)])
 
+Full_main_time = toc(Full_main_time_counter);
+disp([newline '-----------------------------------------' newline ...
+    '             Main fit finish' newline ...
+    '-----------------------------------------' newline ...
+    'Time: ' num2str(Full_main_time) ' s' newline ...
+    '-----------------------------------------' newline])
+
 % FIXME: undone
 % if Save_data_flag
 %     Savedata = struct( ...
@@ -318,6 +321,34 @@ end
 end
 
 
+function [Result_1, Residuals_1, DEBUG_1] = ...
+    fit_one_channels(Ch_data, Properties, Harm_num, Max_points)
+
+T_arr_1 = Ch_data.time;
+V1_arr = Ch_data.voltage;
+Overload_1 = Ch_data.overload;
+Fs = Ch_data.fs;
+Period = Ch_data.time_conf.period;
+freq = 1/Period;
+
+
+Harm_num_1 = Harm_num;
+
+if Overload_1.count > 0
+    Harm_num_1 = [];
+end
+
+Estimations_1 = fit_core.estimation_processing(Ch_data);
+
+Fit_settings_1.freq_dev_flag = true;
+Fit_settings_1.freq_dev_const = 0;
+Fit_settings_1.max_points = Max_points;
+
+[Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr_1, V1_arr, Fs, freq, ...
+    Estimations_1, Properties, Harm_num_1, Fit_settings_1);
+
+end
+
 
 
 function [Result, Residuals, DEBUG] = fit_channel(T_arr, V_arr, Fs, freq, ...
@@ -339,7 +370,7 @@ if ~isempty(Estimations)
     Noise_freq_low = freq*max(Harm_num);
     Noise_rms = fit_core.noise_rms_calc(V_arr, Fs, Noise_freq_low);
 
-    Max_points = Fit_settings.max_points; % FIXME: magic constant nyan
+    Max_points = Fit_settings.max_points;
     % FIXME: upgrade function make_fs_lower
     % FIXME: make it single channel
     [T_arr, V_arr, ~, Fs2] = fit_core.make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
@@ -712,14 +743,16 @@ while ~stop
     end
     %--------------------------------
 
-    if Time_passed > 0.9 * Min_time && Strategy.do_pre_fit
-        % FIXME: do full fit here and save results
-    end
 
+    if Strategy.do_pre_fit
+        Prefit_time_scale = 0.9;
+    else
+        Prefit_time_scale = 1;
+    end
 
     Fit_time_step = prefit_time_step(Period);
 
-    if true && Time_passed > Min_time && ...
+    if true && Time_passed > Prefit_time_scale*Min_time && ...
             ( isempty(Fit_local_timer) || (~isempty(Fit_local_timer) && ...
             toc(Fit_local_timer) > Fit_time_step) )
         
@@ -749,8 +782,8 @@ while ~stop
             [Score1, Score2, ~, ~] = ...
                 fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
 
-            disp([newline 'Scores:' newline 'Ch1: ' num2str(Score1) newline ...
-                'Ch2: ' num2str(Score2)])
+            disp(['--- Scores: ---' newline 'Ch1: ' num2str(Score1) newline ...
+                'Ch2: ' num2str(Score2) newline '---------------'])
 
             Estimations_1 = fit_core.result2estimation(Result_1);
             Estimations_2 = fit_core.result2estimation(Result_2);
