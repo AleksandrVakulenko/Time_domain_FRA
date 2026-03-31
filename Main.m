@@ -543,7 +543,16 @@ end
 end
 
 
-
+function Fit_time_step = prefit_time_step(Period)
+    Fit_time_step = 0.1*Period;
+    if Fit_time_step > 10
+        Fit_time_step = 10;
+    end
+    
+    if Fit_time_step < 1
+        Fit_time_step = 1;
+    end
+end
 
 
 function [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(FRA_dev, ...
@@ -707,44 +716,21 @@ while ~stop
         % FIXME: do full fit here and save results
     end
 
-    Fit_time_step = 0.1*Period;
-    if Fit_time_step > 10
-        Fit_time_step = 10;
-    end
-    if Fit_time_step < 1
-        Fit_time_step = 1;
-    end
+
+    Fit_time_step = prefit_time_step(Period);
+
     if true && Time_passed > Min_time && ...
             ( isempty(Fit_local_timer) || (~isempty(Fit_local_timer) && ...
             toc(Fit_local_timer) > Fit_time_step) )
-        % FIXME: do full fit here and save results
         
         Fit_local_timer = tic;
-        
-        % FIXME: nyan
-        % Error in Main>data_gathering_loop (line 741)
-        %    fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2,
-        %    ...
-        % Insufficient data.
-        % You need at least 3 data points to fit this model.
 
-        Ch_data_1.time = T_arr;
-        Ch_data_1.voltage = V1_arr;
-        Ch_data_1.overload = Overload_1;
-        Ch_data_1.estimations = Estimations_1;
-        Ch_data_1.time_conf = Times_conf;
-        Ch_data_1.accuracy_conf = Accuracy_conf;
-        Ch_data_1.fs = Fs;
-        Ch_data_1.period_counter = Periods_counter;
+        Ch_data_1 = fit_core.Ch_data(T_arr, V1_arr, Overload_1, ...
+            Estimations_1, Times_conf, Accuracy_conf, Fs, Periods_counter);
 
-        Ch_data_2.time = T_arr;
-        Ch_data_2.voltage = V2_arr;
-        Ch_data_2.overload = Overload_2;
-        Ch_data_2.estimations = Estimations_2;
-        Ch_data_2.time_conf = Times_conf;
-        Ch_data_2.accuracy_conf = Accuracy_conf;
-        Ch_data_2.fs = Fs;
-        Ch_data_2.period_counter = Periods_counter;
+        Ch_data_2 = fit_core.Ch_data(T_arr, V2_arr, Overload_2, ...
+            Estimations_2, Times_conf, Accuracy_conf, Fs, Periods_counter);
+
         % nyan
         Properties_1.Amp_type = "linear";
         Properties_1.BG_type = "poly2";
@@ -755,9 +741,10 @@ while ~stop
         Properties_2.Phi_type = "const";
 
         try % nyan
+            Max_points = 10e3; % FIXME: magic constant
             [Result_1, ~, ~, Result_2, ~, ~] = ...
                 fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
-                Harm_num, 10e3);
+                Harm_num, Max_points);
 
             [Score1, Score2, ~, ~] = ...
                 fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
@@ -791,22 +778,10 @@ while ~stop
     end
 end
 
-Ch_data_1.time = T_arr;
-Ch_data_1.voltage = V1_arr;
-Ch_data_1.overload = Overload_1;
-Ch_data_1.estimations = Estimations_1;
-Ch_data_1.time_conf = Times_conf;
-Ch_data_1.accuracy_conf = Accuracy_conf;
-Ch_data_1.fs = Fs;
-Ch_data_1.period_counter = Periods_counter;
+Ch_data_1 = fit_core.Ch_data(T_arr, V1_arr, Overload_1, Estimations_1, ...
+    Times_conf, Accuracy_conf, Fs, Periods_counter);
 
-Ch_data_2.time = T_arr;
-Ch_data_2.voltage = V2_arr;
-Ch_data_2.overload = Overload_2;
-Ch_data_2.estimations = Estimations_2;
-Ch_data_2.time_conf = Times_conf;
-Ch_data_2.accuracy_conf = Accuracy_conf;
-Ch_data_2.fs = Fs;
-Ch_data_2.period_counter = Periods_counter;
+Ch_data_2 = fit_core.Ch_data(T_arr, V2_arr, Overload_2, Estimations_2, ...
+    Times_conf, Accuracy_conf, Fs, Periods_counter);
 
 end
