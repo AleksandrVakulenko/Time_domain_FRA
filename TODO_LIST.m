@@ -10,7 +10,7 @@ Fern.load('Common')
 % 
 % TODO:
 % 
-% 1) 
+% 1) save all estimations for debug
 % 2) Overrange timing
 % 3) That is fit Result is empty?
 % 4) Use residuals to estimate max possible quality
