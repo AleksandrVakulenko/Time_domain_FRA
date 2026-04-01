@@ -87,8 +87,9 @@ Gen.initiate();
 Aster = Aster_dev(Aster_addr);
 Aster.set_connection_mode("I2V");
 Aster.initiate();
-[flag, R_Scale, Aster_Range] = Aster_set_range(Aster, 1);
-% Used_ranges = []; % FIXME: nyan
+Range_init_num = 1;
+[flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Range_init_num);
+Used_ranges = [Range_init_num]; % FIXME: nyan
 
 ERR = [];
 try
@@ -109,22 +110,30 @@ try
         disp(['Exit flag: ' num2str(Exit_flag)])
         
         % FIXME: use all possible exit codes
+        need_to_switch_range = false;
         if Exit_flag == 0
             stop = true;
         elseif Exit_flag == 102
             Aster_Range = Aster_Range + 1;
-            [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Aster_Range);
-            if ~flag
-                stop = true;
-            end
+            need_to_switch_range = true;
         elseif Exit_flag == 202
             Aster_Range = Aster_Range - 1;
-            [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Aster_Range);
-            if ~flag
-                stop = true;
-            end
+            need_to_switch_range = true;
         elseif Exit_flag == 30
             stop = true;
+        end
+
+        if need_to_switch_range
+            if any(Aster_Range == Used_ranges)
+                stop = true;
+            else
+                [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Aster_Range);
+                if ~flag
+                    stop = true;
+                else
+                    Used_ranges = unique([Used_ranges Aster_Range]);
+                end
+            end
         end
     end
 catch ERR

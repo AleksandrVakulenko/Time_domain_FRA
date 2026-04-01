@@ -10,7 +10,7 @@ Fern.load('Common')
 % 
 % TODO:
 % 
-% 1) Update auto-ranging
+% 1) 
 % 2) Overrange timing
 % 3) That is fit Result is empty?
 % 4) Use residuals to estimate max possible quality
@@ -25,10 +25,10 @@ Fern.load('Common')
 % 11) refactor estimations fix
 % 12) Add non-realtime version of fit (just incoming estimations)
 % 
-% 13) add input condition for harm measure or harm ignore
-% 14) investigate "underrange" function behavior
+% 13) harm auto-detector
+% 14) add input condition for harm measure or harm ignore
 % 15) 
-% 16) 
+% 16) investigate "underrange" function behavior
 % 
 % 17) update data viewer (to both test or real data)
 % 18) add data saver function
