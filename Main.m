@@ -5,7 +5,7 @@ clc
 
 Gen_Voltage_level = 0.5; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 0.1; % [Hz]
+Gen_freq = 2; % [Hz]
 
 Save_data_flag = false;
 
@@ -87,8 +87,8 @@ Gen.initiate();
 Aster = Aster_dev(Aster_addr);
 Aster.set_connection_mode("I2V");
 Aster.initiate();
-[flag, R_Scale, Aster_Range] = Aster_set_range(Aster, 5);
-
+[flag, R_Scale, Aster_Range] = Aster_set_range(Aster, 1);
+% Used_ranges = []; % FIXME: nyan
 
 ERR = [];
 try
@@ -549,7 +549,7 @@ function Underrange = check_underrange(V_arr, Underrange, Underrange_force)
 if Underrange
     [Mean, Span, ~, ~] = fit_core.singal_stats(V_arr);
     if Underrange_force
-        Underrange_level = 0.0001*5; % FIXME: magic constant
+        Underrange_level = 0.0000*5; % FIXME: remake it
     else
         Underrange_level = 0.04; % FIXME: magic constant
     end
@@ -723,12 +723,13 @@ while ~stop
         break;
     end
 
-    if Time_passed > 0.3 && Overload_1.volume > Overrange_tolerance_1
+    Time_to_overrange = 0.1; % [s] FIXME: magic constant
+    if Time_passed > Time_to_overrange && Overload_1.volume > Overrange_tolerance_1
         Exit_flag = 201; % NOTE: EF 201: overrange
         break;
     end
 
-    if Time_passed > 0.3 && Overload_2.volume > Overrange_tolerance_2
+    if Time_passed > Time_to_overrange && Overload_2.volume > Overrange_tolerance_2
         Exit_flag = 202; % NOTE: EF 202: overrange
         break;
     end

@@ -10,6 +10,10 @@ Period = Ch_data_1.time_conf.period;
 freq = 1/Period;
 %--------------------------------%--------------------------------%
 
+if isempty(Estimations_1)
+    return;
+end
+
 Time_length_1 = T_arr_1(end) - T_arr_1(1);
 Periods_counter_1 = Time_length_1/Period;
 
