@@ -1,5 +1,6 @@
 *.asv
 untitled*
-
+*hide.mat
+DEBUG_INFO/
 hide/*
 Read/

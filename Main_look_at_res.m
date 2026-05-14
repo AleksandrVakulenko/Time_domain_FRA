@@ -58,12 +58,12 @@ disp(['Δf = ' num2str(Freq_dev, '%0.1f') ' ± ' ...
 
 if Output.single_flag
     disp([newline 'Calc values (mean):'])
-    Str = err_str(Amp_out, Amp_err_out);
-    disp(['A = ' Str ' [V]'])
-    Str = err_str(Phi_out, Phi_err_out);
-    disp(['P = ' Str ' [deg]'])
-    Str = err_str(BG_out, BG_err_out);
-    disp(['C = ' Str ' [V]'])
+    Str = err_str(Amp_out, Amp_err_out, 'V');
+    disp(['A = ' Str])
+    Str = err_str(Phi_out, Phi_err_out, 'deg');
+    disp(['P = ' Str])
+    Str = err_str(BG_out, BG_err_out, 'V');
+    disp(['C = ' Str])
 
     SNR = 20*log10(Amp_out/Noise_rms);
     disp([newline 'Noise level:'])
@@ -82,7 +82,7 @@ disp(['-----------------------'])
 % Residuals = V_arr-ym;
 
 
-figure('position', [98 155 742 874])
+figure('position', [98 105 742 874])
 subplot(2, 1, 1)
 hold on
 plot(Data_time, Data_signal, '.b')
@@ -99,7 +99,7 @@ yline(Noise_rms, '-r')
 title('Residuals')
 
 
-figure('position', [871 333 746 696])
+figure('position', [871 276 746 696])
 
 subplot(2, 2, 1)
 hold on

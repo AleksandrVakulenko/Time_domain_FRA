@@ -4,6 +4,11 @@ function y = poly3calc(poly, x)
     y2 = poly.p2;
     y3 = poly.p3;
 
+    if isnan(y3)
+        y = NaN(size(x));
+        return
+    end
+
     if ~isnan(y1) && ~isnan(y2)
         xf = poly.x;
         yf = [y1 y2 y3];

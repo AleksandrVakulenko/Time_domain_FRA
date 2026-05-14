@@ -1,11 +1,13 @@
 
-%% Fern load
 
-Fern.load('aDevice')
-Fern.load('FRA_tools')
-Fern.load('Common') 
 
 %%
+
+% 2026.05.06
+% 1) if range N -> overrange and range (N-1) -> underange !!!
+% 2) wrong noise calc (DI_0001.mat, DI_0002.mat)
+% 3) delete outliers every fit 
+
 % last date: 2026.03.28
 % 
 % TODO:
@@ -25,9 +27,9 @@ Fern.load('Common')
 % 11) refactor estimations fix
 % 12) Add non-realtime version of fit (just incoming estimations)
 % 
-% 13) harm auto-detector
-% 14) add input condition for harm measure or harm ignore
-% 15) 
+% 13) underrange on chennel 1 !
+% 14) harm auto-detector
+% 15) add input condition for harm measure or harm ignore
 % 16) investigate "underrange" function behavior
 % 
 % 17) update data viewer (to both test or real data)

@@ -39,8 +39,8 @@ Gen.set_func("sin");
 Gen.set_amp(Voltage_level, "amp");
 Gen.set_freq(freq);
 Gen.set_offset(Offset_level);
-Aster = Aster_dev(3);
 
+Aster = Aster_dev(3);
 Aster.set_connection_mode("I2V");
 Sense = Aster.set_sensitivity(Current_pred);
 disp('Range: ');
