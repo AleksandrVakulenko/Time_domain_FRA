@@ -225,6 +225,9 @@ end
 
 
 function Harm_disp(Result_in)
+Output = fit_viewer.calc_output(Result_in, [0]);
+Amp_out = Output.amp;
+
 Harm = Result_in.harm;
 if ~isempty(Harm)
     Freq = Result_in.freq;
@@ -234,11 +237,11 @@ if ~isempty(Harm)
         hn = Harm(i).n;
         A = Harm(i).amp;
         P = Harm(i).phi;
+        A_dBc = 20*log10(A/Amp_out);
         disp(['Harmonic ' num2str(hn) ':'])
         disp(['Freq = ' num2str(hn*Freq) ' Hz'])
-        disp(['A = ' num2str(A) ' V' ...
-              newline ...
-              'P = ' num2str(P) ' deg' newline])
+        disp(['A = ' num2str(A) ' V (' num2str(A_dBc, '%+0.2f') ' dBc)'])
+        disp(['P = ' num2str(P) ' deg'])
     end
 end
 

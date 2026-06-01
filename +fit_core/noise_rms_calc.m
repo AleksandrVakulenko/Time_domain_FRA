@@ -3,7 +3,7 @@
 
 function Noise_rms = noise_rms_calc(Signal, Fs, freq, Harm_num)
     if isempty(Harm_num) || max(Harm_num) == 1
-        Noise_freq_low = freq*1.5;
+        Noise_freq_low = freq*1.5; % NOTE: maybe too low ??? (FX_N01)
     else
         Noise_freq_low = freq*max(Harm_num);
     end

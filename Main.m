@@ -1,17 +1,40 @@
 
 
+%% Fern load
+
+Fern.load('aDevice')
+Fern.load('FRA_tools')
+Fern.load('Common') 
+
+
 %% ------------------------------
 clc
 
-Gen_Voltage_level = 0.5; % [V]
+Gen_Voltage_level = 2; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 2; % [Hz]
+Gen_freq = 1; % [Hz]
 
 Save_data_flag = false;
 
 Fs = 10e3; % FIXME: get from device!
 
 Aster_addr = 3;
+
+if Gen_freq < 2
+    MUX_SETTING = 3;
+elseif Gen_freq < 20
+    MUX_SETTING = 2;
+elseif Gen_freq < 500
+    MUX_SETTING = 1;
+end
+
+% MUX_SETTING = 3;
+Min_filter_freq = 2; % Hz
+ADC_FILTER = 10*Gen_freq;
+if ADC_FILTER < Min_filter_freq
+    ADC_FILTER = Min_filter_freq;
+end
+Filter_wait = 4/ADC_FILTER;
 
 %% Main part (Data gathering)
 
@@ -24,12 +47,12 @@ Freq = freq;
 Period = 1/freq;
 Underrange_force = false;
 Fig = figure('position', [471 217 690 691]);
-Harm_num = [1];
+Harm_num = [1 2 3];
 MAX_CH1_LIMIT = 10;
 MAX_CH2_LIMIT = 5;
 Time_to_underrange = 0.1*Period; % [s]
-Overrange_tolerance = 0.2; % [%]
-Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
+Overrange_tolerance = 0.2; % [%] /FIXME: debug value
+Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 Harm_profile = "common"; % "common", "most_accurate"
 %--------------------------------
 
@@ -70,22 +93,41 @@ Profile.accuracy_conf = Accuracy_conf;
 clc
 
 % Gen = SR860_dev(5);
-Gen = AFG1022_dev();
+% Gen = AFG1022_dev();
 
-if class(Gen) == "SR860_dev"
-    Gen.set_gen_config(Gen_Voltage_level, Gen_freq, Gen_Offset_level);
-elseif class(Gen) == "AFG1022_dev"
-    Gen.set_func("sin");
-    Gen.set_amp(Gen_Voltage_level, "amp");
-    Gen.set_freq(Gen_freq);
-    Gen.set_offset(Gen_Offset_level);
-else
-    error('Wong gen class')
-end
-Gen.initiate();
+% if class(Gen) == "SR860_dev"
+%     Gen.set_gen_config(Gen_Voltage_level, Gen_freq, Gen_Offset_level);
+% elseif class(Gen) == "AFG1022_dev"
+%     Gen.set_func("sin");
+%     Gen.set_amp(Gen_Voltage_level, "amp");
+%     Gen.set_freq(Gen_freq);
+%     Gen.set_offset(Gen_Offset_level);
+% else
+%     error('Wong gen class')
+% end
+% Gen.initiate();
 
 Aster = Aster_dev(Aster_addr);
+
+Aster.Generator_waveform(Gen_Voltage_level, Gen_freq, "sin")
+Fs_new = Aster.ADC_send_freq(100*Gen_freq);
+disp(['>>>>>>  Fs = ' num2str(Fs_new, "%0.3f") ' Hz <<<<<<'])
+
+Channel_settings_1.fs = Fs_new;
+Channel_settings_2.fs = Fs_new;
+
+Aster.Generator_out_active(1);
+Aster.Generator_out_opamp("AD817");
+Aster.Generator_out_mux(MUX_SETTING);
+
 Aster.set_connection_mode("I2V");
+Aster.ADC_1_direction("internal");
+Aster.Gen_direction("Internal");
+Aster.ADC_filter(ADC_FILTER);
+% Filter_wait = 0.2;
+adev_utils.Wait(Filter_wait, 'Apply filter')
+% Aster.ADC_1_direction("external");
+% Aster.Gen_direction("Lock_in");
 Aster.initiate();
 Range_init_num = 1;
 [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Range_init_num);
@@ -128,6 +170,7 @@ try
                 stop = true;
             else
                 [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Aster_Range);
+                adev_utils.Wait(Filter_wait, 'Apply filter');
                 if ~flag
                     stop = true;
                 else
@@ -138,18 +181,18 @@ try
     end
 catch ERR
     Aster.terminate();
-    Gen.terminate();
+%     Gen.terminate();
     delete(Aster);
-    delete(Gen);
+%     delete(Gen);
     disp('ERR finish // devices closed')
     rethrow(ERR)
 end
 
 if isempty(ERR)
     Aster.terminate();
-    Gen.terminate();
+%     Gen.terminate();
     delete(Aster);
-    delete(Gen);
+%     delete(Gen);
     disp('OK finish')
 end
 
@@ -185,7 +228,7 @@ Properties_1.Amp_type = "linear";
 Properties_1.BG_type = "poly2";
 Properties_1.Phi_type = "const";
 
-Properties_2.Amp_type = "const";
+Properties_2.Amp_type = "linear";
 Properties_2.BG_type = "poly2";
 Properties_2.Phi_type = "const";
 
@@ -447,6 +490,9 @@ end
 
 
 function state = signal_per_duration(Periods_counter)
+
+    state = "invalid";
+
     if Periods_counter > 0 && Periods_counter <= 0.45
         state = "invalid";
     end
@@ -563,7 +609,7 @@ if Underrange
     if Underrange_force
         Underrange_level = 0.0000*5; % FIXME: remake it
     else
-        Underrange_level = 0.04; % FIXME: magic constant
+        Underrange_level = 0.01; % FIXME: magic constant
     end
     % FIXME: bad (maybe) condition
     Cond1 = abs(Mean) < Underrange_level;
@@ -722,6 +768,7 @@ while ~stop
         disp(['Overload Ch 2: ' num2str(Overload_2.volume*100, '%0.2f') ' %'])
     end
 
+    Underrange_force_1 = true; % FIXME: debug for low input voltage level
     Underrange_1 = check_underrange(V1_arr, Underrange_1, Underrange_force_1);
     Underrange_2 = check_underrange(V2_arr, Underrange_2, Underrange_force_2);
 
