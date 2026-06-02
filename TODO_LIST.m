@@ -3,9 +3,12 @@
 
 %%
 
+% 2026.06.02
+% 1) 
+
 % 2026.05.06
-% 1) if range N -> overrange and range (N-1) -> underange !!!
-% 2) wrong noise calc (DI_0001.mat, DI_0002.mat) FX_N01
+% 1) 
+% 2) 
 % 3) delete outliers every fit 
 
 % last date: 2026.03.28

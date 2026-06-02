@@ -12,13 +12,13 @@ clc
 
 Gen_Voltage_level = 0.2; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 20; % [Hz]
+Gen_freq = 1; % [Hz]
 
 Save_data_flag = false;
 
 Aster_addr = 3;
 
-Cap_exp = 1e-9;
+Cap_exp = 1000e-9;
 
 
 %% Main part (Data gathering)
@@ -29,7 +29,7 @@ Full_main_time_counter = tic;
 %--------------------------------
 Freq = Gen_freq;
 Period = 1/Freq;
-Underrange_force = true;
+Underrange_force = false;
 Fig = figure('position', [471 217 690 691]);
 Harm_num = [1 2 3];
 MAX_CH1_LIMIT = 10;
@@ -48,7 +48,6 @@ Profile.times_conf = Times_conf;
 Profile.accuracy_conf = Accuracy_conf;
 %--------------------------------
 
-
 % FIXME: debug
 if Time_to_underrange < 0.3
     Time_to_underrange = 0.3; % FIXME: magic constant
@@ -56,7 +55,7 @@ end
 %--------------------------------
 
 
-%--------------------------------%--------------------------------%
+%--------------------------------
 clc
 
 Aster = Aster_dev(Aster_addr);
@@ -99,7 +98,9 @@ Aster.Gen_direction("Internal");
 adev_utils.Wait(Filter_wait, 'Apply filter')
 Aster.initiate();
 [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Range_init_num);
-Used_ranges = [Range_init_num]; % FIXME: nyan
+Used_ranges = [Aster_Range]; % FIXME: nyan
+% Ranges_table = [NaN NaN NaN NaN NaN NaN];
+% Ranges_table(Aster_Range) = 0;
 
 ERR = [];
 try
@@ -120,7 +121,8 @@ try
         
         % FIXME: use all possible exit codes
         need_to_switch_range = false;
-        if Exit_flag == 0
+        switch_range_force = false;
+        if Exit_flag == 0 || Exit_flag == 30
             stop = true;
         elseif Exit_flag == 102
             Aster_Range = Aster_Range + 1;
@@ -128,12 +130,11 @@ try
         elseif Exit_flag == 202
             Aster_Range = Aster_Range - 1;
             need_to_switch_range = true;
-        elseif Exit_flag == 30
-            stop = true;
+            switch_range_force = true;
         end
 
         if need_to_switch_range
-            if any(Aster_Range == Used_ranges)
+            if any(Aster_Range == Used_ranges) && ~switch_range_force
                 stop = true;
             else
                 [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Aster_Range);
@@ -183,6 +184,7 @@ else
 end
 
 
+
 %
 % Fitting part
 
@@ -191,21 +193,22 @@ Period_counter = Ch_data_1.period_counter;
 
 [Properties_1, Properties_2] = get_fit_props(Period_counter);
 
-Max_points = 10e3;
+Max_points = 50e3;
 
 [Result_1, Residuals_1, DEBUG_1, Result_2, Residuals_2, DEBUG_2] = ...
     fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
     Harm_num, Max_points);
-
-% FIXME: use acuracy profile
-% Target.amp_err_prc = 1.0; % [%]
-% Target.phi_err_deg = 0.5; % [deg]
 
 [Score1, Score2, Best_flag, Max_score] = ...
     fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
 
 disp([newline 'Scores:' newline 'Ch1: ' num2str(Score1) newline ...
     'Ch2: ' num2str(Score2)])
+
+
+% FIXME: use debug function to show results
+fit_viewer.show_result_debug(Result_1, Result_2, Freq,  R_Scale)
+
 
 Full_main_time = toc(Full_main_time_counter);
 disp([newline '-----------------------------------------' newline ...
@@ -215,10 +218,11 @@ disp([newline '-----------------------------------------' newline ...
     '-----------------------------------------' newline])
 
 
-% FIXME: use debug function to show results
-fit_viewer.show_result_debug(Result_1, Result_2, Freq,  R_Scale)
 
 
+
+
+% Data save part
 
 % FIXME: undone
 % if Save_data_flag
@@ -577,7 +581,7 @@ function Underrange = check_underrange(V_arr, Underrange, Underrange_force)
 if Underrange
     [Mean, Span, ~, ~] = fit_core.singal_stats(V_arr);
     if Underrange_force
-        Underrange_level = 0.0000*5; % FIXME: remake it
+        Underrange_level = 0; % FIXME: remake it
     else
         Underrange_level = 0.01; % FIXME: magic constant
     end
