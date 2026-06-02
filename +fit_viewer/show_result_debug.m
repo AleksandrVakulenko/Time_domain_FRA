@@ -1,4 +1,4 @@
-function show_result_debug(Result_1, Result_2, freq, R_Scale)
+function Result = show_result_debug(Result_1, Result_2, freq, R_Scale)
 
 Output = fit_viewer.calc_output(Result_1, []);
 Volt1 = Output.amp;
@@ -75,6 +75,14 @@ disp(' ')
 
 warning('|R| may be calculated incorrectly!')
 
+
+Result.res_abs = Res;
+Result.res_abs_err = Res_err;
+
+Result.phi = Phase_diff;
+Result.phi_err = Phase_diff_error;
+
+Result.cap_par = C_par;
 
 end
 
