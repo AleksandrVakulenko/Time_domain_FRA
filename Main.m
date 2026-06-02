@@ -10,9 +10,9 @@ Fern.load('Common')
 %% ------------------------------
 clc
 
-Gen_Voltage_level = 2; % [V]
+Gen_Voltage_level = 0.2; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 0.1; % [Hz]
+Gen_freq = 20; % [Hz]
 
 Save_data_flag = false;
 
@@ -29,9 +29,9 @@ Full_main_time_counter = tic;
 %--------------------------------
 Freq = Gen_freq;
 Period = 1/Freq;
-Underrange_force = false;
+Underrange_force = true;
 Fig = figure('position', [471 217 690 691]);
-Harm_num = [1];
+Harm_num = [1 2 3];
 MAX_CH1_LIMIT = 10;
 MAX_CH2_LIMIT = 5;
 Time_to_underrange = 0.1*Period; % [s]
@@ -694,6 +694,7 @@ stop = false;
 Exit_flag = 0;
 First_time = true;
 Fit_local_timer = [];
+Time_shift = 0;
 % -------------------------------------
 while ~stop
     %FIXME: debug for fast signal
@@ -704,7 +705,8 @@ while ~stop
 
     % FIXME: debug
     if isempty(T_part)
-        stop = true;
+        continue
+%         stop = true;
     end
     
     if First_time
