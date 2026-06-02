@@ -165,11 +165,11 @@ switch Phi_type
         error('unreachable')
 end
 
-Freq_dev_range = [-300 200]; % FIXME: debug
+Freq_dev_range = [-100 100]; % FIXME: debug
 if Freq_dev_flag
     F_dev_str = '*(1+q/1e6)'; % FIXME: add D (coeffname: q)
     Lower = [Lower Freq_dev_range(1)];
-    StartPoint = [StartPoint -150]; % FIXME: magic constant
+    StartPoint = [StartPoint 0]; % FIXME: magic constant
     Upper = [Upper Freq_dev_range(2)];
 else
     F_dev_str = ['*(' num2str(1+Freq_dev_const/1e6) ')'];

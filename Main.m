@@ -12,29 +12,14 @@ clc
 
 Gen_Voltage_level = 2; % [V]
 Gen_Offset_level = 0; % [V]
-Gen_freq = 1; % [Hz]
+Gen_freq = 0.1; % [Hz]
 
 Save_data_flag = false;
 
-Fs = 10e3; % FIXME: get from device!
-
 Aster_addr = 3;
 
-if Gen_freq < 2
-    MUX_SETTING = 3;
-elseif Gen_freq < 20
-    MUX_SETTING = 2;
-elseif Gen_freq < 500
-    MUX_SETTING = 1;
-end
+Cap_exp = 1e-9;
 
-% MUX_SETTING = 3;
-Min_filter_freq = 2; % Hz
-ADC_FILTER = 10*Gen_freq;
-if ADC_FILTER < Min_filter_freq
-    ADC_FILTER = Min_filter_freq;
-end
-Filter_wait = 4/ADC_FILTER;
 
 %% Main part (Data gathering)
 
@@ -42,17 +27,16 @@ Filter_wait = 4/ADC_FILTER;
 Full_main_time_counter = tic;
 
 %--------------------------------
-freq = Gen_freq;
-Freq = freq;
-Period = 1/freq;
+Freq = Gen_freq;
+Period = 1/Freq;
 Underrange_force = false;
 Fig = figure('position', [471 217 690 691]);
-Harm_num = [1 2 3];
+Harm_num = [1];
 MAX_CH1_LIMIT = 10;
 MAX_CH2_LIMIT = 5;
 Time_to_underrange = 0.1*Period; % [s]
 Overrange_tolerance = 0.2; % [%] /FIXME: debug value
-Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
 Harm_profile = "common"; % "common", "most_accurate"
 %--------------------------------
 
@@ -60,6 +44,8 @@ Harm_profile = "common"; % "common", "most_accurate"
     Time_profile, Harm_profile);
 Time_printer(); % FIXME: debug
 
+Profile.times_conf = Times_conf;
+Profile.accuracy_conf = Accuracy_conf;
 %--------------------------------
 
 
@@ -70,72 +56,53 @@ end
 %--------------------------------
 
 
-% ----------------------------------------------------------------
+%--------------------------------%--------------------------------%
+clc
+
+Aster = Aster_dev(Aster_addr);
+
+% Gen = SR860_dev(5);
+% Gen = AFG1022_dev();
+Gen = Aster;
+
+Gen_initiate(Gen, Gen_Voltage_level, Gen_freq);
+
+
+[Fs_new, Filter_wait] = Aster_ADC_init(Aster, Gen_freq, Harm_num, Times_conf);
+
+disp(['>>>>>>  Fs = ' num2str(Fs_new, "%0.3f") ' Hz <<<<<<'])
+
 Channel_settings_1.underrange_force = Underrange_force;
 Channel_settings_1.max_ch1_limit = MAX_CH1_LIMIT;
 Channel_settings_1.time_to_underrange = Time_to_underrange;
 Channel_settings_1.overrange_tolerance = Overrange_tolerance;
-Channel_settings_1.fs = Fs;
+Channel_settings_1.fs = Fs_new;
 
 Channel_settings_2.underrange_force = Underrange_force;
 Channel_settings_2.max_ch1_limit = MAX_CH2_LIMIT;
 Channel_settings_2.time_to_underrange = Time_to_underrange;
 Channel_settings_2.overrange_tolerance = Overrange_tolerance;
-Channel_settings_2.fs = Fs;
-
-Profile.times_conf = Times_conf;
-Profile.accuracy_conf = Accuracy_conf;
-
-% ----------------------------------------------------------------
-
-
-%--------------------------------%--------------------------------%
-clc
-
-% Gen = SR860_dev(5);
-% Gen = AFG1022_dev();
-
-% if class(Gen) == "SR860_dev"
-%     Gen.set_gen_config(Gen_Voltage_level, Gen_freq, Gen_Offset_level);
-% elseif class(Gen) == "AFG1022_dev"
-%     Gen.set_func("sin");
-%     Gen.set_amp(Gen_Voltage_level, "amp");
-%     Gen.set_freq(Gen_freq);
-%     Gen.set_offset(Gen_Offset_level);
-% else
-%     error('Wong gen class')
-% end
-% Gen.initiate();
-
-Aster = Aster_dev(Aster_addr);
-
-Aster.Generator_waveform(Gen_Voltage_level, Gen_freq, "sin")
-Fs_new = Aster.ADC_send_freq(100*Gen_freq);
-disp(['>>>>>>  Fs = ' num2str(Fs_new, "%0.3f") ' Hz <<<<<<'])
-
-Channel_settings_1.fs = Fs_new;
 Channel_settings_2.fs = Fs_new;
 
-Aster.Generator_out_active(1);
-Aster.Generator_out_opamp("AD817");
-Aster.Generator_out_mux(MUX_SETTING);
+[Range_num_forecast, ~] = Range_forecaster(Aster, Cap_exp, ...
+    Gen_Voltage_level, Gen_freq);
+
+if ~isempty(Range_num_forecast)
+    Range_init_num = Range_num_forecast;
+else
+    Range_init_num = 1;
+end
 
 Aster.set_connection_mode("I2V");
 Aster.ADC_1_direction("internal");
 Aster.Gen_direction("Internal");
-Aster.ADC_filter(ADC_FILTER);
-% Filter_wait = 0.2;
 adev_utils.Wait(Filter_wait, 'Apply filter')
-% Aster.ADC_1_direction("external");
-% Aster.Gen_direction("Lock_in");
 Aster.initiate();
-Range_init_num = 1;
 [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Range_init_num);
 Used_ranges = [Range_init_num]; % FIXME: nyan
 
 ERR = [];
 try
-    FRA_dev = Aster;
     Try_num = 0;
     stop = false;
     while ~stop
@@ -144,12 +111,12 @@ try
     
         Aster.CMD_data_stream(1);
     
-        [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(FRA_dev, ...
+        [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(Aster, ...
             Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig);
     
         Aster.CMD_data_stream(0);
         
-        disp(['Exit flag: ' num2str(Exit_flag)])
+        warning(['Exit flag: ' num2str(Exit_flag)])
         
         % FIXME: use all possible exit codes
         need_to_switch_range = false;
@@ -180,29 +147,38 @@ try
         end
     end
 catch ERR
+    if class(Gen) == "Aster_dev"
+        Aster_gen_terminate(Aster);
+    else
+        Gen.terminate();
+        delete(Gen);
+    end
     Aster.terminate();
-%     Gen.terminate();
     delete(Aster);
-%     delete(Gen);
+
     disp('ERR finish // devices closed')
     rethrow(ERR)
 end
 
 if isempty(ERR)
+    if class(Gen) == "Aster_dev"
+        Aster_gen_terminate(Aster);
+    else
+        Gen.terminate();
+        delete(Gen);
+    end
     Aster.terminate();
-%     Gen.terminate();
     delete(Aster);
-%     delete(Gen);
     disp('OK finish')
 end
 
 
 
 if Exit_flag == 0 % FIXME: debug
-    disp(['Exit_flag: ' num2str(Exit_flag)]);
+    warning(['Exit_flag: ' num2str(Exit_flag)]);
 else
-    for i = 1:10
-        disp(['Exit_flag: ' num2str(Exit_flag)]);
+    for i = 1:5
+        warning(['Exit_flag: ' num2str(Exit_flag)]);
     end
 end
 
@@ -213,24 +189,7 @@ end
 
 Period_counter = Ch_data_1.period_counter;
 
-
-% FIXME undone section
-% "const" "linear" "poly2"
-% Properties_1.Amp_type = "const";
-% Properties_1.BG_type = "const";
-% Properties_1.Phi_type = "const";
-% 
-% Properties_2.Amp_type = "const";
-% Properties_2.BG_type = "const";
-% Properties_2.Phi_type = "const";
-
-Properties_1.Amp_type = "linear";
-Properties_1.BG_type = "poly2";
-Properties_1.Phi_type = "const";
-
-Properties_2.Amp_type = "linear";
-Properties_2.BG_type = "poly2";
-Properties_2.Phi_type = "const";
+[Properties_1, Properties_2] = get_fit_props(Period_counter);
 
 Max_points = 10e3;
 
@@ -239,11 +198,11 @@ Max_points = 10e3;
     Harm_num, Max_points);
 
 % FIXME: use acuracy profile
-Target.amp_err_prc = 1.0; % [%]
-Target.phi_err_deg = 0.5; % [deg]
+% Target.amp_err_prc = 1.0; % [%]
+% Target.phi_err_deg = 0.5; % [deg]
 
 [Score1, Score2, Best_flag, Max_score] = ...
-    fit_viewer.score_calc(Result_1, Result_2, Target);
+    fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
 
 disp([newline 'Scores:' newline 'Ch1: ' num2str(Score1) newline ...
     'Ch2: ' num2str(Score2)])
@@ -255,8 +214,11 @@ disp([newline '-----------------------------------------' newline ...
     'Time: ' num2str(Full_main_time) ' s' newline ...
     '-----------------------------------------' newline])
 
+
 % FIXME: use debug function to show results
-fit_viewer.show_result_debug(Result_1, Result_2, freq,  R_Scale)
+fit_viewer.show_result_debug(Result_1, Result_2, Freq,  R_Scale)
+
+
 
 % FIXME: undone
 % if Save_data_flag
@@ -317,6 +279,9 @@ Overload_2 = Ch_data_2.overload;
 Harm_num_1 = Harm_num;
 Harm_num_2 = Harm_num;
 
+Time_length = T_arr_1(end) - T_arr_1(1);
+Period_counter = Time_length/Period;
+
 if Overload_1.count > 0
     Harm_num_1 = [];
 end
@@ -328,8 +293,13 @@ end
 Estimations_1 = fit_core.estimation_processing(Ch_data_1);
 Estimations_2 = fit_core.estimation_processing(Ch_data_2);
 
-Fit_settings_1.freq_dev_flag = true;
-Fit_settings_1.freq_dev_const = 0;
+if Period_counter < 2
+    Fit_settings_1.freq_dev_flag = false;
+    Fit_settings_1.freq_dev_const = 0;
+else
+    Fit_settings_1.freq_dev_flag = true;
+    Fit_settings_1.freq_dev_const = 0;
+end
 Fit_settings_1.max_points = Max_points;
 
 disp(['Start final fit:' newline])
@@ -828,7 +798,7 @@ while ~stop
         Ch_data_2 = fit_core.Ch_data(T_arr, V2_arr, Overload_2, ...
             Estimations_2, Times_conf, Accuracy_conf, Fs, Periods_counter);
 
-        % nyan
+        %  FIXME: !!! nyan
         Properties_1.Amp_type = "linear";
         Properties_1.BG_type = "poly2";
         Properties_1.Phi_type = "const";
@@ -893,12 +863,21 @@ while ~stop
         subplot(2, 1, 1)
         cla
         plot(T_arr, V1_arr);
+        grid on
+        grid minor
         title(['Ch 1 (PC: ' num2str(Periods_counter, '%0.3f') ')'])
+        xlabel('t, s')
+        ylabel('V1, V')
 
         subplot(2, 1, 2)
         cla
         plot(T_arr, V2_arr);
+        grid on
+        grid minor
         title('Ch 2')
+        xlabel('t, s')
+        ylabel('V2, V')
+
         drawnow
     end
 end
