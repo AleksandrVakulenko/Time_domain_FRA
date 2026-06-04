@@ -264,7 +264,7 @@ while ~stop
         hold on
         cla
         plot(T_arr, V1_arr, '-b');
-        plot(T_arr(Outliers_range_1), V1_arr(Outliers_range_1), '.k');
+        plot(T_arr(Outliers_range_1), V1_arr(Outliers_range_1), '.r');
         grid on
 %         grid minor
         title(['Ch 1 (PC: ' num2str(Periods_counter, '%0.3f') ')'])
@@ -275,7 +275,7 @@ while ~stop
         hold on
         cla
         plot(T_arr, V2_arr, '-b');
-        plot(T_arr(Outliers_range_2), V2_arr(Outliers_range_2), '.k');
+        plot(T_arr(Outliers_range_2), V2_arr(Outliers_range_2), '.r');
         grid on
 %         grid minor
         title('Ch 2')

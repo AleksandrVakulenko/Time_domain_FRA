@@ -64,7 +64,7 @@ set(gca, 'xscale', 'log')
 
 % Freq = Result_1.freq;
 Ch_data_1 = Extra_data.ch_data_1;
-Ch_data_2 = Extra_data.ch_data_1;
+Ch_data_2 = Extra_data.ch_data_2;
 Result_1 = Extra_data.result_1;
 Result_2 = Extra_data.result_2;
 % Residuals_1 = Extra_data.residuals_1;
@@ -197,7 +197,7 @@ disp([newline 'Scores:' newline 'Ch1: ' num2str(Score_1) newline ...
 % FIXME: use debug function to show results
 Fit_Result = fit_viewer.show_result_debug(Result_1, Result_2, Freq,  R_Scale);
 Extra_data.ch_data_1 = Ch_data_1;
-Extra_data.ch_data_1 = Ch_data_2;
+Extra_data.ch_data_2 = Ch_data_2;
 Extra_data.result_1 = Result_1;
 Extra_data.result_2 = Result_2;
 Extra_data.residuals_1 = Residuals_1;
