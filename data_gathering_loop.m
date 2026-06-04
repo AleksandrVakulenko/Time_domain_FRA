@@ -68,6 +68,9 @@ Underrange_2 = true;
 Overload_1 = struct('range', [], 'count', 0, 'volume', 0);
 Overload_2 = struct('range', [], 'count', 0, 'volume', 0);
 
+Outliers_range_1 = [];
+Outliers_range_2 = [];
+
 Prefit_need_1 = true;
 Prefit_need_2 = true;
 Prefit_ready_1 = false;
@@ -180,10 +183,10 @@ while ~stop
         
         Fit_local_timer = tic;
 
-        Ch_data_1 = fit_core.Ch_data(T_arr, V1_arr, Overload_1, ...
+        Ch_data_1 = fit_core.Ch_data(T_arr, V1_arr, Outliers_range_1, Overload_1, ...
             Estimations_1, Times_conf, Accuracy_conf, Fs, Periods_counter);
 
-        Ch_data_2 = fit_core.Ch_data(T_arr, V2_arr, Overload_2, ...
+        Ch_data_2 = fit_core.Ch_data(T_arr, V2_arr, Outliers_range_2, Overload_2, ...
             Estimations_2, Times_conf, Accuracy_conf, Fs, Periods_counter);
 
         %  FIXME: !!! nyan
@@ -201,6 +204,8 @@ while ~stop
                 disp('PREFIT CHANNEL 1') % FIXME: disp
                 [Result_1] = fit_one_channels(Ch_data_1, Properties_1, ...
                     Harm_num, Prefit_max_points);
+                [Outliers_range_1, Outliers_volume_1] = ...
+                    fit_core.find_outliers(Ch_data_1, Result_1);
                 [Score_1, ~] = fit_viewer.score_calc_ch(Result_1, Accuracy_conf);
                 Estimations_1 = fit_core.result2estimation(Result_1);
                 if Score_1 > 0
@@ -213,6 +218,8 @@ while ~stop
                 disp('PREFIT CHANNEL 2') % FIXME: disp
                 [Result_2] = fit_one_channels(Ch_data_2, Properties_2, ...
                     Harm_num, Prefit_max_points);
+                [Outliers_range_2, Outliers_volume_2] = ...
+                    fit_core.find_outliers(Ch_data_2, Result_2);
                 [Score_2, ~] = fit_viewer.score_calc_ch(Result_2, Accuracy_conf);
                 Estimations_2 = fit_core.result2estimation(Result_2);
                 if Score_2 > 0
@@ -226,6 +233,11 @@ while ~stop
                 [Result_1, ~, ~, Result_2, ~, ~] = ...
                     fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, ...
                     Properties_2, Harm_num, Prefit_max_points);
+
+                [Outliers_range_1, Outliers_volume_1] = ...
+                    fit_core.find_outliers(Ch_data_1, Result_1);
+                [Outliers_range_2, Outliers_volume_2] = ...
+                    fit_core.find_outliers(Ch_data_2, Result_2);
 
                 [Score_1, Score2, ~, ~] = ...
                     fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
@@ -249,19 +261,23 @@ while ~stop
 
     if ~isempty(Fig)
         subplot(2, 1, 1)
+        hold on
         cla
-        plot(T_arr, V1_arr);
+        plot(T_arr, V1_arr, '-b');
+        plot(T_arr(Outliers_range_1), V1_arr(Outliers_range_1), '.k');
         grid on
-        grid minor
+%         grid minor
         title(['Ch 1 (PC: ' num2str(Periods_counter, '%0.3f') ')'])
         xlabel('t, s')
         ylabel('V1, V')
 
         subplot(2, 1, 2)
+        hold on
         cla
-        plot(T_arr, V2_arr);
+        plot(T_arr, V2_arr, '-b');
+        plot(T_arr(Outliers_range_2), V2_arr(Outliers_range_2), '.k');
         grid on
-        grid minor
+%         grid minor
         title('Ch 2')
         xlabel('t, s')
         ylabel('V2, V')
@@ -270,11 +286,11 @@ while ~stop
     end
 end
 
-Ch_data_1 = fit_core.Ch_data(T_arr, V1_arr, Overload_1, Estimations_1, ...
-    Times_conf, Accuracy_conf, Fs, Periods_counter);
+Ch_data_1 = fit_core.Ch_data(T_arr, V1_arr, Outliers_range_1, Overload_1, ...
+    Estimations_1, Times_conf, Accuracy_conf, Fs, Periods_counter);
 
-Ch_data_2 = fit_core.Ch_data(T_arr, V2_arr, Overload_2, Estimations_2, ...
-    Times_conf, Accuracy_conf, Fs, Periods_counter);
+Ch_data_2 = fit_core.Ch_data(T_arr, V2_arr, Outliers_range_2, Overload_2, ...
+    Estimations_2, Times_conf, Accuracy_conf, Fs, Periods_counter);
 
 end
 
@@ -432,6 +448,8 @@ function [Result_1, Residuals_1, DEBUG_1] = ...
 
 T_arr_1 = Ch_data.time;
 V1_arr = Ch_data.voltage;
+Outliers_range = Ch_data.outliers_range;
+Fit_range = ~Outliers_range;
 Overload_1 = Ch_data.overload;
 Fs = Ch_data.fs;
 Period = Ch_data.time_conf.period;
@@ -450,8 +468,8 @@ Fit_settings_1.freq_dev_flag = true; % FIXME: why it is true?
 Fit_settings_1.freq_dev_const = 0;
 Fit_settings_1.max_points = Max_points;
 
-[Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr_1, V1_arr, Fs, freq, ...
-    Estimations_1, Properties, Harm_num_1, Fit_settings_1);
+[Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr_1, V1_arr, ...
+    Fit_range, Fs, freq, Estimations_1, Properties, Harm_num_1, Fit_settings_1);
 
 end
 

@@ -90,7 +90,7 @@ Gen_Voltage_level = 1; % [V]
 
 Gen_freq = 0.01; % [Hz]
 Harm_num = [1];
-Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
 
 
 Cap_exp = 1e-9;

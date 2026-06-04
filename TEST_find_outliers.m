@@ -10,8 +10,8 @@ disp(['Outliers volume = ' num2str(Outliers_volume*100, '%0.2f') ' %'])
 
 figure
 hold on
-plot(T_arr(~range), V2_arr(~range), '.b')
-plot(T_arr(range), V2_arr(range), '.r')
+plot(T_arr(~range), V2_arr(~range), '-b')
+plot(T_arr(range), V2_arr(range), '.k')
 
 
 

@@ -8,6 +8,7 @@ classdef Ch_data
     properties (Access = public)
         time double
         voltage double
+        outliers_range logical
         overload
         estimations fit_core.Estimation
         time_conf
@@ -17,10 +18,11 @@ classdef Ch_data
     end
 
     methods (Access = public)
-        function obj = Ch_data(time, voltage, overload, estimations, time_conf, ...
-                accuracy_conf, fs, period_counter)
+        function obj = Ch_data(time, voltage, outliers_range, overload, ...
+                estimations, time_conf, accuracy_conf, fs, period_counter)
             obj.time = time;
             obj.voltage = voltage;
+            obj.outliers_range = outliers_range;
             obj.overload = overload;
             obj.estimations = estimations;
             obj.time_conf = time_conf;

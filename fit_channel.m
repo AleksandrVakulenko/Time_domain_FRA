@@ -1,4 +1,4 @@
-function [Result, Residuals, DEBUG] = fit_channel(T_arr, V_arr, Fs, freq, ...
+function [Result, Residuals, DEBUG] = fit_channel(T_arr, V_arr, Range, Fs, freq, ...
     Estimations, Properties, Harm_num, Fit_settings)
 
 if ~isempty(Estimations)
@@ -14,6 +14,11 @@ if ~isempty(Estimations)
     end
 
     Noise_rms = fit_core.noise_rms_calc(V_arr, Fs, freq, Harm_num);
+
+    if numel(find(Range)) > 10 % FIXME: magic constant
+        T_arr = T_arr(Range);
+        V_arr = V_arr(Range);
+    end
 
     Max_points = Fit_settings.max_points;
     % FIXME: upgrade function make_fs_lower
