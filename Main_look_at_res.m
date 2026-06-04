@@ -22,18 +22,20 @@ T_arr = Ch_data.time;
 Data_signal = Ch_data.voltage;
 
 Data_time = T_arr;
+Fs = Ch_data.fs;
+Freq = Result_in.freq;
 
 T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
 [ym, Amp_full, Phi_full, BG_full] = fit_viewer.calc_fitted_signal(Result_in, T_arr);
 
-Harm_y = Harm_calc(Result_in, T_arr);
+Harm_y = fit_viewer.Harm_calc(Result_in, T_arr);
 if ~isempty(Harm_y)
     ym = ym + Harm_y;
 end
 Residuals_in = Data_signal - ym;
 
-Noise_rms = fit_core.noise_rms_calc(Data_signal, Fs_new, Freq, Harm_num);
+Noise_rms = fit_core.noise_rms_calc(Data_signal, Fs, Freq, Harm_num);
 
 [~, Amp, Phi, BG, Amp_err, Phi_err, BG_err] = ...
     fit_viewer.calc_fitted_signal(Result_in, T_arr_min);
@@ -138,7 +140,7 @@ title('Residuals histogram')
 
 
 %%
-HHH = Harm_calc(Result, T_arr);
+HHH = fit_viewer.Harm_calc(Result, T_arr);
 plot(T_arr, HHH);
 %%
 
@@ -247,25 +249,7 @@ end
 
 end
 
-function out = Harm_calc(Result_in, Time)
-Harm = Result_in.harm;
-if ~isempty(Harm)
-    Freq = Result_in.freq;
-    Freq_dev = Result_in.f_dev_ppm;
-    Freq = Freq * (1 + Freq_dev/1e6);
-    out = zeros(size(Time));
-    for i = 1:numel(Harm)
-        hn = Harm(i).n;
-        A = Harm(i).amp;
-        P = Harm(i).phi;
-        H_value = A*sin(2*pi*hn*Freq*Time + P/180*pi);
-        out = out + H_value;
-    end
-else
-    out= [];
-end
 
-end
 
 
 

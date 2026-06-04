@@ -12,15 +12,15 @@ end
 % Fs = 10e3; % FIXME: get from device!
 
 if Times_conf.time_profile == "ultra_fast"
-    Sampling_freq = 500*Gen_freq;
+    Sampling_freq = 5000*Gen_freq; % FIXME: magic constant
 elseif Times_conf.time_profile == "common"
-    Sampling_freq = 250*Gen_freq;
+    Sampling_freq = 2500*Gen_freq;
 elseif Times_conf.time_profile == "fine"
-    Sampling_freq = 200*Gen_freq;
+    Sampling_freq = 2000*Gen_freq;
 elseif Times_conf.time_profile == "most_accurate"
-    Sampling_freq = 200*Gen_freq;
+    Sampling_freq = 2000*Gen_freq;
 else
-    Sampling_freq = 100*Gen_freq;
+    Sampling_freq = 1000*Gen_freq;
 end
 
 

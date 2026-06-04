@@ -3,13 +3,12 @@
 
 %%
 
-% 2026.06.02
-% 1) 
-
-% 2026.05.06
-% 1) 
-% 2) 
+% 2026.06.04
+% 1) Undata Cap_exp
+% 2) disable auto-range flag
 % 3) delete outliers every fit 
+% 4) 
+
 
 % last date: 2026.03.28
 % 
