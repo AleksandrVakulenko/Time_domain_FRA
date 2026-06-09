@@ -4,7 +4,7 @@ clc
 % % T_arr = T_arr;
 % % Residuals_in = Residuals;
 
-Show_channel = 2;
+Show_channel = 1;
 
 
 
@@ -20,6 +20,7 @@ end
 
 T_arr = Ch_data.time;
 Data_signal = Ch_data.voltage;
+Outliers_range = Ch_data.outliers_range;
 
 Data_time = T_arr;
 Fs = Ch_data.fs;
@@ -29,10 +30,6 @@ T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
 [ym, Amp_full, Phi_full, BG_full] = fit_viewer.calc_fitted_signal(Result_in, T_arr);
 
-Harm_y = fit_viewer.Harm_calc(Result_in, T_arr);
-if ~isempty(Harm_y)
-    ym = ym + Harm_y;
-end
 Residuals_in = Data_signal - ym;
 
 Noise_rms = fit_core.noise_rms_calc(Data_signal, Fs, Freq, Harm_num);
@@ -95,7 +92,9 @@ plot(T_arr, BG_full-Amp_full, '--k', 'LineWidth', 1)
 title('Signal')
 
 subplot(2, 1, 2)
-plot(T_arr, Residuals_in, '-b')
+hold on
+plot(T_arr(~Outliers_range), Residuals_in(~Outliers_range), '-b')
+plot(T_arr(Outliers_range), Residuals_in(Outliers_range), '.r')
 yline(std(Residuals_in)*2)
 yline(Noise_rms, '-r')
 title('Residuals')

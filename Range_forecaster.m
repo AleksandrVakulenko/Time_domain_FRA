@@ -15,7 +15,7 @@ Current = Amp/Res;
 Current_value = abs(Current);
 
 
-if class(Ammeter) == "Aster_dev"
+if class(Ammeter) == "Aster_dev" || Ammeter == "Aster_dev"
     Res_list = [200 10e3 1e6 100e6 10e9 1e12]; % Ohm
     V2_max = 5; % V
     V_out = Current_value * Res_list;

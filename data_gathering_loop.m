@@ -61,6 +61,8 @@ V2_arr = [];
 % FIXME: need refactor
 Estimations_1 = fit_core.Estimation.empty;
 Estimations_2 = fit_core.Estimation.empty;
+Result_1 = fit_core.Result_type.empty;
+Result_2 = fit_core.Result_type.empty;
 
 Underrange_1 = true;
 Underrange_2 = true;
@@ -190,13 +192,14 @@ while ~stop
             Estimations_2, Times_conf, Accuracy_conf, Fs, Periods_counter);
 
         %  FIXME: !!! nyan
-        Properties_1.Amp_type = "linear";
-        Properties_1.BG_type = "poly2";
-        Properties_1.Phi_type = "const";
-
-        Properties_2.Amp_type = "const";
-        Properties_2.BG_type = "poly2";
-        Properties_2.Phi_type = "const";
+%         Properties_1.Amp_type = "linear";
+%         Properties_1.BG_type = "poly2";
+%         Properties_1.Phi_type = "const";
+% 
+%         Properties_2.Amp_type = "const";
+%         Properties_2.BG_type = "poly2";
+%         Properties_2.Phi_type = "const";
+        [Properties_1, Properties_2] = get_fit_props(Periods_counter);
 
         try % nyan
             
@@ -260,22 +263,32 @@ while ~stop
     end
 
     if ~isempty(Fig)
+        figure(Fig)
         subplot(2, 1, 1)
         hold on
         cla
         plot(T_arr, V1_arr, '-b');
         plot(T_arr(Outliers_range_1), V1_arr(Outliers_range_1), '.r');
+        if ~isempty(Result_1)
+            Fit_y_1 = fit_viewer.calc_fitted_signal(Result_1, T_arr);
+            plot(T_arr, Fit_y_1, '--k', 'LineWidth', 0.5);
+        end
         grid on
 %         grid minor
         title(['Ch 1 (PC: ' num2str(Periods_counter, '%0.3f') ')'])
         xlabel('t, s')
         ylabel('V1, V')
 
+        figure(Fig)
         subplot(2, 1, 2)
         hold on
         cla
         plot(T_arr, V2_arr, '-b');
         plot(T_arr(Outliers_range_2), V2_arr(Outliers_range_2), '.r');
+        if ~isempty(Result_2)
+            Fit_y_1 = fit_viewer.calc_fitted_signal(Result_2, T_arr);
+            plot(T_arr, Fit_y_1, '--k', 'LineWidth', 0.5);
+        end
         grid on
 %         grid minor
         title('Ch 2')
@@ -387,26 +400,34 @@ switch signal_per_duration(Periods_counter)
     case "single" % 1.0 : 2
         Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
             Freq, Estimations);
+        Estimations = [Estimations Result];
         [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
             "last", 1.05);
         Result2 = fit_core.DFT_estimation(out_time, out_sig, Period);
-        Estimations = [Estimations Result Result2];
+        if ~isempty(Result2)
+            Estimations = [Estimations Result2];
+        end
 
 
-    case "long" % 2 : 10
+    case "long" % 2 : 10 FIXME: same as above?
         [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
             "last", 1.05);
         Result1 = fit_core.simple_sin_fit_f(out_time, out_sig, ...
             Freq, Estimations);
+        Estimations = [Estimations Result1];
         Result2 = fit_core.DFT_estimation(out_time, out_sig, Period);
-        Estimations = [Estimations Result1 Result2];
+        if ~isempty(Result2)
+            Estimations = [Estimations Result2];
+        end
 
 
     case "max" % 10 : inf
         [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
             "last", 1.05);
         Result = fit_core.DFT_estimation(out_time, out_sig, Period);
-        Estimations = [Estimations Result];
+        if ~isempty(Result)
+            Estimations = [Estimations Result];
+        end
 
 end
 

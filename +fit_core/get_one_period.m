@@ -1,4 +1,5 @@
-function [out_time, out_sig] = get_one_period(Time, Signal, Period, mode, Scale)
+function [out_time, out_sig] = get_one_period(Time, ...
+    Signal, Period, mode, Scale)
 arguments
     Time
     Signal
@@ -30,4 +31,5 @@ else % first
         out_sig = Signal(range);
     end
 end
+
 end

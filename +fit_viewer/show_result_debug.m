@@ -83,6 +83,12 @@ Result.phi = Phase_diff;
 Result.phi_err = Phase_diff_error;
 
 Result.cap_par = C_par;
+Result.r_scale = R_Scale;
+Result.current = Cur;
+Result.current_error = Cur_err;
+Result.voltage = Volt1;
+Result.voltage_error = Volt1_err;
+
 
 end
 

@@ -31,10 +31,6 @@ T_arr_min = linspace(T_arr_print(1), T_arr_print(end), 1000);
 
 % Harm_disp(Result_in);
 
-Harm_y = fit_viewer.Harm_calc(Result_in, T_arr_print);
-if ~isempty(Harm_y)
-    ym = ym + Harm_y;
-end
 Residuals_in = Data_signal - ym;
 
 Noise_rms = fit_core.noise_rms_calc(Data_signal, Fs, freq, Harm_num);

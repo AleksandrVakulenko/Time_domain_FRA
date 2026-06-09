@@ -1,35 +1,38 @@
 
+% FIXME: need refactor
 
 function [Times_conf, printer, Accuracy_conf] = get_time_config_Aster(Period, Harm_num, ...
     Time_profile, Harm_profile)
 arguments
     Period double
-    Harm_num double = 1
+    Harm_num double = 1 % FIXME: unused
     Time_profile string {mustBeMember(Time_profile, ...
         ["ultra_fast", "common", "fine", "most_accurate"])} = "common"
     Harm_profile string {mustBeMember(Harm_profile, ...
         ["common", "most_accurate"])} = "common"
 end
 
-if Harm_profile ~= "most_accurate"
-    Harm_num = 1;
+if Harm_profile == "most_accurate"
+    Harm_mult = 2;
+else
+    Harm_mult = 1;
 end
 
 switch Time_profile
     case "ultra_fast"
-        Times_conf_basic = get_time_conf_ultra_fast(Period, Harm_num);
+        Times_conf_basic = get_time_conf_ultra_fast(Period, Harm_mult);
         Amp_err_prc = 1; % [%]
         Phi_err_deg = 0.5; % [deg]
     case "common"
-        Times_conf_basic = get_time_conf_common(Period, Harm_num);
+        Times_conf_basic = get_time_conf_common(Period, Harm_mult);
         Amp_err_prc = 0.5; % [%]
         Phi_err_deg = 0.2; % [deg]
     case "fine"
-        Times_conf_basic = get_time_conf_fine(Period, Harm_num);
+        Times_conf_basic = get_time_conf_fine(Period, Harm_mult);
         Amp_err_prc = 0.10; % [%]
         Phi_err_deg = 0.1; % [deg]
     case "most_accurate"
-        Times_conf_basic = get_time_conf_most_accurate(Period, Harm_num);
+        Times_conf_basic = get_time_conf_most_accurate(Period, Harm_mult);
         Amp_err_prc = 0.05; % [%]
         Phi_err_deg = 0.05; % [deg]
     otherwise
@@ -55,7 +58,7 @@ end
 
 Min_fop = max([Min_meas_time/Period Min_fop]);
 
-if Max_fop < Min_fop
+if Max_fop <= Min_fop
     Max_fop = Min_fop*1.2;
 end
 
@@ -72,38 +75,36 @@ end
 
 
 % FIXME: add accuracy settings
-function Times_conf = get_time_conf_ultra_fast(Period, Harm_num)
-    Times_conf.period_for_harm_det = 0;
+function Times_conf = get_time_conf_ultra_fast(Period, Harm_mult)
+    if Harm_mult > 1
+        Times_conf.period_for_harm_det = 0;
+    else
+        Times_conf.period_for_harm_det = 1;
+    end
     Times_conf.min_meas_time = 0.5; % [s]
     Times_conf.min_fop = 0.6; % [1]
     Times_conf.max_fop = 0.8; % [1]
 end
 
 
-function Times_conf = get_time_conf_common(Period, Harm_num)
-    Harm_num(Harm_num > 3) = [];
-
-    Times_conf.period_for_harm_det = lcms(Harm_num);
+function Times_conf = get_time_conf_common(Period, Harm_mult)
+    Times_conf.period_for_harm_det = Harm_mult;
     Times_conf.min_meas_time = 1; % [s]
     Times_conf.min_fop = 1.0; % [1]
     Times_conf.max_fop = 2.0; % [1]
 end
 
 
-function Times_conf = get_time_conf_fine(Period, Harm_num)
-    Harm_num(Harm_num > 3) = [];
-
-    Times_conf.period_for_harm_det = lcms(Harm_num);
+function Times_conf = get_time_conf_fine(Period, Harm_mult)
+    Times_conf.period_for_harm_det = Harm_mult;
     Times_conf.min_meas_time = 3; % [s]
     Times_conf.min_fop = 1.5; % [1]
     Times_conf.max_fop = 10; % [1]
 end
 
 
-function Times_conf = get_time_conf_most_accurate(Period, Harm_num)
-    Harm_num(Harm_num > 5) = [];
-
-    Times_conf.period_for_harm_det = lcms(Harm_num);
+function Times_conf = get_time_conf_most_accurate(Period, Harm_mult)
+    Times_conf.period_for_harm_det = Harm_mult;
     Times_conf.min_meas_time = 5; % [s]
     Times_conf.min_fop = 4;
     Times_conf.max_fop = 20; % [1]

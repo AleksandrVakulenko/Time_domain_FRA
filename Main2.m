@@ -1,15 +1,20 @@
 %% TEST FREQ LOOP
 
-Freq_arr = 10.^linspace(log10(0.1), log10(200), 15);
+F_min = 0.1;
+F_max = 200;
+F_num = 20;
+
+Gen_Voltage_level = 1; % [V]
+Fixed_range = 1;
+
+Freq_arr = 10.^linspace(log10(F_min), log10(F_max), F_num);
 Freq_arr(Freq_arr > 200) = [];
 
 Aster_addr = 3;
 
-Gen_Voltage_level = 1; % [V]
-
 % Gen_freq = 2; % [Hz]
-Harm_num = [1];
-Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
+Harm_num = [1 2 3];
+Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 
 
 Cap_exp = 1e-9;
@@ -22,7 +27,7 @@ for i = 1:N
 
     Gen_freq = Freq_arr(i);
     [Fit_Result, Extra_data] = Test_measurment_function(Aster_addr, Gen_freq, ...
-        Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, Fig);
+        Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, Fig, Fixed_range);
     Result_arr = [Result_arr Fit_Result];
 
     Cap_exp = Fit_Result.cap_par;
@@ -39,8 +44,8 @@ Phi_err = [Result_arr.phi_err];
 
 subplot(2, 1, 1)
 hold on
-% errorbar(Freq_arr, Res, Res_err, '-b')
-plot(Freq_arr, 1./(2*pi*Res.*Freq_arr)*1e12)
+errorbar(Freq_arr, Res, Res_err, '-b')
+% plot(Freq_arr, 1./(2*pi*Res.*Freq_arr)*1e12)
 % plot(Res./Res*100, '-b')
 % plot((Res+Res_err)./Res*100, '--b')
 % plot((Res-Res_err)./Res*100, '--b')
@@ -86,14 +91,14 @@ Used_ranges = Extra_data.used_ranges;
 
 Aster_addr = 3;
 
-Gen_Voltage_level = 1; % [V]
+Gen_Voltage_level = 0.5; % [V]
 
-Gen_freq = 0.01; % [Hz]
+Gen_freq = 0.5; % [Hz]
 Harm_num = [1];
 Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
 
 
-Cap_exp = 1e-9;
+Cap_exp = 1e-12;
 Fig = figure('position', [471 217 690 691]);
 
 Result_arr = [];
@@ -102,7 +107,7 @@ for i = 1:N
     disp([num2str(i) '/' num2str(N)])
 
     [Fit_Result, Extra_data] = Test_measurment_function(Aster_addr, Gen_freq, ...
-        Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, Fig);
+        Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, Fig, [5]);
     Result_arr = [Result_arr Fit_Result];
 
     Cap_exp = Fit_Result.cap_par;
@@ -153,7 +158,7 @@ ylabel('Phi, deg')
 %% TEST MEASUREMENT FUNCTNION
 
 function [Fit_Result, Extra_data] = Test_measurment_function(Aster_addr, ...
-    Gen_freq, Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, Fig)
+    Gen_freq, Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, Fig, Fixed_range)
 
 %--------------------------------
 Freq = Gen_freq;
@@ -171,7 +176,7 @@ Settings.harm_profile = Harm_profile;
 
 % Measurement part
 [Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, Used_ranges] = ...
-    Aster_FRA_measure(Aster_addr, Settings, Fig, Cap_exp);
+    Aster_FRA_measure(Aster_addr, Settings, Fig, Cap_exp, Fixed_range);
 
 warning(['>>>>>> Exit_flag: ' num2str(Exit_flag) ' >>>>>>>>']); % FIXME: disp
 
@@ -186,6 +191,18 @@ Max_points = 50e3;
 [Result_1, Residuals_1, DEBUG_1, Result_2, Residuals_2, DEBUG_2] = ...
     fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
     Harm_num, Max_points);
+
+% % redefine outliers
+% Outliers_range_1 = fit_core.find_outliers(Ch_data_1, Result_1);
+% Outliers_range_2 = fit_core.find_outliers(Ch_data_2, Result_2);
+% Ch_data_1.outliers_range = Outliers_range_1;
+% Ch_data_2.outliers_range = Outliers_range_2;
+% 
+% % Refit after redefine outliers
+% [Result_1, Residuals_1, DEBUG_1, Result_2, Residuals_2, DEBUG_2] = ...
+%     fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
+%     Harm_num, Max_points);
+
 
 [Score_1, Score_2, Best_flag, Max_score] = ...
     fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);

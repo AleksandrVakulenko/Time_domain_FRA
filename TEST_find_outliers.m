@@ -1,17 +1,30 @@
 
+Show_channel = 1;
 
-T_arr = Ch_data_2.time;
-V2_arr = Ch_data_2.voltage;
+if  1 == Show_channel
+    Ch_data = Ch_data_1;
+    Result = Result_1;
+elseif Show_channel == 2
+    Ch_data = Ch_data_2;
+    Result = Result_2;
+else
+    error('wrong channel number')
+end
+
+
+
+T_arr = Ch_data.time;
+V_arr = Ch_data.voltage;
 
 [range, Outliers_volume, Limits, Residuals] = ...
-    fit_core.find_outliers(Ch_data_2, Result_2);
+    fit_core.find_outliers(Ch_data, Result);
 
 disp(['Outliers volume = ' num2str(Outliers_volume*100, '%0.2f') ' %'])
 
 figure
 hold on
-plot(T_arr(~range), V2_arr(~range), '-b')
-plot(T_arr(range), V2_arr(range), '.k')
+plot(T_arr(~range), V_arr(~range), '-b')
+plot(T_arr(range), V_arr(range), '.k')
 
 
 

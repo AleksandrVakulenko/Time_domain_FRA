@@ -82,26 +82,26 @@ switch Amp_type
     case "const"
         Amp_str = fit_core.func_constructor([], 'a');
         a3 = mean(Est_amp);
-        Lower = [Lower 0];
+        Lower = [Lower a3/10];
         StartPoint = [StartPoint a3];
-        Upper = [Upper inf];
+        Upper = [Upper a3*10];
     case "linear"
         Amp_str = fit_core.func_constructor([X_arr(1) X_arr(3)], 'a');
         amp_poly = fit(Est_time_norm', Est_amp', 'poly1');
         a2 = feval(amp_poly, X_arr(1)/Period);
         a3 = feval(amp_poly, X_arr(3)/Period);
-        Lower = [Lower 0 0];
+        Lower = [Lower a2/10 a3/10];
         StartPoint = [StartPoint a2 a3];
-        Upper = [Upper +inf +inf];
+        Upper = [Upper a2*10 a3*10];
     case "poly2"
         Amp_str = fit_core.func_constructor(X_arr, 'a');
         amp_poly = fit(Est_time_norm', Est_amp', 'poly2');
         a1 = feval(amp_poly, X_arr(1)/Period); % FIXME: use feval once for all
         a2 = feval(amp_poly, X_arr(2)/Period);
         a3 = feval(amp_poly, X_arr(3)/Period);
-        Lower = [Lower 0 0 0];
+        Lower = [Lower a1/10 a2/10 a3/10];
         StartPoint = [StartPoint a1 a2 a3];
-        Upper = [Upper +inf +inf +inf];
+        Upper = [Upper a1*10 a2*10 a3*10];
     otherwise
         error('unreachable')
 end

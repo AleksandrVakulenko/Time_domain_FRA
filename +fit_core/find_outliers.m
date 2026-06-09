@@ -30,10 +30,6 @@ Data_signal = Ch_data.voltage;
 
 ym = fit_viewer.calc_fitted_signal(Result_in, T_arr);
 
-Harm_y = fit_viewer.Harm_calc(Result_in, T_arr);
-if ~isempty(Harm_y)
-    ym = ym + Harm_y;
-end
 Residuals = Data_signal - ym;
 
 end
@@ -55,6 +51,8 @@ if N > 100
     N = 100;
 end
 
+% figure
+% histogram(Residuals_scaled, N, 'Normalization', 'pdf')
 [Values, BinEdges] = histcounts(Residuals_scaled, N, 'Normalization', 'pdf');
 hx = (BinEdges(2:end)+BinEdges(1:end-1))/2;
 hy = Values;
@@ -64,8 +62,8 @@ fit_res = fit(hx', hy', '1/(sqrt(2*pi)*sigma)*exp(-1/2*((x-mu)/sigma)^2)', ...
 Mu = fit_res.mu/Scale;
 Sigma = fit_res.sigma/Scale;
 
-Top_limit = Mu + 3*Sigma;
-Bot_limit = Mu - 3*Sigma;
+Top_limit = Mu + 4*Sigma;
+Bot_limit = Mu - 4*Sigma;
 
 range = Residuals > Top_limit | Residuals < Bot_limit;
 
