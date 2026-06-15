@@ -10,7 +10,8 @@ if Range < 1 || Range > 6
 else
     flag = true;
 
-    [R_num, R_time] = Aster.get_current_range;
+    [R_num, R_time, FB_res] = Aster.get_current_range;
+    R_sense = 1/FB_res;
 
     if R_num ~= Range
         Res_list = [200 10e3 1e6 100e6 10e9 1e12];

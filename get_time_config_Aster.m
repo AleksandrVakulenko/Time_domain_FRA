@@ -62,6 +62,8 @@ if Max_fop <= Min_fop
     Max_fop = Min_fop*1.2;
 end
 
+% FIXME: maybe add top limit on FOP (~50)
+
 Times_conf.min_fop = Min_fop;
 Times_conf.max_fop = Max_fop;
 Times_conf.period = Period;
@@ -81,7 +83,7 @@ function Times_conf = get_time_conf_ultra_fast(Period, Harm_mult)
     else
         Times_conf.period_for_harm_det = 1;
     end
-    Times_conf.min_meas_time = 0.5; % [s]
+    Times_conf.min_meas_time = 0.25; % [s]
     Times_conf.min_fop = 0.6; % [1]
     Times_conf.max_fop = 0.8; % [1]
 end
@@ -89,7 +91,7 @@ end
 
 function Times_conf = get_time_conf_common(Period, Harm_mult)
     Times_conf.period_for_harm_det = Harm_mult;
-    Times_conf.min_meas_time = 1; % [s]
+    Times_conf.min_meas_time = 0.5; % [s]
     Times_conf.min_fop = 1.0; % [1]
     Times_conf.max_fop = 2.0; % [1]
 end
@@ -97,7 +99,7 @@ end
 
 function Times_conf = get_time_conf_fine(Period, Harm_mult)
     Times_conf.period_for_harm_det = Harm_mult;
-    Times_conf.min_meas_time = 3; % [s]
+    Times_conf.min_meas_time = 1; % [s]
     Times_conf.min_fop = 1.5; % [1]
     Times_conf.max_fop = 10; % [1]
 end
@@ -105,7 +107,7 @@ end
 
 function Times_conf = get_time_conf_most_accurate(Period, Harm_mult)
     Times_conf.period_for_harm_det = Harm_mult;
-    Times_conf.min_meas_time = 5; % [s]
+    Times_conf.min_meas_time = 2; % [s]
     Times_conf.min_fop = 4;
     Times_conf.max_fop = 20; % [1]
 end
