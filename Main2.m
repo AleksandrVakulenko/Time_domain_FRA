@@ -221,7 +221,8 @@ ylabel('Phi, deg')
 %% TEST MEASUREMENT FUNCTNION
 
 function [Fit_Result, Extra_data] = Test_measurment_function(Aster_addr, ...
-    Gen_freq, Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, Fig, Fixed_range)
+    Gen_freq, Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, ...
+    Fig_or_ax, Fixed_range)
 
 %--------------------------------
 Freq = Gen_freq;
@@ -239,7 +240,7 @@ Settings.harm_profile = Harm_profile;
 
 % Measurement part
 [Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, Used_ranges] = ...
-    Aster_FRA_measure(Aster_addr, Settings, Fig, Cap_exp, Fixed_range);
+    Aster_FRA_measure(Aster_addr, Settings, Fig_or_ax, Cap_exp, Fixed_range);
 
 warning(['>>>>>> Exit_flag: ' num2str(Exit_flag) ' >>>>>>>>']); % FIXME: disp
 
@@ -290,6 +291,28 @@ end
 
 disp([newline 'Scores:' newline 'Ch1: ' num2str(Score_1) newline ...
     'Ch2: ' num2str(Score_2)]) % FIXME: disp
+
+% Final plot part
+Axes_arr = init_gather_axes(Fig_or_ax);
+if numel(Axes_arr) == 2 && all(isvalid(Axes_arr))
+    style_num = 2;
+
+    Ax1 = Axes_arr(1);
+    Ax2 = Axes_arr(2);
+
+    data_gather_plot(Ax1, Ch_data_1.time, Ch_data_1.voltage, ...
+        Ch_data_1.outliers_range, Result_1, style_num);
+    xlabel('t, s', 'Parent', Ax1)
+    ylabel('V1, V', 'Parent', Ax1)
+
+    data_gather_plot(Ax2, Ch_data_2.time, Ch_data_2.voltage, ...
+        Ch_data_2.outliers_range, Result_2, style_num);
+    xlabel('t, s', 'Parent', Ax2);
+    ylabel('V2, V', 'Parent', Ax2);
+
+    drawnow
+end
+
 
 
 % FIXME: use debug function to show results
