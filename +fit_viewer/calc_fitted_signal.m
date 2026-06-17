@@ -1,6 +1,11 @@
 
 function [Signal, Amp_full, Phi_full, BG_full, Amp_err, Phi_err, BG_err] = ...
-    calc_fitted_signal(Result, Time)
+    calc_fitted_signal(Result, Time, no_harm)
+arguments
+    Result
+    Time
+    no_harm logical = false
+end
 
 Amp_full = fit_viewer.poly3calc(Result.amp_poly, Time);
 Phi_full = fit_viewer.poly3calc(Result.phi_poly, Time);
@@ -15,7 +20,7 @@ Freq2 = Result.freq*(1+D/1e6);
 Signal = Amp_full.*sin(2*pi*Freq2*Time + Phi_full/180*pi) + BG_full;
 
 Harm_y = fit_viewer.Harm_calc(Result, Time);
-if ~isempty(Harm_y)
+if ~isempty(Harm_y) && ~no_harm
     Signal = Signal + Harm_y;
 end
 

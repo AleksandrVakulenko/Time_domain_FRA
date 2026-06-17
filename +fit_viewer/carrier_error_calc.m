@@ -14,6 +14,9 @@ Amp_err_out = Output.amp_err;
 Phi_err_out = Output.phi_err;
 BG_err_out = Output.bg_err;
 
+Amp_err_out(isnan(Amp_err_out)) = inf;
+Phi_err_out(isnan(Phi_err_out)) = inf;
+BG_err_out(isnan(BG_err_out)) = inf;
 
 A_err_prc = mean(Amp_err_out./Amp_out)*100;
 P_err_deg = mean(Phi_err_out);
