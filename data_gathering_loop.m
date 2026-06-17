@@ -1,5 +1,5 @@
 function [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(FRA_dev, ...
-    Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig)
+    Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig_or_ax)
 
 arguments
     FRA_dev
@@ -8,8 +8,10 @@ arguments
     Profile
     Channel_settings_1
     Channel_settings_2
-    Fig = []
+    Fig_or_ax = []
 end
+
+Axes_arr = init_gather_axes(Fig_or_ax);
 
 Period = 1/Freq;
 Harm_num(Harm_num == 1) = [];
@@ -261,39 +263,23 @@ while ~stop
         end
     end
 
-    if ~isempty(Fig)
-        % FIXME: update color
-        figure(Fig)
-        subplot(2, 1, 1)
-        hold on
-        cla
-        plot(T_arr, V1_arr, '-b');
-        plot(T_arr(Outliers_range_1), V1_arr(Outliers_range_1), '.');
-        if ~isempty(Result_1)
-            Fit_y_1 = fit_viewer.calc_fitted_signal(Result_1, T_arr);
-            plot(T_arr, Fit_y_1, '--k', 'LineWidth', 0.5);
-        end
-        grid on
-%         grid minor
-        title(['Ch 1 (PC: ' num2str(Periods_counter, '%0.3f') ')'])
-        xlabel('t, s')
-        ylabel('V1, V')
+    if numel(Axes_arr) == 2 && all(isvalid(Axes_arr))
+        style_num = 2;
 
-        figure(Fig)
-        subplot(2, 1, 2)
-        hold on
-        cla
-        plot(T_arr, V2_arr, '-b');
-        plot(T_arr(Outliers_range_2), V2_arr(Outliers_range_2), '.r');
-        if ~isempty(Result_2)
-            Fit_y_1 = fit_viewer.calc_fitted_signal(Result_2, T_arr);
-            plot(T_arr, Fit_y_1, '--k', 'LineWidth', 0.5);
-        end
-        grid on
-%         grid minor
-        title('Ch 2')
-        xlabel('t, s')
-        ylabel('V2, V')
+        Ax1 = Axes_arr(1);
+        Ax2 = Axes_arr(2);
+
+        data_gather_plot(Ax1, T_arr, V1_arr, ...
+            Outliers_range_1, Result_1, style_num);
+        title(['Ch 1 (PC: ' num2str(Periods_counter, '%0.3f') ')'], 'Parent', Ax1);
+        xlabel('t, s', 'Parent', Ax1)
+        ylabel('V1, V', 'Parent', Ax1)
+
+        data_gather_plot(Ax2, T_arr, V2_arr, ...
+            Outliers_range_2, Result_2, style_num);
+        title('Ch 2', 'Parent', Ax2);
+        xlabel('t, s', 'Parent', Ax2);
+        ylabel('V2, V', 'Parent', Ax2);
 
         drawnow
     end
