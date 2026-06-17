@@ -131,7 +131,6 @@ while ~stop
         disp(['Overload Ch 2: ' num2str(Overload_2.volume*100, '%0.2f') ' %']) % FIXME: disp
     end
 
-    Underrange_force_1 = true; % FIXME: debug for low input voltage level
     Underrange_1 = check_underrange(V1_arr, Underrange_1, Underrange_force_1);
     Underrange_2 = check_underrange(V2_arr, Underrange_2, Underrange_force_2);
 
@@ -162,10 +161,10 @@ while ~stop
     end
 
     if Strategy.do_estimations
-        Estimations_1 = do_estimations(Estimations_1, T_arr, V1_arr, ...
+        Estimations_1 = fit_core.do_estimations(Estimations_1, T_arr, V1_arr, ...
             Freq, Periods_counter);
 
-        Estimations_2 = do_estimations(Estimations_2, T_arr, V2_arr, ...
+        Estimations_2 = fit_core.do_estimations(Estimations_2, T_arr, V2_arr, ...
             Freq, Periods_counter);
     end
     %--------------------------------
@@ -263,12 +262,13 @@ while ~stop
     end
 
     if ~isempty(Fig)
+        % FIXME: update color
         figure(Fig)
         subplot(2, 1, 1)
         hold on
         cla
         plot(T_arr, V1_arr, '-b');
-        plot(T_arr(Outliers_range_1), V1_arr(Outliers_range_1), '.r');
+        plot(T_arr(Outliers_range_1), V1_arr(Outliers_range_1), '.');
         if ~isempty(Result_1)
             Fit_y_1 = fit_viewer.calc_fitted_signal(Result_1, T_arr);
             plot(T_arr, Fit_y_1, '--k', 'LineWidth', 0.5);
@@ -299,6 +299,9 @@ while ~stop
     end
 end
 
+Outliers_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1);
+Outliers_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2);
+
 Ch_data_1 = fit_core.Ch_data(T_arr, V1_arr, Outliers_range_1, Overload_1, ...
     Estimations_1, Times_conf, Accuracy_conf, Fs, Periods_counter);
 
@@ -306,7 +309,6 @@ Ch_data_2 = fit_core.Ch_data(T_arr, V2_arr, Outliers_range_2, Overload_2, ...
     Estimations_2, Times_conf, Accuracy_conf, Fs, Periods_counter);
 
 end
-
 
 
 
@@ -350,149 +352,9 @@ end
 end
 
 
-function [Estimations] = do_estimations(Estimations, T_arr, V_arr, ...
-    Freq, Periods_counter)
-
-Period = 1/Freq;
-
-% FIXME: do we need this?
-if isempty(Estimations) && Periods_counter >= 1.0
-    Init_values = fit_core.do_initial_estimation(T_arr, V_arr, Period);
-    Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
-        Freq, Init_values);
-    Estimations = Result;
-end
-
-switch signal_per_duration(Periods_counter)
-    case "invalid" % 0 : 0.45
-        % DO SOMETHING:
-        % - noise analysis
-        % pause(0.05*Period)
-
-    case "get_lucky" % 0.45 : 0.5
-        if isempty(Estimations)
-            Init_values = fit_core.do_initial_estimation(T_arr, V_arr, Period);
-            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
-                Freq, Init_values);
-            Result.legacy_status = "extra";
-            Estimations = Result;
-        else
-            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
-                Freq, Estimations);
-            Result.legacy_status = "extra";
-            Estimations = [Estimations Result];
-        end
-
-    case "min" % 0.5 : 1.0
-        if isempty(Estimations)
-            Init_values = fit_core.do_initial_estimation(T_arr, V_arr, Period);
-            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
-                Freq, Init_values);
-            Result.legacy_status = "low";
-            Estimations = Result;
-        else
-            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
-                Freq, Estimations);
-            Result.legacy_status = "low";
-            Estimations = [Estimations Result];
-        end
-
-    case "single" % 1.0 : 2
-        Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
-            Freq, Estimations);
-        Estimations = [Estimations Result];
-        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
-            "last", 1.05);
-        Result2 = fit_core.DFT_estimation(out_time, out_sig, Period);
-        if ~isempty(Result2)
-            Estimations = [Estimations Result2];
-        end
 
 
-    case "long" % 2 : 10 FIXME: same as above?
-        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
-            "last", 1.05);
-        Result1 = fit_core.simple_sin_fit_f(out_time, out_sig, ...
-            Freq, Estimations);
-        Estimations = [Estimations Result1];
-        Result2 = fit_core.DFT_estimation(out_time, out_sig, Period);
-        if ~isempty(Result2)
-            Estimations = [Estimations Result2];
-        end
 
-
-    case "max" % 10 : inf
-        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
-            "last", 1.05);
-        Result = fit_core.DFT_estimation(out_time, out_sig, Period);
-        if ~isempty(Result)
-            Estimations = [Estimations Result];
-        end
-
-end
-
-end
-
-
-function state = signal_per_duration(Periods_counter)
-
-    state = "invalid";
-
-    if Periods_counter > 0 && Periods_counter <= 0.45
-        state = "invalid";
-    end
-    
-    if Periods_counter > 0.45 && Periods_counter <= 0.5
-        state = "get_lucky";
-    end
-
-    if Periods_counter > 0.5 && Periods_counter <= 1.0
-        state = "min";
-    end
-
-    if Periods_counter > 1.0 && Periods_counter <= 2.0
-        state = "single";
-    end
-
-    if Periods_counter > 2.0 && Periods_counter <= 10.0
-        state = "long";
-    end
-
-    if Periods_counter > 10.0
-        state = "max";
-    end
-end
-
-
-function [Result_1, Residuals_1, DEBUG_1] = ...
-    fit_one_channels(Ch_data, Properties, Harm_num, Max_points)
-
-T_arr_1 = Ch_data.time;
-V1_arr = Ch_data.voltage;
-Outliers_range = Ch_data.outliers_range;
-Fit_range = ~Outliers_range;
-Overload_1 = Ch_data.overload;
-Fs = Ch_data.fs;
-Period = Ch_data.time_conf.period;
-freq = 1/Period;
-
-
-Harm_num_1 = Harm_num;
-
-if Overload_1.count > 0
-    Harm_num_1 = [];
-end
-
-Estimations_1 = fit_core.estimation_processing(Ch_data);
-
-Fit_settings_1.freq_dev_flag = true; % FIXME: why it is true?
-Fit_settings_1.freq_dev_const = 0;
-Fit_settings_1.max_points = Max_points;
-
-[Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr_1, V1_arr, ...
-    Fit_range, Fs, freq, Estimations_1, Properties, Harm_num_1, Fit_settings_1);
-
-end
 
 
 

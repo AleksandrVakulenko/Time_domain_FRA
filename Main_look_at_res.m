@@ -21,6 +21,7 @@ end
 T_arr = Ch_data.time;
 Data_signal = Ch_data.voltage;
 Outliers_range = Ch_data.outliers_range;
+% Outliers_range = fit_core.uppend_outliers(T_arr, Outliers_range);
 
 Data_time = T_arr;
 Fs = Ch_data.fs;
@@ -95,6 +96,7 @@ subplot(2, 1, 2)
 hold on
 plot(T_arr(~Outliers_range), Residuals_in(~Outliers_range), '-b')
 plot(T_arr(Outliers_range), Residuals_in(Outliers_range), '.r')
+% plot(T_arr, Residuals_in, '--g')
 yline(std(Residuals_in)*2)
 yline(Noise_rms, '-r')
 title('Residuals')

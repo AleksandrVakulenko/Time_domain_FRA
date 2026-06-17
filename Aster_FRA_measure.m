@@ -18,13 +18,14 @@ Harm_profile = Settings.harm_profile;
 Full_main_time_counter = tic; % FIXME: debug
 Freq = Gen_freq;
 Period = 1/Freq;
-Underrange_force = false;
-Overrange_tolerance = 0.2; % [%] /FIXME: debug value
+Underrange_force_1 = true; % NOTE: for low input voltage level
+Underrange_force_2 = false;
+Overrange_tolerance = 0.2; % [%] // FIXME: debug value
 MAX_CH1_LIMIT = 10;
 MAX_CH2_LIMIT = 5;
 
 if ~isempty(Fixed_range) && any(Fixed_range == [1 2 3 4 5 6])
-    Underrange_force = true;
+    Underrange_force_2 = true;
     Overrange_tolerance = 100; % [%]
     Auto_range = false;
 else
@@ -61,13 +62,13 @@ try
 
     disp(['>>>>>>  Fs = ' num2str(Fs_new, "%0.3f") ' Hz <<<<<<']) % FIXME: disp
 
-    Channel_settings_1.underrange_force = Underrange_force;
+    Channel_settings_1.underrange_force = Underrange_force_1;
     Channel_settings_1.max_ch1_limit = MAX_CH1_LIMIT;
     Channel_settings_1.time_to_underrange = Time_to_underrange;
     Channel_settings_1.overrange_tolerance = Overrange_tolerance;
     Channel_settings_1.fs = Fs_new;
 
-    Channel_settings_2.underrange_force = Underrange_force;
+    Channel_settings_2.underrange_force = Underrange_force_2;
     Channel_settings_2.max_ch1_limit = MAX_CH2_LIMIT;
     Channel_settings_2.time_to_underrange = Time_to_underrange;
     Channel_settings_2.overrange_tolerance = Overrange_tolerance;
