@@ -269,6 +269,22 @@ Max_points = 50e3; % FIXME: magic constant
 %     Harm_num, Max_points);
 
 
+% FIXME: why refit if we could do good fit previously?
+Res_to_noise_1 = fit_core.calc_res_to_noise(Ch_data_1, Result_1, Harm_num);
+Res_to_noise_2 = fit_core.calc_res_to_noise(Ch_data_2, Result_2, Harm_num);
+
+if Res_to_noise_1 > 5 % FIXME: magic constant
+    [Result_1, Residuals_1, DEBUG_1] = fit_refit_one_ch(Ch_data_1, ...
+        Freq, Harm_num, Time_profile, Harm_profile, 1, Max_points);
+end
+
+if Res_to_noise_2 > 5 % FIXME: magic constant
+    [Result_2, Residuals_2, DEBUG_2] = fit_refit_one_ch(Ch_data_2, ...
+        Freq, Harm_num, Time_profile, Harm_profile, 2, Max_points);
+end
+% NOTE: end of refit part
+
+
 [Score_1, Score_2, Best_flag, Max_score] = ...
     fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
 

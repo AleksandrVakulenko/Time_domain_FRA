@@ -2,6 +2,9 @@
 
 % TODO:
 % 
+% - extract all Aster specific functions from here
+% 
+% 
 % 0) add freq to ch_data
 %
 % 1) save all estimations for debug
