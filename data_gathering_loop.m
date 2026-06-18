@@ -21,12 +21,14 @@ Underrange_force_1 = Channel_settings_1.underrange_force;
 MAX_CH1_LIMIT = Channel_settings_1.max_ch1_limit;
 Time_to_underrange_1 = Channel_settings_1.time_to_underrange;
 Overrange_tolerance_1 = Channel_settings_1.overrange_tolerance;
+Time_to_overrange_1 = 0.1; % [s] FIXME: magic constant
 Fs = Channel_settings_1.fs; % NOTE: ch2 fs same as ch1
 
 Underrange_force_2 = Channel_settings_2.underrange_force;
 MAX_CH2_LIMIT = Channel_settings_2.max_ch1_limit;
 Time_to_underrange_2 = Channel_settings_2.time_to_underrange;
 Overrange_tolerance_2 = Channel_settings_2.overrange_tolerance;
+Time_to_overrange_2 = 0.1; % [s] FIXME: magic constant
 
 Times_conf = Profile.times_conf;
 Accuracy_conf = Profile.accuracy_conf;
@@ -35,7 +37,7 @@ Accuracy_conf = Profile.accuracy_conf;
 Min_FOP = Times_conf.min_fop;
 Max_FOP = Times_conf.max_fop;
 Period = Times_conf.period;
-% Time_profile = Times_conf.time_profile; % NOTE: unused
+Time_profile = Times_conf.time_profile; % NOTE: unused
 
 Max_time = Max_FOP*Period;
 Min_time = Min_FOP*Period;
@@ -116,12 +118,11 @@ while ~stop
     Periods_counter = Time_passed/Period;
     
     %--------------------------------
-    OV_scale = 0.999; % FIXME: magic constant
-    Overload_1.range = abs(V1_arr) > MAX_CH1_LIMIT * OV_scale;
+    Overload_1.range = abs(V1_arr) > MAX_CH1_LIMIT;
     Overload_1.count = numel(find(Overload_1.range));
     Overload_1.volume = Overload_1.count/numel(V1_arr);
     
-    Overload_2.range = abs(V2_arr) > MAX_CH2_LIMIT * OV_scale;
+    Overload_2.range = abs(V2_arr) > MAX_CH2_LIMIT;
     Overload_2.count = numel(find(Overload_2.range));
     Overload_2.volume = Overload_2.count/numel(V2_arr);
 
@@ -136,6 +137,8 @@ while ~stop
     Underrange_1 = check_underrange(V1_arr, Underrange_1, Underrange_force_1);
     Underrange_2 = check_underrange(V2_arr, Underrange_2, Underrange_force_2);
 
+    disp_underrange(Underrange_1, Underrange_2); % FIXME: disp
+
     if Underrange_1 && Time_passed > Time_to_underrange_1
         Exit_flag = 101; % NOTE: EF 101: underrange ch1
         break;
@@ -146,13 +149,12 @@ while ~stop
         break;
     end
 
-    Time_to_overrange = 0.1; % [s] FIXME: magic constant
-    if Time_passed > Time_to_overrange && Overload_1.volume > Overrange_tolerance_1
+    if Time_passed > Time_to_overrange_1 && Overload_1.volume > Overrange_tolerance_1
         Exit_flag = 201; % NOTE: EF 201: overrange
         break;
     end
 
-    if Time_passed > Time_to_overrange && Overload_2.volume > Overrange_tolerance_2
+    if Time_passed > Time_to_overrange_2 && Overload_2.volume > Overrange_tolerance_2
         Exit_flag = 202; % NOTE: EF 202: overrange
         break;
     end
@@ -192,18 +194,9 @@ while ~stop
         Ch_data_2 = fit_core.Ch_data(T_arr, V2_arr, Outliers_range_2, Overload_2, ...
             Estimations_2, Times_conf, Accuracy_conf, Fs, Periods_counter);
 
-        %  FIXME: !!! nyan
-%         Properties_1.Amp_type = "linear";
-%         Properties_1.BG_type = "poly2";
-%         Properties_1.Phi_type = "const";
-% 
-%         Properties_2.Amp_type = "const";
-%         Properties_2.BG_type = "poly2";
-%         Properties_2.Phi_type = "const";
         [Properties_1, Properties_2] = get_fit_props(Periods_counter);
 
-        try % nyan
-            
+        try
             if Prefit_need_1 && ~Prefit_ready_1
                 disp('PREFIT CHANNEL 1') % FIXME: disp
                 [Result_1] = fit_one_channels(Ch_data_1, Properties_1, ...
@@ -256,7 +249,6 @@ while ~stop
                     stop = true;
                 end
             end
-
         catch err
             warning('fit error')
             rethrow(err);
@@ -288,6 +280,7 @@ end
 Outliers_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1);
 Outliers_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2);
 
+% FIXME: add Time_profile and freq to Ch_data
 Ch_data_1 = fit_core.Ch_data(T_arr, V1_arr, Outliers_range_1, Overload_1, ...
     Estimations_1, Times_conf, Accuracy_conf, Fs, Periods_counter);
 
@@ -331,14 +324,21 @@ if Underrange
     if ~Cond1 && ~Cond2
         Underrange = false;
     end
-    if Underrange
-        disp('Underrange') % FIXME: disp
-    end
 end
 end
 
 
+function disp_underrange(Underrange_1, Underrange_2)
 
+if Underrange_1 && Underrange_2
+    disp('Underrande: CH1 CH2')
+elseif Underrange_1
+    disp('Underrande: CH1')
+elseif Underrange_2
+    disp('Underrande:     CH2')
+end
+
+end
 
 
 

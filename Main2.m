@@ -237,7 +237,6 @@ Settings.harm_num = Harm_num;
 Settings.time_profile = Time_profile;
 Settings.harm_profile = Harm_profile;
 
-
 % Measurement part
 [Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, ...
     Used_ranges, Aster_range] = ...
@@ -270,7 +269,8 @@ Max_points = 50e3; % FIXME: magic constant
 %     fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
 %     Harm_num, Max_points);
 
-
+% NOTE: 1 is small, 5 is too much
+Res_to_noise_ratio_max = 5; % FIXME: magic constant
 
 Refit_1_flag = false;
 if isempty(Result_1)
@@ -278,7 +278,7 @@ if isempty(Result_1)
 else
     % FIXME: why refit if we could do good fit previously?
     Res_to_noise_1 = fit_core.calc_res_to_noise(Ch_data_1, Result_1, Harm_num);
-    if Res_to_noise_1 > 5 % FIXME: magic constant
+    if Res_to_noise_1 > Res_to_noise_ratio_max
         Refit_1_flag = true;
     end
 end
@@ -289,7 +289,7 @@ if isempty(Result_2)
 else
     % FIXME: why refit if we could do good fit previously?
     Res_to_noise_2 = fit_core.calc_res_to_noise(Ch_data_2, Result_2, Harm_num);
-    if Res_to_noise_2 > 5 % FIXME: magic constant
+    if Res_to_noise_2 > Res_to_noise_ratio_max
         Refit_2_flag = true;
     end
 end

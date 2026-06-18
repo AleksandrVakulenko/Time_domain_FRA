@@ -16,7 +16,7 @@
 % 6) Add accuracy setting to fit function
 
 % 7) Use residuals to estimate max possible quality
-% 8) harm auto-detector
+% 8) harm auto-detector (ALREADY: fit_core.estimate_harms_from_res)
 % 9) add input condition for harm measure or harm ignore
 
 % 10) place fft functions to its own lib

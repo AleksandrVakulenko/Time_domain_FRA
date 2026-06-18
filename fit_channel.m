@@ -15,7 +15,8 @@ if ~isempty(Estimations)
 
     Noise_rms = fit_core.noise_rms_calc(V_arr, Fs, freq, Harm_num);
 
-    if numel(find(Range)) > 10 % FIXME: magic constant
+    % NOTE: use range oly if it contains more than 100 points
+    if numel(find(Range)) > 100 % FIXME: magic constant
         T_arr = T_arr(Range);
         V_arr = V_arr(Range);
     end
@@ -26,10 +27,9 @@ if ~isempty(Estimations)
     [T_arr, V_arr, ~, Fs2] = fit_core.make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
         freq, Harm_num, Max_points);
 
-    if Fs2 ~= Fs % FIXME: debug print
-        disp(' ') % FIXME: disp
-        warning(['Sampling freq reduced: ' num2str(Fs) ' -> ' num2str(Fs2)]) % FIXME: disp
-        disp(' ') % FIXME: disp
+    if Fs2 ~= Fs
+        % FIXME: disp
+        warning(['Sampling freq reduced: ' num2str(Fs) ' -> ' num2str(Fs2)])
     end
 
     % NOTE: fit with harmonics estimations
@@ -43,6 +43,7 @@ if ~isempty(Estimations)
 
     % NOTE: analize residuals here
     if ~isempty(Harm_num)
+        % FIXME: is it better to use full Fs?
         Harm_est_2 = fit_core.estimate_harms_from_res(T_arr, Residuals, freq, ...
             Noise_rms, Harm_num);
     else
@@ -55,7 +56,7 @@ if ~isempty(Estimations)
             hn = Harm_est_2(i).n;
             ind = find([Fitted_harm.n] == hn);
             if ~isempty(ind)
-                disp([num2str(i) ' : ' num2str(ind)]) % FIXME: disp
+                disp(['Harm ' num2str(ind)]) % FIXME: disp
                 Fitted_harm(ind).amp = Fitted_harm(ind).amp + Harm_est_2(i).amp;
                 Fitted_harm(ind).phi = Harm_est_2(i).phi;
             end

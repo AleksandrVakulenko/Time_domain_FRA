@@ -10,6 +10,7 @@ Harm_amp_arr_dB = zeros(size(Harm_num));
 Harm_phi_arr = zeros(size(Harm_num));
 for i = 1:numel(Harm_num)
     Harm_freq = freq*Harm_num(i);
+    % FIXME: DFT_single_freq could return empty
     [Harm_amp, Phi_harm] = DFT_single_freq(T_arr, Residuals, Harm_freq);
     Harm_amp_arr(i) = Harm_amp;
     Value = Harm_amp;

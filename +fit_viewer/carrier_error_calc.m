@@ -25,9 +25,4 @@ if mean(abs(BG_out)) < 0.1*mean(abs(Amp_out))
     C_err_prc = mean(BG_err_out./Amp_out)*100;
 end
 
-% FIXME: debug
-% disp(['A_err = ' num2str(A_err_prc, '%0.4f') ' %'])
-% disp(['P_err = ' num2str(P_err_deg, '%0.4f') ' deg'])
-% disp(['C_err = ' num2str(C_err_prc, '%0.4f') ' %'])
-
 end

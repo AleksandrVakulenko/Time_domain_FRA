@@ -23,6 +23,7 @@ if ~isempty(Harm_num)
     k = 0;
     Harm_est = struct('n', [], 'amp', [], 'phi', []);
     for hn = Harm_num
+        % FIXME: DFT_single_freq could return empty
         [Amp_DFT, Phi_DFT] = DFT_single_freq(T_arr, V_arr, hn*freq);
         if Amp_DFT > 10^(HNR_min_dB/20)*nf_calc(hn*freq)
             k = k + 1;
