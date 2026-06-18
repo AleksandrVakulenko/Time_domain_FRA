@@ -7,52 +7,42 @@
 % TODO:
 % 
 % 
-% 
-% 1) add freq to ch_data (all previously saved data will be invalidate!)
-% 2) 
+% 1) Update FRA calc function
+% 2) Add error calc function foo(Freq, Rabs, Phi)
 % 3) Add variable accuracy
-% 4) 
-% 
-% 5) 
-% 6) 
-% 7) add more errors calculation (for colplex numbers)
-% 8) add absolute errors (hardware)
-% 
-% 9) harm auto-detector
-% 10) Use residuals to estimate max possible quality
+% 4) add absolute errors (hardware)
+% 5) add more errors calculation (for colplex numbers)
+% 6) Add accuracy setting to fit function
+
+% 7) Use residuals to estimate max possible quality
+% 8) harm auto-detector
+% 9) add input condition for harm measure or harm ignore
+
+% 10) place fft functions to its own lib
 % 11) 
-% 12) add input condition for harm measure or harm ignore
+% 12) 
 % 
-% 13) place fft functions to its own lib
-% 14) make Fern module
-% 15) add data saver function
-% 16) Add accuracy setting to fit function
+% 13) update data viewer (to both test or real data)
+% 14) add data saver function
+% 15) make Fern module
+% 16) Add freq to ch_data (all previously saved data will be invalidate!)
 % 
 % 17) 
-% 18) 
+% 18) use incoming estimations
 % 19) refactor estimations fix function
 % 20) use Estimations for Properties
 % 
-% 21) 
-% 22) 
-% 23) 
-% 24) update data viewer (to both test or real data)
+% 21) use different strategy for different periods
+% 22) investigate "underrange" function behavior
+% 23) save all estimations for debug
+% 24) 
 % 
-% 25) 
-% 26) use different strategy for different periods
-% 27) investigate "underrange" function behavior
-% 28) save all estimations for debug
+% 25) upgrade synth test
+% 26) [sig_gen:] add underrange (span and mean) test signals
+% 27) DFT vs fft problem (calculating many DFTs) (where?)
+% 28) Remember about f = 0 on fft calc data
 % 
-% 29) 
-% 30) upgrade synth test
-% 31) [sig_gen:] add underrange (span and mean) test signals
-% 32) use incoming estimations
-% 
-% 33) 
-% 34) 
-% 35) DFT vs fft problem (calculating many DFTs) (where?)
-% 36) Remember about f = 0 on fft calc data
-% 
+
 
 
 

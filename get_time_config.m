@@ -21,12 +21,12 @@ end
 switch Time_profile
     case "ultra_fast"
         Times_conf_basic = get_time_conf_ultra_fast(Period, Harm_mult);
-        Amp_err_prc = 1; % [%]
-        Phi_err_deg = 0.5; % [deg]
+        Amp_err_prc = 2; % [%]
+        Phi_err_deg = 1.0; % [deg]
     case "common"
         Times_conf_basic = get_time_conf_common(Period, Harm_mult);
-        Amp_err_prc = 0.5; % [%]
-        Phi_err_deg = 0.2; % [deg]
+        Amp_err_prc = 0.4; % [%]
+        Phi_err_deg = 0.3; % [deg]
     case "fine"
         Times_conf_basic = get_time_conf_fine(Period, Harm_mult);
         Amp_err_prc = 0.10; % [%]
@@ -111,7 +111,7 @@ function Times_conf = get_time_conf_fine(Period, Harm_mult)
     Times_conf.period_for_harm_det = Harm_mult;
     Times_conf.min_meas_time = 1; % [s]
     Times_conf.min_fop = 1.5; % [1]
-    Times_conf.max_fop = 10; % [1]
+    Times_conf.max_fop = 8; % [1]
 end
 
 
@@ -119,7 +119,7 @@ function Times_conf = get_time_conf_most_accurate(Period, Harm_mult)
     Times_conf.period_for_harm_det = Harm_mult;
     Times_conf.min_meas_time = 2; % [s]
     Times_conf.min_fop = 4;
-    Times_conf.max_fop = 20; % [1]
+    Times_conf.max_fop = 15; % [1]
 end
 
 

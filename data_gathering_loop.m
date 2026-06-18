@@ -35,7 +35,7 @@ Accuracy_conf = Profile.accuracy_conf;
 Min_FOP = Times_conf.min_fop;
 Max_FOP = Times_conf.max_fop;
 Period = Times_conf.period;
-Time_profile = Times_conf.time_profile;
+% Time_profile = Times_conf.time_profile; % NOTE: unused
 
 Max_time = Max_FOP*Period;
 Min_time = Min_FOP*Period;
