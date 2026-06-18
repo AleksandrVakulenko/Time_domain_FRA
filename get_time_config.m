@@ -1,8 +1,8 @@
 
 % FIXME: need refactor
 
-function [Times_conf, printer, Accuracy_conf] = get_time_config(Period, Harm_num, ...
-    Time_profile, Harm_profile)
+function [Times_conf, printer, Accuracy_conf, Profile] = ...
+    get_time_config(Period, Harm_num, Time_profile, Harm_profile)
 arguments
     Period double
     Harm_num double = 1 % FIXME: unused
@@ -81,6 +81,9 @@ Times_conf.time_profile = Time_profile;
 Times_conf.harm_profile = Harm_profile;
 
 printer = @() print_time_conf(Times_conf);
+
+Profile.times_conf = Times_conf;
+Profile.accuracy_conf = Accuracy_conf;
 end
 
 

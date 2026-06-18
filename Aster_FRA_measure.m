@@ -33,13 +33,9 @@ else
     Auto_range = true;
 end
 
-[Times_conf, Time_printer, Accuracy_conf] = get_time_config(Period, Harm_num, ...
-    Time_profile, Harm_profile);
+[Times_conf, Time_printer, ~, Profile] = get_time_config(Period, ...
+    Harm_num, Time_profile, Harm_profile);
 Time_printer(); % FIXME: debug
-
-Profile.times_conf = Times_conf;
-Profile.accuracy_conf = Accuracy_conf;
-%--------------------------------
 
 %--------------------------------
 Time_to_underrange = 0.1*Period; % [s]
@@ -94,9 +90,14 @@ try
     Aster.Gen_direction("Internal");
     Aster.initiate();
 
-    [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Range_init_num);
+    [~, ~, Aster_Range] = Aster_set_range(Aster, Range_init_num);
+    % NOTE: update time and accuracy profiles
+    Time_profile_new = Aster_max_time_profile(Time_profile, Aster_Range);
+    [~, ~, ~, Profile] = get_time_config(Period, Harm_num, ...
+        Time_profile_new, Harm_profile);
+    
     adev_utils.Wait(Filter_wait, 'Apply filter'); % FIXME: disp
-    Used_ranges = Aster_Range; % FIXME: nyan
+    Used_ranges = Aster_Range;
     Last_used_range = Aster_Range;
 
     Try_num = 0;
@@ -138,6 +139,11 @@ try
                     stop = true;
                 else
                     [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Aster_Range);
+                    % NOTE: update time and accuracy profiles
+                    Time_profile_new = Aster_max_time_profile(Time_profile, Aster_Range);
+                    [~, ~, ~, Profile] = get_time_config(Period, Harm_num, ...
+                        Time_profile_new, Harm_profile);
+
                     adev_utils.Wait(Filter_wait, 'Apply filter'); % FIXME: disp
                     if ~flag
                         stop = true;

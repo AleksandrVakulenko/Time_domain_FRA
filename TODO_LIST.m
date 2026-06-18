@@ -1,7 +1,8 @@
 
 % NOTE:
 % 1) all Aster specific function are named with prefix "Aster_"
-% 2) 
+% 2) Max time profile on range 5 if "fine", on range 6 is "common"
+% 3) 
 %
 
 % TODO:
@@ -9,7 +10,7 @@
 % 
 % 1) Update FRA calc function
 % 2) Add error calc function foo(Freq, Rabs, Phi)
-% 3) Add variable accuracy
+% 3) 
 % 4) add absolute errors (hardware)
 % 5) add more errors calculation (for colplex numbers)
 % 6) Add accuracy setting to fit function
