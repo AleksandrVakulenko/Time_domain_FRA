@@ -1,4 +1,4 @@
-function Gen_initiate(Gen, Gen_Voltage_level, Gen_freq)
+function Aster_Gen_initiate(Gen, Gen_Voltage_level, Gen_freq)
 
     if class(Gen) == "SR860_dev"
         Gen.set_gen_config(Gen_Voltage_level, Gen_freq, Gen_Offset_level);

@@ -65,7 +65,7 @@ Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 Harm_profile = "common"; % "common", "most_accurate"
 %--------------------------------
 
-[Times_conf, Time_printer] = get_time_config_Aster(Period, Harm_num, ...
+[Times_conf, Time_printer] = get_time_config(Period, Harm_num, ...
     Time_profile, Harm_profile);
 Time_printer(); % FIXME: debug
 

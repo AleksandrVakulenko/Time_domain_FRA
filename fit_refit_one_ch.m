@@ -21,7 +21,7 @@ Fs = Ch_data.fs;
 % Freq = Result.freq;
 Period = 1/Freq;
 
-[Times_conf, ~, Accuracy_conf] = get_time_config_Aster(Period, Harm_num, ...
+[Times_conf, ~, Accuracy_conf] = get_time_config(Period, Harm_num, ...
     Time_profile, Harm_profile);
 
 Time_passed = T_arr(end) - T_arr(1);

@@ -1,4 +1,4 @@
-function [Aster, Gen] = Connect_to_devices(Aster_addr, Gen_type, Gen_addr)
+function [Aster, Gen] = Aster_Connect_to_devices(Aster_addr, Gen_type, Gen_addr)
 arguments
     Aster_addr
     Gen_type {mustBeMember(Gen_type, ...

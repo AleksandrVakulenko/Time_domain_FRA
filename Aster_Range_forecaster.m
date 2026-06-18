@@ -1,6 +1,6 @@
 
 
-function [Range_num, Current_value] = Range_forecaster(Ammeter, Cap, Amp, Freq)
+function [Range_num, Current_value] = Aster_Range_forecaster(Ammeter, Cap, Amp, Freq)
 
 if isempty(Cap)
     Range_num = [];

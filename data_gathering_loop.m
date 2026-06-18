@@ -94,7 +94,7 @@ while ~stop
     pause(0.001);
 
     [T_part, V1_part, V2_part] = FRA_dev.get_VV();
-    V2_part = -V2_part; % NOTE: Aster ch2 inv
+    V2_part = -V2_part; % FIXME: add setting for inversion CH2 (Aster ch2 inv)
 
     % FIXME: debug
     if isempty(T_part)

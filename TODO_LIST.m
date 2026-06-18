@@ -1,11 +1,15 @@
 
+% NOTE:
+% 1) all Aster specific function are named with prefix "Aster_"
+% 2) 
+%
 
 % TODO:
 % 
 % 
 % 
 % 1) add freq to ch_data (all previously saved data will be invalidate!)
-% 2) extract all Aster specific functions from here
+% 2) 
 % 3) Add variable accuracy
 % 4) 
 % 

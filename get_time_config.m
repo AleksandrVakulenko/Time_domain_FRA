@@ -1,7 +1,7 @@
 
 % FIXME: need refactor
 
-function [Times_conf, printer, Accuracy_conf] = get_time_config_Aster(Period, Harm_num, ...
+function [Times_conf, printer, Accuracy_conf] = get_time_config(Period, Harm_num, ...
     Time_profile, Harm_profile)
 arguments
     Period double

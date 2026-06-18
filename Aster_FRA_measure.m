@@ -33,7 +33,7 @@ else
     Auto_range = true;
 end
 
-[Times_conf, Time_printer, Accuracy_conf] = get_time_config_Aster(Period, Harm_num, ...
+[Times_conf, Time_printer, Accuracy_conf] = get_time_config(Period, Harm_num, ...
     Time_profile, Harm_profile);
 Time_printer(); % FIXME: debug
 
@@ -53,11 +53,11 @@ end
 Last_used_range = [];
 Gen_type = "Aster_dev";
 Gen_addr = [];
-[Aster, Gen] = Connect_to_devices(Aster_addr, Gen_type, Gen_addr);
+[Aster, Gen] = Aster_Connect_to_devices(Aster_addr, Gen_type, Gen_addr);
 
 ERR = [];
 try
-    Gen_initiate(Gen, Gen_Voltage_level, Gen_freq);
+    Aster_Gen_initiate(Gen, Gen_Voltage_level, Gen_freq);
 
     [Fs_new, Filter_wait] = Aster_ADC_init(Aster, Gen_freq, Harm_num, Times_conf);
 
@@ -77,7 +77,7 @@ try
 
     % FIXME: add more options
     if Auto_range
-        [Range_num_forecast, ~] = Range_forecaster(Aster, Cap_exp, ...
+        [Range_num_forecast, ~] = Aster_Range_forecaster(Aster, Cap_exp, ...
             Gen_Voltage_level, Gen_freq);
 
         if ~isempty(Range_num_forecast)
@@ -152,13 +152,13 @@ try
         end
     end
 catch ERR
-    Disconnest_devices(Aster, Gen)
+    Aster_Disconnest_devices(Aster, Gen)
     disp('ERR finish // devices closed') % FIXME: disp
     rethrow(ERR)
 end
 
 if isempty(ERR)
-    Disconnest_devices(Aster, Gen)
+    Aster_Disconnest_devices(Aster, Gen)
     disp('OK finish') % FIXME: disp
 end
 

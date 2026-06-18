@@ -1,4 +1,4 @@
-function Disconnest_devices(Aster, Gen)
+function Aster_Disconnest_devices(Aster, Gen)
     if class(Gen) == "Aster_dev"
         Aster_gen_terminate(Aster);
     else
