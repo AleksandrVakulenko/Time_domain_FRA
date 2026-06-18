@@ -62,6 +62,16 @@ if Max_fop <= Min_fop
     Max_fop = Min_fop*1.2;
 end
 
+Absolute_max_FOP = 50; % FIXME: magic constant
+
+if Max_fop > Absolute_max_FOP
+    Max_fop = Absolute_max_FOP;
+end
+
+if Min_fop > Max_fop
+    Min_fop = Max_fop*0.9; % FIXME: magic constant
+end
+
 % FIXME: maybe add top limit on FOP (~50)
 
 Times_conf.min_fop = Min_fop;

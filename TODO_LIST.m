@@ -7,7 +7,7 @@
 % 1) add freq to ch_data (all previously saved data will be invalidate!)
 % 2) extract all Aster specific functions from here
 % 3) Add variable accuracy
-% 4) Add max FOP value
+% 4) 
 % 
 % 5) 
 % 6) 
