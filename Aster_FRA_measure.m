@@ -1,5 +1,6 @@
-function [Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, Used_ranges] = ...
-    Aster_FRA_measure(Aster_addr, Settings, Fig, Cap_exp, Fixed_range)
+function [Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, ...
+    Used_ranges, Last_used_range] = Aster_FRA_measure(Aster_addr, Settings, ...
+    Fig, Cap_exp, Fixed_range)
 arguments
     Aster_addr
     Settings
@@ -49,7 +50,7 @@ if Time_to_underrange < 0.3
 end
 %--------------------------------
 
-
+Last_used_range = [];
 Gen_type = "Aster_dev";
 Gen_addr = [];
 [Aster, Gen] = Connect_to_devices(Aster_addr, Gen_type, Gen_addr);
@@ -95,7 +96,8 @@ try
 
     [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Range_init_num);
     adev_utils.Wait(Filter_wait, 'Apply filter'); % FIXME: disp
-    Used_ranges = [Aster_Range]; % FIXME: nyan
+    Used_ranges = Aster_Range; % FIXME: nyan
+    Last_used_range = Aster_Range;
 
     Try_num = 0;
     stop = false;
@@ -141,6 +143,7 @@ try
                         stop = true;
                     else
                         Used_ranges = unique([Used_ranges Aster_Range]);
+                        Last_used_range = Aster_Range;
                     end
                 end
             end

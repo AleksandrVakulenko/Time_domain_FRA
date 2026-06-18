@@ -1,6 +1,6 @@
 
 % NOTE:
-% class for all fit functions result
+% class for channel data (from gathering fonction)
 
 
 classdef Ch_data

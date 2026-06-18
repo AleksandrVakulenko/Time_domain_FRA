@@ -239,7 +239,8 @@ Settings.harm_profile = Harm_profile;
 
 
 % Measurement part
-[Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, Used_ranges] = ...
+[Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, ...
+    Used_ranges, Aster_range] = ...
     Aster_FRA_measure(Aster_addr, Settings, Fig_or_ax, Cap_exp, Fixed_range);
 
 warning(['>>>>>> Exit_flag: ' num2str(Exit_flag) ' >>>>>>>>']); % FIXME: disp
@@ -270,16 +271,35 @@ Max_points = 50e3; % FIXME: magic constant
 %     Harm_num, Max_points);
 
 
-% FIXME: why refit if we could do good fit previously?
-Res_to_noise_1 = fit_core.calc_res_to_noise(Ch_data_1, Result_1, Harm_num);
-Res_to_noise_2 = fit_core.calc_res_to_noise(Ch_data_2, Result_2, Harm_num);
 
-if Res_to_noise_1 > 5 % FIXME: magic constant
+Refit_1_flag = false;
+if isempty(Result_1)
+    Refit_1_flag = true;
+else
+    % FIXME: why refit if we could do good fit previously?
+    Res_to_noise_1 = fit_core.calc_res_to_noise(Ch_data_1, Result_1, Harm_num);
+    if Res_to_noise_1 > 5 % FIXME: magic constant
+        Refit_1_flag = true;
+    end
+end
+
+Refit_2_flag = false;
+if isempty(Result_2)
+    Refit_2_flag = true;
+else
+    % FIXME: why refit if we could do good fit previously?
+    Res_to_noise_2 = fit_core.calc_res_to_noise(Ch_data_2, Result_2, Harm_num);
+    if Res_to_noise_2 > 5 % FIXME: magic constant
+        Refit_2_flag = true;
+    end
+end
+
+if Refit_1_flag
     [Result_1, Residuals_1, DEBUG_1] = fit_refit_one_ch(Ch_data_1, ...
         Freq, Harm_num, Time_profile, Harm_profile, 1, Max_points);
 end
 
-if Res_to_noise_2 > 5 % FIXME: magic constant
+if Refit_2_flag
     [Result_2, Residuals_2, DEBUG_2] = fit_refit_one_ch(Ch_data_2, ...
         Freq, Harm_num, Time_profile, Harm_profile, 2, Max_points);
 end
@@ -314,9 +334,13 @@ if numel(Axes_arr) == 2 && all(isvalid(Axes_arr))
 end
 
 
-
 % FIXME: use debug function to show results
-Fit_Result = fit_viewer.show_result_debug(Result_1, Result_2, Freq,  R_Scale);
+if ~isempty(Result_1) && ~isempty(Result_2)
+    Fit_Result = fit_viewer.show_result_debug(Result_1, Result_2, Freq,  R_Scale);
+else
+    Fit_Result = [];
+end
+
 Extra_data.ch_data_1 = Ch_data_1;
 Extra_data.ch_data_2 = Ch_data_2;
 Extra_data.result_1 = Result_1;
@@ -330,6 +354,7 @@ Extra_data.score.max_score = Max_score;
 Extra_data.DEBUG.DEBUG_1 = DEBUG_1;
 Extra_data.DEBUG.DEBUG_2 = DEBUG_2;
 Extra_data.used_ranges = Used_ranges;
+Extra_data.aster_range = Aster_range;
 
 end
 
