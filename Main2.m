@@ -336,7 +336,8 @@ end
 
 % FIXME: use debug function to show results
 if ~isempty(Result_1) && ~isempty(Result_2)
-    Fit_Result = fit_viewer.show_result_debug(Result_1, Result_2, Freq,  R_Scale);
+%     Fit_Result = fit_viewer.show_result_debug(Result_1, Result_2, Freq,  R_Scale);
+    Fit_Result = show_result_debug_2(Result_1, Result_2, Freq, R_Scale, Aster_range);
 else
     Fit_Result = [];
 end
