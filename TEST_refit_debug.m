@@ -4,13 +4,14 @@ clc
 
 
 
-i = 3;
+i = 10;
 
 
 Result_1 = Extra_data_arr(i).result_1;
 Result_2 = Extra_data_arr(i).result_2;
 
 Ch_data_1 = Extra_data_arr(i).ch_data_1;
+Ch_data_2 = Extra_data_arr(i).ch_data_2;
 % Residuals_1 = Extra_data_arr(i).residuals_1;
 
 Extra_data = Extra_data_arr(i);
@@ -71,18 +72,18 @@ Refit_flag
 
 clc
 
-Ch_data = Ch_data_1;
+Ch_data = Ch_data_2;
 % Freq
 % Harm_num
 % Time_profile
 % Harm_profile
 
-% Harm_num = [1 2 3]
+Harm_num = [1 2 3 4 5]
 % plot(Residuals_new)
 
 [Score_prev, ~] = fit_viewer.score_calc_ch(Result_1, Accuracy_conf);
 
-[Result_new, Residuals_new, DEBUG_new] = fit_refit_one_ch(Ch_data_1, ...
+[Result_new, Residuals_new, DEBUG_new] = fit_refit_one_ch(Ch_data_2, ...
     Freq, Harm_num, Time_profile, Harm_profile, 1);
 
 [Score_new, Max_score] = fit_viewer.score_calc_ch(Result_new, Accuracy_conf);

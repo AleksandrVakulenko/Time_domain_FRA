@@ -8,12 +8,12 @@
 % TODO:
 % 
 % 
-% 1) Update FRA calc function
-% 2) Add error calc function foo(Freq, Rabs, Phi)
-% 3) 
-% 4) add absolute errors (hardware)
-% 5) add more errors calculation (for colplex numbers)
-% 6) Add accuracy setting to fit function
+% 1) Update Final result FRA calc function
+% 2) add absolute errors (hardware)
+% 3) add more errors calculation (for colplex numbers)
+% 4) Add accuracy setting to fit function
+% 5) 
+% 6) 
 
 % 7) Use residuals to estimate max possible quality
 % 8) harm auto-detector (ALREADY: fit_core.estimate_harms_from_res)
