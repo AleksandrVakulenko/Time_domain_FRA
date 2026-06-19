@@ -18,8 +18,8 @@ Max_freq = Max_harm * freq;
 Filter_freq = Max_freq*2;
 Fs_new = Max_freq*4;
 
-if Fs_new < 500
-    Fs_new = 500; % FIXME: magic constant
+if Fs_new < 200
+    Fs_new = 200; % FIXME: magic constant
 end
 
 if Num > Max_points

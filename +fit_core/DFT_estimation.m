@@ -7,7 +7,7 @@ function Result = DFT_estimation(Time, Signal, Period)
     Time_length = End_time - Start_time;
     Periods_counter = Time_length/Period;
 
-    if Periods_counter < 0.99999 % NOTE: at least one full period
+    if Periods_counter < 0.98 % FIXME: magic constant NOTE: at least one full period
         Result = [];
     else
         [Amp_DFT, Phi_DFT, Mean] = DFT_single_freq(Time, Signal, Freq);

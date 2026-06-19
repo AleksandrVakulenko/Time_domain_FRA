@@ -51,7 +51,7 @@ if Periods_counter >= 1
     Result1.t_max = 0;
     Result1.status = 'fixed';
 
-    if ~isnan(Result1.amp)
+    if ~isempty(Result1) && ~isnan(Result1.amp)
         Estimations = [Estimations Result1];
     else
         error('err EF2'); % FIXME: undone
@@ -62,7 +62,7 @@ if Periods_counter >= 1
     Result2.t_max = T_arr(end);
     Result2.status = 'fixed';
 
-    if ~isnan(Result1.amp)
+    if ~isempty(Result2) && ~isnan(Result2.amp)
         Estimations = [Estimations Result2];
     else
         error('err EF4'); % FIXME: undone

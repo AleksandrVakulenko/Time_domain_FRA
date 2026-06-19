@@ -1,14 +1,22 @@
 %% TEST FREQ LOOP
 
 
-Gen_Voltage_level = 0.7; % [V]
-F_min = 0.005;
+Aster_addr = 3;
+
+Harm_num = [1 2 3];
+Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
+
+Gen_Voltage_level = 1; % [V]
+F_min = 0.01;
 F_max = 300e3;
-F_num = 100;
+F_num = 30;
 
 % Fixed_range = [5];
 
-% Freq_arr = 10.^linspace(log10(F_min), log10(F_max), F_num);
+Freq_arr = 10.^linspace(log10(F_min), log10(F_max), F_num);
+% Freq_arr = 0.5;
+Fixed_range = [];
+
 % Freq_arr = [0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2];
 % Voltage_amp_arr = [   8       8       8      6      3      1    0.5   0.25 ];
 % Voltage_amp_arr = [   3       3       3      3      3      1    0.5   0.25 ];
@@ -18,10 +26,10 @@ F_num = 100;
 
 Run_num = 2;
 
-Fixed_range = 6;
-Cal_cap_N = 1; % 10 pF
-Voltage_amp_arr = [    10    10    10     5      3      1    0.5   0.25  ];
-Freq_arr =        [0.001  0.002  0.005  0.01  0.02   0.05   0.1   0.2  ];
+% Fixed_range = 6;
+% Cal_cap_N = 1; % 10 pF
+% Voltage_amp_arr = [    10    10    10     5      3      1    0.5   0.25  ];
+% Freq_arr =        [0.001  0.002  0.005  0.01  0.02   0.05   0.1   0.2  ];
 
 
 F_range_Aster = Freq_arr <= 200;
@@ -31,14 +39,7 @@ Freq_arr_Aster = Freq_arr(F_range_Aster);
 Freq_arr_LCR = Freq_arr(F_range_LCR);
 
 
-Aster_addr = 3;
-
-% Gen_freq = 2; % [Hz]
-Harm_num = [1 2 3];
-Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
-
-
-Cap_exp = 100e-9;
+Cap_exp = 1e-9;
 Fig = figure('position', [471 217 690 691]);
 Ax_arr = create_axes(Fig);
 
@@ -50,7 +51,7 @@ for i = 1:N
     disp([num2str(i) '/' num2str(N)])
 
     Gen_freq = Freq_arr_Aster(i);
-    Gen_Voltage_level = Voltage_amp_arr(i);
+%     Gen_Voltage_level = Voltage_amp_arr(i);
     [Fit_Result, Extra_data] = Test_measurment_function(Aster_addr, Gen_freq, ...
         Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, Ax_arr, Fixed_range);
     Fit_Result.freq = Gen_freq;
@@ -64,36 +65,39 @@ Full_time = toc(Timer);
 
 disp(['Full time: ' num2str(Full_time/60, '%0.1f') ' min'])
 
-Save_file = ['Calibration_data_2/' 'C' num2str(Fixed_range, '%02d') ...
-    '_' num2str(Run_num, '%02d') '.mat'];
-save(Save_file, "Result_arr_Aster", "Extra_data_arr", "Voltage_amp_arr", ...
-    "Freq_arr_Aster", "Full_time")
 
-% Aster_switch_to_LCR(Aster_addr);
-% 
-% Result_arr_LCR = [];
-% N = numel(Freq_arr_LCR);
-% for i = 1:N
-%     disp([num2str(i) '/' num2str(N)])
-% 
-%     Gen_freq = Freq_arr_LCR(i);
-%     LCR_Result = LCR_measure(Gen_freq, Gen_Voltage_level);
-%     LCR_Result.freq = Gen_freq;
-%     Result_arr_LCR = [Result_arr_LCR LCR_Result];
-% end
-% 
-% 
+if ~isempty(Fixed_range)
+    Save_file = ['Calibration_data_2/' 'C' num2str(Fixed_range, '%02d') ...
+        '_' num2str(Run_num, '%02d') '.mat'];
+    save(Save_file, "Result_arr_Aster", "Extra_data_arr", "Voltage_amp_arr", ...
+        "Freq_arr_Aster", "Full_time")
+end
+
+Aster_switch_to_LCR(Aster_addr);
+
+Result_arr_LCR = [];
+N = numel(Freq_arr_LCR);
+for i = 1:N
+    disp([num2str(i) '/' num2str(N)])
+
+    Gen_freq = Freq_arr_LCR(i);
+    LCR_Result = LCR_measure(Gen_freq, Gen_Voltage_level);
+    LCR_Result.freq = Gen_freq;
+    Result_arr_LCR = [Result_arr_LCR LCR_Result];
+end
+
+
 % Result_arr = [Result_arr_Aster Result_arr_LCR];
 
 %%
 
 figure('position', [468 218 686 783])
 
-% Freq_arr_plot_LCR = [Result_arr_LCR.freq];
-% Res_LCR = [Result_arr_LCR.res_abs];
-% Res_err_LCR = [Result_arr_LCR.res_abs_err];
-% Phi_LCR = [Result_arr_LCR.phi];
-% Phi_err_LCR = [Result_arr_LCR.phi_err];
+Freq_arr_plot_LCR = [Result_arr_LCR.freq];
+Res_LCR = [Result_arr_LCR.res_abs];
+Res_err_LCR = [Result_arr_LCR.res_abs_err];
+Phi_LCR = [Result_arr_LCR.phi];
+Phi_err_LCR = [Result_arr_LCR.phi_err];
 
 Freq_arr_plot_Aster = [Result_arr_Aster.freq];
 Res_Aster = [Result_arr_Aster.res_abs];
@@ -103,29 +107,35 @@ Phi_err_Aster = [Result_arr_Aster.phi_err];
 
 subplot(2, 1, 1)
 hold on
-% errorbar(Freq_arr_plot_LCR, Res_LCR, Res_err_LCR, '-b')
-% errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '-r')
+errorbar(Freq_arr_plot_LCR, Res_LCR, Res_err_LCR, '-b')
+errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '--r')
 % plot(Freq_arr_plot_LCR, 1./(2*pi*Res_LCR.*Freq_arr_plot_LCR)*1e12, '-b')
-plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '-r')
+% plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '-r')
 % plot(Res./Res*100, '-b')
 % plot((Res+Res_err)./Res*100, '--b')
 % plot((Res-Res_err)./Res*100, '--b')
-ylabel('|Cap|, pF')
+% ylabel('|Cap|, pF')
+ylabel('|R|, Ohm')
 xlabel('f, Hz')
 set(gca, 'xscale', 'log')
-set(gca, 'yscale', 'log')
+% set(gca, 'yscale', 'log')
+grid on
+grid minor
+box on
 
 subplot(2, 1, 2)
 hold on
-% errorbar(Freq_arr_plot_LCR, Phi_LCR, Phi_err_LCR, '-b')
-errorbar(Freq_arr_plot_Aster, Phi_Aster, Phi_err_Aster, '-r')
+errorbar(Freq_arr_plot_LCR, Phi_LCR, Phi_err_LCR, '-b')
+errorbar(Freq_arr_plot_Aster, Phi_Aster, Phi_err_Aster, '--r')
 % plot(Freq_arr_plot_Aster, abs(tan((Phi_Aster+90)/180*pi)))
 % plot(Freq_arr, Phi_err)
 % plot(Phi_err, '--b')
 ylabel('Phi, deg')
 xlabel('f, Hz')
 set(gca, 'xscale', 'log')
-
+grid on
+grid minor
+box on
 
 
 %% Extra_data

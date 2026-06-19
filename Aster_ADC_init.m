@@ -6,7 +6,7 @@ if Times_conf.time_profile == "ultra_fast"
     Min_filter_freq = 10; 
 else
     Number_of_periods = 5; % FIXME: magic constant
-    Min_filter_freq = 2;  % Hz
+    Min_filter_freq = 1;  % Hz
 end
 
 % Fs = 10e3; % FIXME: get from device!
@@ -23,7 +23,9 @@ else
     Sampling_freq = 1000*Gen_freq;
 end
 
-
+if Sampling_freq < 200
+    Sampling_freq = 200; % FIXME: magic constant
+end
 
 Max_harm = max(Harm_num);
 if Max_harm <= 2

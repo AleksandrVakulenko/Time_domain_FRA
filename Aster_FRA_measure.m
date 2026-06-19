@@ -90,7 +90,7 @@ try
     Aster.Gen_direction("Internal");
     Aster.initiate();
 
-    [~, ~, Aster_Range] = Aster_set_range(Aster, Range_init_num);
+    [~, R_Scale, Aster_Range] = Aster_set_range(Aster, Range_init_num);
     % NOTE: update time and accuracy profiles
     Time_profile_new = Aster_max_time_profile(Time_profile, Aster_Range);
     [~, ~, ~, Profile] = get_time_config(Period, Harm_num, ...
@@ -127,6 +127,8 @@ try
                 Aster_Range = Aster_Range - 1;
                 need_to_switch_range = true;
                 switch_range_force = true;
+                Channel_settings_2.underrange_force = true;
+                disp('Underrange force on CH2 is active') % FIXME: debug
             elseif Exit_flag == 101 || Exit_flag == 201
                 stop = true;
             else
@@ -168,7 +170,7 @@ if isempty(ERR)
     disp('OK finish') % FIXME: disp
 end
 
-
+Accuracy_conf = Profile.accuracy_conf;
 
 Full_main_time = toc(Full_main_time_counter);
 disp([newline '-----------------------------------------' newline ...

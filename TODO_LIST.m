@@ -13,7 +13,7 @@
 % 3) add more errors calculation (for colplex numbers)
 % 4) Add accuracy setting to fit function
 % 5) 
-% 6) 
+% 6) PROBLEM IN make Fs lower FUNCTION !!!!!!
 
 % 7) Use residuals to estimate max possible quality
 % 8) harm auto-detector (ALREADY: fit_core.estimate_harms_from_res)
