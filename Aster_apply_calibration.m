@@ -1,3 +1,6 @@
+
+% FIXME: add force flag to calibration to preserve harmonics
+
 function [Res_out, Phi_out, Amp_cal_err, Phi_cal_err] = ...
     Aster_apply_calibration(Range_N, Freq_arr, Res_arr, Phi_arr)
 
