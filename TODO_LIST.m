@@ -16,21 +16,20 @@
 % 23.06.2026
 % 1) One more test
 % 2) Add timer_callback
-% 3) Add Temp controller class
-% 4) Add LCR meter class
-% 5) Add set_freq and set_amp in Aster hardware
-% 6) Add ADC and DAC scales in Aster hardware.
+% 3) Add LCR meter class
+% 4) Add set_freq and set_amp in Aster hardware
+% 5) Add ADC and DAC scales in Aster hardware.
 
 % 24.06.2026
-% 1) Eliminate all magic constants (1/2)
+% 1) Eliminate all magic constants
 % 2) Use residuals to estimate max possible quality
 % 3) harm auto-detector (ALREADY: fit_core.estimate_harms_from_res)
 % 4) 
 
 % 25.06.2026
-% 1) Eliminate all magic constants (2/2)
+% 1) Update Debug_msg module
 % 2) Add accuracy setting to fit function
-% 3) Update Debug_msg module
+% 3) Add Temp controller class
 % 4) Do refactor
 
 % 26.06.2026

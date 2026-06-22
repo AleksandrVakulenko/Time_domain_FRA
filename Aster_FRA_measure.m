@@ -1,7 +1,8 @@
 function [Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, ...
-    Used_ranges, Last_used_range] = Aster_FRA_measure(Aster_addr, Settings, ...
-    Fig, Cap_exp, Fixed_range)
+    Used_ranges, Last_used_range] = Aster_FRA_measure(Resources, Aster_addr, ...
+    Settings, Fig, Cap_exp, Fixed_range)
 arguments
+    Resources
     Aster_addr
     Settings
     Fig = []
@@ -108,8 +109,8 @@ try
 
         Aster.CMD_data_stream(1);
 
-        [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(Aster, ...
-            Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig);
+        [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(Resources, ...
+            Aster, Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig);
 
         Aster.CMD_data_stream(0);
 

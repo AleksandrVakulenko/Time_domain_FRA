@@ -41,6 +41,9 @@ Stop_button = uicontrol('parent', Control_Frame, ...
                    'Callback', CB, ...
                    'BackgroundColor', [0.9 0.4 0.4]);
 
+Stop_button.UserData = struct('stop', false);
+Stop_button.Callback = @gui.stop_callback;
+
 Data = struct('axes_top', Ax1, 'axes_bot', Ax2, 'stop_button', Stop_button);
 Fig.UserData = Data;
 

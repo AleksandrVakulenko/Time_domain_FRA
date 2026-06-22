@@ -1,7 +1,8 @@
-function [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(FRA_dev, ...
-    Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig_or_ax)
+function [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(Resources, ...
+    FRA_dev, Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig_or_ax)
 
 arguments
+    Resources
     FRA_dev
     Freq
     Harm_num
@@ -10,6 +11,8 @@ arguments
     Channel_settings_2
     Fig_or_ax = []
 end
+
+Stop_button = Resources.stop_button;
 
 Axes_arr = init_gather_axes(Fig_or_ax);
 
@@ -94,6 +97,12 @@ Time_shift = 0;
 while ~stop
     %FIXME: debug for fast signal
     pause(0.001);
+    
+    external_stop = gui.stop_check(Stop_button);
+    if external_stop
+        Exit_flag = 40;
+        break;
+    end
 
     [T_part, V1_part, V2_part] = FRA_dev.get_VV();
     V2_part = -V2_part; % FIXME: add setting for inversion CH2 (Aster ch2 inv)

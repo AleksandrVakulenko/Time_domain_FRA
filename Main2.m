@@ -41,7 +41,13 @@ Freq_arr_LCR = Freq_arr(F_range_LCR);
 
 Cap_exp = 1e-9;
 Fig = figure('position', [471 217 690 691]);
-Ax_arr = create_axes(Fig);
+
+Fig = gui.init_Aster_FRA_gui();
+Ax_arr = [Fig.UserData.axes_top Fig.UserData.axes_bot];
+Stop_button = Fig.UserData.stop_button;
+Resources.stop_button = Stop_button;
+% Ax_arr = create_axes(Fig);
+
 
 Timer = tic;
 Result_arr_Aster = [];
@@ -52,8 +58,8 @@ for i = 1:N
 
     Gen_freq = Freq_arr_Aster(i);
 %     Gen_Voltage_level = Voltage_amp_arr(i);
-    [Fit_Result, Extra_data] = Test_measurment_function(Aster_addr, Gen_freq, ...
-        Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, Ax_arr, Fixed_range);
+    [Fit_Result, Extra_data] = Test_measurment_function(Resources, Aster_addr, ...
+        Gen_freq, Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, Ax_arr, Fixed_range);
     Fit_Result.freq = Gen_freq;
     Result_arr_Aster = [Result_arr_Aster Fit_Result];
     Extra_data_arr = [Extra_data_arr Extra_data];
@@ -160,69 +166,6 @@ Used_ranges = Extra_data.used_ranges;
 
 
 
-%% TEST MEASUREMENT LOOP
-
-Aster_addr = 3;
-
-Gen_Voltage_level = 0.5; % [V]
-
-Gen_freq = 0.5; % [Hz]
-Harm_num = [1];
-Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
-
-
-Cap_exp = 1e-12;
-Fig = figure('position', [471 217 690 691]);
-
-Result_arr = [];
-N = 1;
-for i = 1:N
-    disp([num2str(i) '/' num2str(N)])
-
-    [Fit_Result, Extra_data] = Test_measurment_function(Aster_addr, Gen_freq, ...
-        Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, Fig, [5]);
-    Result_arr = [Result_arr Fit_Result];
-
-    Cap_exp = Fit_Result.cap_par;
-end
-
-%%
-% Result_arr1 = Result_arr; % common
-% Result_arr2 = Result_arr; % ultra_fast
-% Result_arr3 = Result_arr; % fine
-% Result_arr4 = Result_arr; % most_accurate
-
-Result_arr = [Result_arr2 Result_arr1 Result_arr3 Result_arr4]
-
-figure('position', [468 218 686 783])
-
-Res = [Result_arr.res_abs];
-Res_err = [Result_arr.res_abs_err];
-Phi = [Result_arr.phi];
-Phi_err = [Result_arr.phi_err];
-
-subplot(2, 1, 1)
-hold on
-plot(Res, '-b')
-plot(Res+Res_err, '--b')
-plot(Res-Res_err, '--b')
-% plot(Res./Res*100, '-b')
-% plot((Res+Res_err)./Res*100, '--b')
-% plot((Res-Res_err)./Res*100, '--b')
-ylabel('|R|, Ohm')
-
-
-subplot(2, 1, 2)
-hold on
-plot(Phi, '-b')
-plot(Phi+Phi_err, '--b')
-plot(Phi-Phi_err, '--b')
-% plot(Phi_err, '--b')
-ylabel('Phi, deg')
-
-
-
-
 
 
 
@@ -230,8 +173,8 @@ ylabel('Phi, deg')
 
 %% TEST MEASUREMENT FUNCTNION
 
-function [Fit_Result, Extra_data] = Test_measurment_function(Aster_addr, ...
-    Gen_freq, Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, ...
+function [Fit_Result, Extra_data] = Test_measurment_function(Resources, ...
+    Aster_addr, Gen_freq, Gen_Voltage_level, Harm_num, Cap_exp, Time_profile, ...
     Fig_or_ax, Fixed_range)
 
 %--------------------------------
@@ -249,11 +192,15 @@ Settings.harm_profile = Harm_profile;
 
 % Measurement part
 [Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, ...
-    Used_ranges, Aster_range] = ...
-    Aster_FRA_measure(Aster_addr, Settings, Fig_or_ax, Cap_exp, Fixed_range);
+    Used_ranges, Aster_range] = Aster_FRA_measure(Resources, Aster_addr, ...
+    Settings, Fig_or_ax, Cap_exp, Fixed_range);
 
 warning(['>>>>>> Exit_flag: ' num2str(Exit_flag) ' >>>>>>>>']); % FIXME: disp
 
+if Exit_flag == 40
+    % FIXME: debug way to finish by stop button
+    error('The program has been terminated by the user.')
+end
 
 % Fitting part
 Period_counter = Ch_data_1.period_counter;
