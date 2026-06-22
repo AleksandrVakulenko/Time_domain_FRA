@@ -11,7 +11,7 @@
 % 1) PROBLEM IN make Fs lower FUNCTION !!!!!!
 % 2) 
 % 3) Update Final result FRA calc function
-% 4) Add GUI draft
+% 4) 
 
 % 23.06.2026
 % 1) One more test
