@@ -15,15 +15,10 @@ F_num = 30;
 
 Freq_arr = 10.^linspace(log10(F_min), log10(F_max), F_num);
 % Freq_arr = 0.5;
+
+Sample.info = "test";
+
 Fixed_range = [];
-
-% Freq_arr = [0.001 0.002 0.005 0.01 0.02 0.05 0.1 0.2];
-% Voltage_amp_arr = [   8       8       8      6      3      1    0.5   0.25 ];
-% Voltage_amp_arr = [   3       3       3      3      3      1    0.5   0.25 ];
-% Freq_arr =        [ 0.001   0.002   0.005  0.01   0.02   0.05   0.1   0.2  ];
-% Voltage_amp_arr = [  10    10     10     10    10    10   10   5];
-% Freq_arr =        [0.005  0.01   0.02   0.05   0.1   0.2  0.5  1];
-
 Run_num = 2;
 
 % Fixed_range = 6;
@@ -46,7 +41,7 @@ Fig = gui.init_Aster_FRA_gui();
 Ax_arr = [Fig.UserData.axes_top Fig.UserData.axes_bot];
 Stop_button = Fig.UserData.stop_button;
 Resources.stop_button = Stop_button;
-% Ax_arr = create_axes(Fig);
+% Ax_arr = create_axes(Fig); % NOTE: old style
 
 
 Timer = tic;
@@ -68,15 +63,17 @@ for i = 1:N
 end
 
 Full_time = toc(Timer);
-
-disp(['Full time: ' num2str(Full_time/60, '%0.1f') ' min'])
+Time_to_compare = sum(2./Freq_arr_Aster);
+disp(['Full time: ' num2str(Full_time/60, '%0.1f') ' min | NC_time ~ ' ...
+    num2str(Time_to_compare/60, '%0.1f') ' min | ratio = ' ...
+    num2str(Full_time/Time_to_compare, '%0.1f') ])
 
 
 if ~isempty(Fixed_range)
     Save_file = ['Calibration_data_2/' 'C' num2str(Fixed_range, '%02d') ...
         '_' num2str(Run_num, '%02d') '.mat'];
     save(Save_file, "Result_arr_Aster", "Extra_data_arr", "Voltage_amp_arr", ...
-        "Freq_arr_Aster", "Full_time")
+        "Freq_arr_Aster", "Full_time", "Sample")
 end
 
 Aster_switch_to_LCR(Aster_addr);
@@ -294,7 +291,8 @@ end
 % FIXME: use debug function to show results
 if ~isempty(Result_1) && ~isempty(Result_2)
 %     Fit_Result = fit_viewer.show_result_debug(Result_1, Result_2, Freq,  R_Scale);
-    Fit_Result = show_result_debug_2(Result_1, Result_2, Freq, R_Scale, Aster_range);
+%     Fit_Result = show_result_debug_2(Result_1, Result_2, Freq, R_Scale, Aster_range);
+    Fit_Result = Aster_FRA_result(Result_1, Result_2, Freq, Aster_range);
 else
     Fit_Result = [];
 end

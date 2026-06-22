@@ -20,9 +20,11 @@ BG_err_out(isnan(BG_err_out)) = inf;
 
 A_err_prc = mean(Amp_err_out./Amp_out)*100;
 P_err_deg = mean(Phi_err_out);
-C_err_prc = mean(BG_err_out./BG_out)*100;
+
 if mean(abs(BG_out)) < 0.1*mean(abs(Amp_out))
     C_err_prc = mean(BG_err_out./Amp_out)*100;
+else
+    C_err_prc = mean(BG_err_out./BG_out)*100;
 end
 
 end

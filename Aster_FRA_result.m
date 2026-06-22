@@ -122,8 +122,9 @@ Result.current = []; % FIXME: debug; previously: Cur;
 Result.current_error = []; % FIXME: debug; previously: Cur_err;
 Result.voltage = []; % FIXME: debug; previously: Volt1;
 Result.voltage_error = [];% FIXME: debug; previously: Volt1_err;
-Result.range_n = Range_N;
 
+Result.range_n = Range_N;
+Result.freq = freq;
 
 end
 

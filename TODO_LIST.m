@@ -5,13 +5,8 @@
 
 % TO TEST
 % 1) make_fs_lower function
-% 2) 
-
-% 22.06.2026
-% 1) 
-% 2) 
+% 2) new scoring system
 % 3) 
-% 4) 
 
 % 23.06.2026
 % 1) One more test
@@ -31,6 +26,7 @@
 % 2) Add accuracy setting to fit function
 % 3) Add Temp controller class
 % 4) Do refactor
+% 5) Update LCR_measure function
 
 % 26.06.2026
 % 1) Add freq to ch_data (all previously saved data will be invalidate!)
