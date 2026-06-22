@@ -1,48 +1,84 @@
-
 % NOTE:
 % 1) all Aster specific function are named with prefix "Aster_"
-% 2) Max time profile on range 5 if "fine", on range 6 is "common"
+% 2) Limit time profile on range 5 up to "fine", on range 6 to "common"
 % 3) 
-%
 
-% TODO:
-% 
-% 
-% 1) Update Final result FRA calc function
+
+
+% 22.06.2026
+% 1) PROBLEM IN make Fs lower FUNCTION !!!!!!
 % 2) add absolute errors (hardware)
+% 3) Update Final result FRA calc function
+% 4) Add GUI draft
+
+% 23.06.2026
+% 1) One more test
+% 2) Add timer_callback
+% 3) Add Temp controller class
+% 4) Add LCR meter class
+% 5) Add set_freq and set_amp in Aster hardware
+% 6) Add ADC and DAC scales in Aster hardware.
+
+% 24.06.2026
+% 1) Eliminate all magic constants (1/2)
+% 2) Use residuals to estimate max possible quality
+% 3) harm auto-detector (ALREADY: fit_core.estimate_harms_from_res)
+% 4) 
+
+% 25.06.2026
+% 1) Eliminate all magic constants (2/2)
+% 2) Add accuracy setting to fit function
+% 3) Update Debug_msg module
+% 4) Do refactor
+
+% 26.06.2026
+% 1) Add freq to ch_data (all previously saved data will be invalidate!)
+% 2) add data saver function
+% 3) One more test
+% 4) 
+
+
+
+% 29.06.2026
+% 1) place fft functions to its own lib
+% 2) make Fern module (exclude all Astra functions)
+% 3) Exclude Astra from aDevice
+% 4) 
+
+% 30.06.2026
+% 1) 
+% 2) 
 % 3) add more errors calculation (for colplex numbers)
-% 4) Add accuracy setting to fit function
+% 4) update data viewer (to both test or real data)
+
+% 01.07.2026
+% 1) use incoming estimations
+% 2) use Estimations for Properties
+% 3) 
+% 4) refactor estimations fix function
+
+% 02.07.2026
+% 1) use different strategy for different periods
+% 2) investigate "underrange" function behavior
+% 3) 
+% 4) 
+
+% 03.07.2026
+% 1) 
+% 2) 
+% 3) 
+% 4) 
+
+
+
+
+% OTHER TODO:
+% 1) upgrade synth test
+% 2) [sig_gen:] add underrange (span and mean) test signals
+% 3) DFT vs fft problem (calculating many DFTs) (where?)
+% 4) Remember about f = 0 on fft calc data
 % 5) 
-% 6) PROBLEM IN make Fs lower FUNCTION !!!!!!
-
-% 7) Use residuals to estimate max possible quality
-% 8) harm auto-detector (ALREADY: fit_core.estimate_harms_from_res)
-% 9) add input condition for harm measure or harm ignore
-
-% 10) place fft functions to its own lib
-% 11) 
-% 12) 
-% 
-% 13) update data viewer (to both test or real data)
-% 14) add data saver function
-% 15) make Fern module
-% 16) Add freq to ch_data (all previously saved data will be invalidate!)
-% 
-% 17) 
-% 18) use incoming estimations
-% 19) refactor estimations fix function
-% 20) use Estimations for Properties
-% 
-% 21) use different strategy for different periods
-% 22) investigate "underrange" function behavior
-% 23) save all estimations for debug
-% 24) 
-% 
-% 25) upgrade synth test
-% 26) [sig_gen:] add underrange (span and mean) test signals
-% 27) DFT vs fft problem (calculating many DFTs) (where?)
-% 28) Remember about f = 0 on fft calc data
-% 
+% 6) 
 
 
 
