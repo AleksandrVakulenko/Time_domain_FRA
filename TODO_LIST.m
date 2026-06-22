@@ -3,11 +3,13 @@
 % 2) Limit time profile on range 5 up to "fine", on range 6 to "common"
 % 3) 
 
-
+% TO TEST
+% 1) make_fs_lower function
+% 2) 
 
 % 22.06.2026
 % 1) PROBLEM IN make Fs lower FUNCTION !!!!!!
-% 2) add absolute errors (hardware)
+% 2) 
 % 3) Update Final result FRA calc function
 % 4) Add GUI draft
 
