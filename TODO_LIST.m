@@ -8,7 +8,7 @@
 % 2) 
 
 % 22.06.2026
-% 1) PROBLEM IN make Fs lower FUNCTION !!!!!!
+% 1) 
 % 2) 
 % 3) 
 % 4) 
@@ -24,7 +24,7 @@
 % 1) Eliminate all magic constants
 % 2) Use residuals to estimate max possible quality
 % 3) harm auto-detector (ALREADY: fit_core.estimate_harms_from_res)
-% 4) 
+% 4) Create list of all exit codes
 
 % 25.06.2026
 % 1) Update Debug_msg module

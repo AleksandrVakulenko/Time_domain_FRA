@@ -22,7 +22,6 @@ if ~isempty(Estimations)
     end
 
     Max_points = Fit_settings.max_points;
-    % FIXME: upgrade function make_fs_lower
     % FIXME: make it single channel
     [T_arr, V_arr, ~, Fs2] = fit_core.make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
         freq, Harm_num, Max_points);
