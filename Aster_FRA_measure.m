@@ -1,12 +1,12 @@
 function [Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, ...
     Used_ranges, Last_used_range] = Aster_FRA_measure(Resources, Aster_addr, ...
-    Settings, Fig, Cap_exp, Fixed_range)
+    Settings, Fig, Zest, Fixed_range)
 arguments
     Resources
     Aster_addr
     Settings
     Fig = []
-    Cap_exp = []
+    Zest = []
     Fixed_range = []
 end
 
@@ -74,7 +74,7 @@ try
 
     % FIXME: add more options
     if Auto_range
-        [Range_num_forecast, ~] = Aster_Range_forecaster(Aster, Cap_exp, ...
+        [Range_num_forecast, ~] = Aster_Range_forecaster(Aster, Zest, ...
             Gen_Voltage_level, Gen_freq);
 
         if ~isempty(Range_num_forecast)
@@ -115,6 +115,10 @@ try
         Aster.CMD_data_stream(0);
 
         warning(['Exit flag: ' num2str(Exit_flag)])
+
+        if Exit_flag == 40
+            break;
+        end
 
         if Auto_range
             need_to_switch_range = false;

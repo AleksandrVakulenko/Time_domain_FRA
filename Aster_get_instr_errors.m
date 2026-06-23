@@ -35,7 +35,7 @@ switch range_num
 end
 
 Amp_err_rel = Basic_amp_error/100 + Temp_error*1e-6*Temp_diff;
-Phi_err_abs = 0.2; % FIXME: magic constant
+Phi_err_abs = 0.05; % FIXME: magic constant
 
 end
 

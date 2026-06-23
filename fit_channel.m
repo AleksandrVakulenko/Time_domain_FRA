@@ -63,13 +63,14 @@ if ~isempty(Estimations)
         Refit_flag = true;
     end
     
-    % NOTE: fit residuals here to find lost harms
+    % FIXME: fit residuals here to find lost harms
     if Refit_flag
         [Result, Residuals, DEBUG] = fit_core.any_sin_fit(T_arr, V_arr, freq, ...
             Estimations, Properties, Fitted_harm, Fit_settings);
     end
     
 else
+    disp('NO ESTIMATIONS FOR FIT'); % FIXME: disp
     Result = [];
     Residuals = [];
     DEBUG = [];

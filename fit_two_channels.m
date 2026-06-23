@@ -46,12 +46,20 @@ Fit_settings_1.max_points = Max_points;
 [Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr_1, V1_arr, ...
     Fit_range_1, Fs, freq, Estimations_1, Properties_1, Harm_num_1, Fit_settings_1);
 
+if isempty(Result_1)
+    error('Fit CH1 fail')
+end
+
 Fit_settings_2.freq_dev_flag = false;
 Fit_settings_2.freq_dev_const = Result_1.f_dev_ppm;
 Fit_settings_2.max_points = Max_points;
 
 [Result_2, Residuals_2, DEBUG_2] = fit_channel(T_arr_2, V2_arr, ...
     Fit_range_2, Fs, freq, Estimations_2, Properties_2, Harm_num_2, Fit_settings_2);
+
+if isempty(Result_2)
+    error('Fit CH2 fail')
+end
 
 Result_1.estimations = Estimations_1;
 Result_2.estimations = Estimations_2;

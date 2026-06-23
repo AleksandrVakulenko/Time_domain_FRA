@@ -26,10 +26,22 @@ for i = 1:N
     [Amp_cal, Phi_cal] = Calibration_function(Range_N, Freq);
 
     if ~isempty(Amp_cal) && ~isnan(Amp_cal) && ~isempty(Phi_cal) && ~isnan(Phi_cal)
+        % FIXME: experimental part
+        Alpha_min = 0.85;
+        if Phi >= 0
+            Alpha = Alpha_min;
+        elseif Phi <= -80
+            Alpha = 1;
+        else
+            Alpha = Alpha_min + abs(Phi)/80*(1-Alpha_min);
+        end
+        Phi_cal = Phi_cal * Alpha;
+        % end of experimantal part
+
         Res_out(i) = Res*Amp_cal; % "*" is res, "/" is cur amp
         Phi_out(i) = Phi - Phi_cal;
         Amp_cal_err(i) = 0; % FIXME: undone
-        Phi_cal_err(i) = 0.05*Phi_cal; % FIXME: magic constant
+        Phi_cal_err(i) = 0.2*Phi_cal; % FIXME: magic constant
     end
 end
 
@@ -45,7 +57,7 @@ freq_log = log10(Freq);
 switch Range
 
     case 1
-        F_LIMIT = 200; % Hz
+        F_LIMIT = Aster_range_freq_limit(1); % Hz
 
         Amp_model.foo = "model_1";
         Amp_model.A = 0;
@@ -60,7 +72,7 @@ switch Range
         Phi_model.x0 = 1;
 
     case 2
-        F_LIMIT = 200; % Hz
+        F_LIMIT = Aster_range_freq_limit(2); % Hz
 
         Amp_model.foo = "model_1";
         Amp_model.A = 0;
@@ -75,7 +87,7 @@ switch Range
         Phi_model.x0 = -1;
 
     case 3
-        F_LIMIT = 200; % Hz
+        F_LIMIT = Aster_range_freq_limit(3); % Hz
 
         Amp_model.foo = "model_1";
         Amp_model.A = 0;
@@ -90,7 +102,7 @@ switch Range
         Phi_model.x0 = 0;
 
     case 4
-        F_LIMIT = 200; % Hz
+        F_LIMIT = Aster_range_freq_limit(4); % [Hz]
 
         Amp_model.foo = "model_1";
         Amp_model.A = -0.3144;
@@ -105,7 +117,7 @@ switch Range
         Phi_model.x0 = -3.537;
 
     case 5
-        F_LIMIT = 2; % Hz
+        F_LIMIT = Aster_range_freq_limit(5); % Hz
 
         Amp_model.foo = "model_2";
         Amp_model.A = -0.0003747;
@@ -120,7 +132,7 @@ switch Range
         Phi_model.x0 = -7.655;
 
     case 6
-        F_LIMIT = 0.2; % Hz
+        F_LIMIT = Aster_range_freq_limit(6); % Hz
 
         Amp_model.foo = "model_2";
         Amp_model.A = -0.001272;

@@ -8,18 +8,21 @@
 % 2) new scoring system
 % 3) 
 
+
 % 23.06.2026
 % 1) One more test
-% 2) Add timer_callback
-% 3) Add LCR meter class
-% 4) Add set_freq and set_amp in Aster hardware
-% 5) Add ADC and DAC scales in Aster hardware.
+% 2) Add LCR meter class
+% 3) Add set_freq and set_amp in Aster hardware
+% 4) Add ADC and DAC scales in Aster hardware.
+% 5) Add DC offset in Aster hardware
+% 6) Refactor Aster class
 
 % 24.06.2026
 % 1) Eliminate all magic constants
 % 2) Use residuals to estimate max possible quality
 % 3) harm auto-detector (ALREADY: fit_core.estimate_harms_from_res)
 % 4) Create list of all exit codes
+% 5) Add timer_callback
 
 % 25.06.2026
 % 1) Update Debug_msg module

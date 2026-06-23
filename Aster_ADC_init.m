@@ -3,10 +3,13 @@ function [Fs_new, Filter_wait] = Aster_ADC_init(Aster, Gen_freq, ...
 
 if Times_conf.time_profile == "ultra_fast"
     Number_of_periods = 2; % FIXME: magic constant
-    Min_filter_freq = 10; 
+    Min_filter_freq = 10; % [Hz]
+elseif Times_conf.time_profile == "common"
+    Number_of_periods = 5; % FIXME: magic constant
+    Min_filter_freq = 2; % [Hz]
 else
     Number_of_periods = 5; % FIXME: magic constant
-    Min_filter_freq = 1;  % Hz
+    Min_filter_freq = 0.5; % [Hz[
 end
 
 % Fs = 10e3; % FIXME: get from device!
@@ -32,7 +35,6 @@ if Max_harm <= 2
     Max_harm = 2;
 end
 
-% Min_filter_freq = 2; % Hz
 ADC_filter_Fc = Max_harm*Gen_freq;
 if ADC_filter_Fc < Min_filter_freq
     ADC_filter_Fc = Min_filter_freq;

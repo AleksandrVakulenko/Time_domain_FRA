@@ -27,7 +27,19 @@ Fig = figure('Position', Figure_pos, ...
              'MenuBar', 'figure', 'Resize', 'off');
 
 Ax1 = axes('Parent', Fig, 'Position', [0.480 0.557 0.504 0.406]);
+grid(Ax1, 'on')
+grid(Ax1, 'minor')
+box(Ax1, 'on')
+hold(Ax1, 'on')
+cla(Ax1)
+
 Ax2 = axes('Parent', Fig, 'Position', [0.480 0.064 0.504 0.406]);
+grid(Ax2, 'on')
+grid(Ax2, 'minor')
+box(Ax2, 'on')
+hold(Ax2, 'on')
+cla(Ax2)
+
 
 CB = @(a, b) disp('Stop button'); % FIXME: debug
 
@@ -39,7 +51,7 @@ Stop_button = uicontrol('parent', Control_Frame, ...
                    'position', [0.05 0.85 0.15 0.15/Aspect_ratio], ...
                    'string', 'Stop', ...
                    'Callback', CB, ...
-                   'BackgroundColor', [0.9 0.4 0.4]);
+                   'BackgroundColor', [0.95 0.73 0.73]);
 
 Stop_button.UserData = struct('stop', false);
 Stop_button.Callback = @gui.stop_callback;

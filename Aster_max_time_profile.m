@@ -8,8 +8,12 @@ if Range == 5
         Time_profile = "fine";
     end
 elseif Range == 6
-    if Time_profile == "fine" || Time_profile == "most_accurate"
-        Time_profile = "common";
+    % FIXME: do we need fine on range 6?
+%     if Time_profile == "fine" || Time_profile == "most_accurate"
+%         Time_profile = "common";
+%     end
+    if Time_profile == "most_accurate"
+        Time_profile = "fine";
     end
 end
 

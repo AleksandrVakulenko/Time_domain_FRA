@@ -1,14 +1,20 @@
 
 
-function [Range_num, Current_value] = Aster_Range_forecaster(Ammeter, Cap, Amp, Freq)
+function [Range_num, Current_value] = Aster_Range_forecaster(Ammeter, Zest, Amp, Freq)
 
-if isempty(Cap)
+if isempty(Zest)
     Range_num = [];
     Current_value = [];
     return;
 end
 
-Res = 1/(2*pi*1i*Freq*Cap);
+if Zest.type == "cap"
+    Res = 1/(2*pi*1i*Freq*Zest.value);
+elseif Zest.type == "res"
+    Res = Zest.value;
+else
+
+end
 
 Current = Amp/Res;
 

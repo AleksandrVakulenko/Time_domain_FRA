@@ -210,28 +210,32 @@ while ~stop
                 disp('PREFIT CHANNEL 1') % FIXME: disp
                 [Result_1] = fit_one_channels(Ch_data_1, Properties_1, ...
                     Harm_num, Prefit_max_points);
-                [Outliers_range_1, Outliers_volume_1] = ...
-                    fit_core.find_outliers(Ch_data_1, Result_1);
-                [Score_1, ~] = fit_viewer.score_calc_ch(Result_1, Accuracy_conf);
-                Estimations_1 = fit_core.result2estimation(Result_1);
-                if Score_1 > 0
-                    Prefit_ready_1 = true;
+                if ~isempty(Result_1)
+                    [Outliers_range_1, ~] = ...
+                        fit_core.find_outliers(Ch_data_1, Result_1);
+                    [Score_1, ~] = fit_viewer.score_calc_ch(Result_1, Accuracy_conf);
+                    Estimations_1 = fit_core.result2estimation(Result_1);
+                    if Score_1 > 0
+                        Prefit_ready_1 = true;
+                    end
+                    disp(['Score: ' num2str(Score_1)]); % FIXME: disp
                 end
-                disp(['Score: ' num2str(Score_1)]); % FIXME: disp
             end
 
             if Prefit_need_2 && ~Prefit_ready_2
                 disp('PREFIT CHANNEL 2') % FIXME: disp
                 [Result_2] = fit_one_channels(Ch_data_2, Properties_2, ...
                     Harm_num, Prefit_max_points);
-                [Outliers_range_2, Outliers_volume_2] = ...
-                    fit_core.find_outliers(Ch_data_2, Result_2);
-                [Score_2, ~] = fit_viewer.score_calc_ch(Result_2, Accuracy_conf);
-                Estimations_2 = fit_core.result2estimation(Result_2);
-                if Score_2 > 0
-                    Prefit_ready_2 = true;
+                if ~isempty(Result_2)
+                    [Outliers_range_2, Outliers_volume_2] = ...
+                        fit_core.find_outliers(Ch_data_2, Result_2);
+                    [Score_2, ~] = fit_viewer.score_calc_ch(Result_2, Accuracy_conf);
+                    Estimations_2 = fit_core.result2estimation(Result_2);
+                    if Score_2 > 0
+                        Prefit_ready_2 = true;
+                    end
+                    disp(['Score: ' num2str(Score_2)]); % FIXME: disp
                 end
-                disp(['Score: ' num2str(Score_2)]); % FIXME: disp
             end
 
             if Prefit_need_1 && Prefit_need_2 && Prefit_ready_1 && Prefit_ready_2
@@ -239,23 +243,24 @@ while ~stop
                 [Result_1, ~, ~, Result_2, ~, ~] = ...
                     fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, ...
                     Properties_2, Harm_num, Prefit_max_points);
+                if ~isempty(Result_1) && ~isempty(Result_2)
+                    [Outliers_range_1, Outliers_volume_1] = ...
+                        fit_core.find_outliers(Ch_data_1, Result_1);
+                    [Outliers_range_2, Outliers_volume_2] = ...
+                        fit_core.find_outliers(Ch_data_2, Result_2);
 
-                [Outliers_range_1, Outliers_volume_1] = ...
-                    fit_core.find_outliers(Ch_data_1, Result_1);
-                [Outliers_range_2, Outliers_volume_2] = ...
-                    fit_core.find_outliers(Ch_data_2, Result_2);
+                    [Score_1, Score2, ~, ~] = ...
+                        fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
 
-                [Score_1, Score2, ~, ~] = ...
-                    fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
+                    disp(['--- Scores: ---' newline 'Ch1: ' num2str(Score_1) newline ...
+                        'Ch2: ' num2str(Score2) newline '---------------']) % FIXME: disp
 
-                disp(['--- Scores: ---' newline 'Ch1: ' num2str(Score_1) newline ...
-                    'Ch2: ' num2str(Score2) newline '---------------']) % FIXME: disp
+                    Estimations_1 = fit_core.result2estimation(Result_1);
+                    Estimations_2 = fit_core.result2estimation(Result_2);
 
-                Estimations_1 = fit_core.result2estimation(Result_1);
-                Estimations_2 = fit_core.result2estimation(Result_2);
-
-                if Score_1 > 0 && Score2 > 0
-                    stop = true;
+                    if Score_1 > 0 && Score2 > 0
+                        stop = true;
+                    end
                 end
             end
         catch err
@@ -293,16 +298,21 @@ while ~stop
     end
 end
 
-% NOTE: where are breaks in while loop
-Outliers_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1);
-Outliers_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2);
+if Exit_flag == 40
+    Ch_data_1 = fit_core.Ch_data.empty();
+    Ch_data_2 = fit_core.Ch_data.empty();
+else
+    % NOTE: where are breaks in while loop
+    Outliers_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1);
+    Outliers_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2);
 
-% FIXME: add Time_profile and freq to Ch_data
-Ch_data_1 = fit_core.Ch_data(T_arr, V1_arr, Outliers_range_1, Overload_1, ...
-    Estimations_1, Times_conf, Accuracy_conf, Fs, Periods_counter);
+    % FIXME: add Time_profile and freq to Ch_data
+    Ch_data_1 = fit_core.Ch_data(T_arr, V1_arr, Outliers_range_1, Overload_1, ...
+        Estimations_1, Times_conf, Accuracy_conf, Fs, Periods_counter);
 
-Ch_data_2 = fit_core.Ch_data(T_arr, V2_arr, Outliers_range_2, Overload_2, ...
-    Estimations_2, Times_conf, Accuracy_conf, Fs, Periods_counter);
+    Ch_data_2 = fit_core.Ch_data(T_arr, V2_arr, Outliers_range_2, Overload_2, ...
+        Estimations_2, Times_conf, Accuracy_conf, Fs, Periods_counter);
+end
 
 end
 

@@ -82,7 +82,7 @@ Harm_3_phi_arr = [];
 for i = 1:numel(Result_arr_Aster)
     Result = Result_arr_Aster(i);
 
-    Freq = Result.Freq;
+    Freq = Result.freq;
     Res = Result.res_abs;
     Phi = Result.phi;
 

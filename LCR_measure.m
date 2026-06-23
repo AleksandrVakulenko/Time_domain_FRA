@@ -27,7 +27,7 @@ end
         try
             LCR_dev.set_volt(LCR_gen_voltage);
             LCR_dev.set_freq(LCR_gen_freq);
-            LCR_dev.set_speed('short', 1); % FIXME: magic constant
+            LCR_dev.set_speed('medium', 2); % FIXME: magic constant
             LCR_dev.set_measurment_function("Z-thd");
             pause(0.1);
             for i = 1:5
