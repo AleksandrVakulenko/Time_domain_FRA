@@ -1,5 +1,5 @@
 
-function [Fig] = init_Aster_FRA_gui()
+function [Fig] = init_FRA_gui()
 
 Fig_name = 'FRA GUI';
 
@@ -54,7 +54,7 @@ Stop_button = uicontrol('parent', Control_Frame, ...
                    'BackgroundColor', [0.95 0.73 0.73]);
 
 Stop_button.UserData = struct('stop', false);
-Stop_button.Callback = @gui.stop_callback;
+Stop_button.Callback = @fit_gui.stop_callback;
 
 Data = struct('axes_top', Ax1, 'axes_bot', Ax2, 'stop_button', Stop_button);
 Fig.UserData = Data;

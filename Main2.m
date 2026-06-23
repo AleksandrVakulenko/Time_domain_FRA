@@ -47,15 +47,13 @@ F_range_LCR = Freq_arr >= 20;
 Freq_arr_Aster = Freq_arr(F_range_Aster);
 Freq_arr_LCR = Freq_arr(F_range_LCR);
 
-% Fig = figure('position', [471 217 690 691]);
-% Ax_arr = create_axes(Fig); % NOTE: old style
-Fig = gui.init_Aster_FRA_gui();
+Fig = fit_gui.init_FRA_gui();
 Ax_arr = [Fig.UserData.axes_top Fig.UserData.axes_bot];
 Stop_button = Fig.UserData.stop_button;
 Resources.stop_button = Stop_button;
 
 
-Zest = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr);
+Z_est = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr);
 % Zest = struct('type', 'cap', 'value', 10e-12);
 % Zest = struct('type', 'res', 'value', 10e3);
 
@@ -69,12 +67,12 @@ for i = 1:N
     Gen_freq = Freq_arr_Aster(i);
 %     Gen_Voltage_level = Voltage_amp_arr(i);
     [Fit_Result, Extra_data] = Test_measurment_function(Resources, Aster_addr, ...
-        Gen_freq, Gen_Voltage_level, Harm_num, Zest, Time_profile, Ax_arr, Fixed_range);
+        Gen_freq, Gen_Voltage_level, Harm_num, Z_est, Time_profile, Ax_arr, Fixed_range);
     Fit_Result.freq = Gen_freq;
     Result_arr_Aster = [Result_arr_Aster Fit_Result];
     Extra_data_arr = [Extra_data_arr Extra_data];
 
-    Zest = struct('type', 'res', 'value', Fit_Result.res_abs);
+    Z_est = struct('type', 'res', 'value', Fit_Result.res_abs);
 end
 
 Full_time = toc(Timer);
@@ -253,8 +251,6 @@ end
 
 % FIXME: use debug function to show results
 if ~isempty(Result_1) && ~isempty(Result_2)
-%     Fit_Result = fit_viewer.show_result_debug(Result_1, Result_2, Freq,  R_Scale);
-%     Fit_Result = show_result_debug_2(Result_1, Result_2, Freq, R_Scale, Aster_range);
     Fit_Result = Aster_FRA_result(Result_1, Result_2, Freq, Aster_range);
 else
     Fit_Result = [];
@@ -280,32 +276,10 @@ end
 
 
 
-function Axes_arr = create_axes(Fig)
-if ~isempty(Fig)
-    figure(Fig)
-
-    Ax1 = subplot(2, 1, 1);
-    grid on
-    grid minor
-    box on
-    hold on
-    cla
-
-    Ax2 = subplot(2, 1, 2);
-    grid on
-    grid minor
-    box on
-    hold on
-    cla
-
-    Axes_arr = [Ax1 Ax2];
-else
-    Axes_arr = [];
-end
-end
 
 
 function Zest = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr)
+% NOTE: bad version
 % FIXME: it is bad to estimate on single point
     Harm_num = [1 2 3];
     Gen_freq = 1;

@@ -98,7 +98,7 @@ while ~stop
     %FIXME: debug for fast signal
     pause(0.001);
     
-    external_stop = gui.stop_check(Stop_button);
+    external_stop = fit_gui.stop_check(Stop_button);
     if external_stop
         Exit_flag = 40;
         break;
