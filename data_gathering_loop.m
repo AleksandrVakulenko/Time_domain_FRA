@@ -14,7 +14,7 @@ end
 
 Stop_button = Resources.stop_button;
 
-Axes_arr = init_gather_axes(Fig_or_ax);
+Axes_arr = fit_gui.init_gather_axes(Fig_or_ax);
 
 Period = 1/Freq;
 Harm_num(Harm_num == 1) = [];

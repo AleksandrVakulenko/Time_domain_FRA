@@ -1,7 +1,7 @@
 
 
 
-function [flag, R_sense, Range] = Aster_set_range(Aster, Range)
+function [flag, R_sense, Range] = set_range(Aster, Range)
 
 if Range < 1 || Range > 6
     flag = false;

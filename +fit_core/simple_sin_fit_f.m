@@ -1,8 +1,7 @@
 
 
 
-function Result = ... % simple_sin_fit_f
-    simple_sin_fit_f(Time, Signal, Freq, Estimations)
+function Result = simple_sin_fit_f(Time, Signal, Freq, Estimations)
     
     Start_time = Time(1);
     End_time = Time(end);

@@ -1,5 +1,5 @@
 
-% FIXME: add info
+% FIXME: add header
 
 classdef LCR_result
 

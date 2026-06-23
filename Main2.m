@@ -89,7 +89,7 @@ if ~isempty(Fixed_range)
         "Freq_arr_Aster", "Full_time", "Sample")
 end
 
-Aster_switch_to_LCR(Aster_addr);
+Aster_FRA.switch_to_LCR(Aster_addr);
 
 Result_arr_LCR = [];
 N = numel(Freq_arr_LCR);
@@ -200,7 +200,7 @@ Settings.harm_profile = Harm_profile;
 
 % Measurement part
 [Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, ...
-    Used_ranges, Aster_range] = Aster_FRA_measure(Resources, Aster_addr, ...
+    Used_ranges, Aster_range] = Aster_FRA.measure(Resources, Aster_addr, ...
     Settings, Fig_or_ax, Zest, Fixed_range);
 
 warning(['>>>>>> Exit_flag: ' num2str(Exit_flag) ' >>>>>>>>']); % FIXME: disp
@@ -228,7 +228,7 @@ disp([newline 'Scores:' newline 'Ch1: ' num2str(Score_1) newline ...
     'Ch2: ' num2str(Score_2)]) % FIXME: disp
 
 % Final plot part
-Axes_arr = init_gather_axes(Fig_or_ax);
+Axes_arr = fit_gui.init_gather_axes(Fig_or_ax);
 if numel(Axes_arr) == 2 && all(isvalid(Axes_arr))
     style_num = 2;
 
@@ -251,7 +251,7 @@ end
 
 % FIXME: use debug function to show results
 if ~isempty(Result_1) && ~isempty(Result_2)
-    Fit_Result = Aster_FRA_result(Result_1, Result_2, Freq, Aster_range);
+    Fit_Result = Aster_FRA.do_FRA_result(Result_1, Result_2, Freq, Aster_range);
 else
     Fit_Result = [];
 end

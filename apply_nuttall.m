@@ -1,3 +1,6 @@
+
+% FIXME: move to FFT module
+
 function [Signal_out, F_lim] = apply_nuttall(Signal, Fs, freq)
 arguments
     Signal

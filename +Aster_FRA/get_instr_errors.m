@@ -1,5 +1,5 @@
 
-function [Amp_err_rel, Phi_err_abs] = Aster_get_instr_errors(range_num)
+function [Amp_err_rel, Phi_err_abs] = get_instr_errors(range_num)
 
 Temp_diff = 10; % K
 

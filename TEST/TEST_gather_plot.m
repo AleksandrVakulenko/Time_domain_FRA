@@ -43,7 +43,7 @@ hold on
 cla
 
 
-Axes_arr = init_gather_axes([Ax_1 Ax_2]);
+Axes_arr = fit_gui.init_gather_axes([Ax_1 Ax_2]);
 
 %
 

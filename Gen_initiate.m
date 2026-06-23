@@ -1,4 +1,9 @@
-function Aster_Gen_initiate(Gen, Gen_Voltage_level, Gen_freq)
+
+% FIXME: this is not an Astra specific function !
+
+% FIXME: unused function
+
+function Gen_initiate(Gen, Gen_Voltage_level, Gen_freq)
 
     if class(Gen) == "SR860_dev"
         Gen.set_gen_config(Gen_Voltage_level, Gen_freq, Gen_Offset_level);
@@ -10,7 +15,7 @@ function Aster_Gen_initiate(Gen, Gen_Voltage_level, Gen_freq)
         Gen.set_offset(Gen_Offset_level);
         Gen.initiate();
     elseif class(Gen) == "Aster_dev"
-        Aster_gen_init(Gen, Gen_Voltage_level, Gen_freq);
+        Aster_FRA.gen_init(Gen, Gen_Voltage_level, Gen_freq);
     else
         error('Wong gen class')
     end

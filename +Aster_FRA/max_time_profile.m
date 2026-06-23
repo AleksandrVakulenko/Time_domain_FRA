@@ -1,7 +1,7 @@
 
 
 
-function Time_profile = Aster_max_time_profile(Time_profile, Range)
+function Time_profile = max_time_profile(Time_profile, Range)
 
 if Range == 5
     if Time_profile == "most_accurate"

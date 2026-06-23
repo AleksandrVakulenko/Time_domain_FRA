@@ -1,5 +1,5 @@
 
-function Aster_gen_init(Aster, Gen_Voltage_level, Gen_freq)
+function gen_init(Aster, Gen_Voltage_level, Gen_freq)
 
 if Gen_Voltage_level >= 0.04
     High_voltage_mode(Aster, Gen_Voltage_level, Gen_freq)

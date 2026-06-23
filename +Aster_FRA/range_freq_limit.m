@@ -1,6 +1,6 @@
 
 
-function Freq_limit = Aster_range_freq_limit(Range_num)
+function Freq_limit = range_freq_limit(Range_num)
 
 switch Range_num
 

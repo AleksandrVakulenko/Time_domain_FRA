@@ -28,7 +28,7 @@ for i = 1:numel(Extra_data_arr)
         error(num2str(Range_N))
     end
 
-    Result = Aster_FRA_result(Result_1, Result_2, Freq, Range_N);
+    Result = Aster_FRA.do_FRA_result(Result_1, Result_2, Freq, Range_N);
 
 %     Freq = Result.Freq;
     Res = Result.res_abs;

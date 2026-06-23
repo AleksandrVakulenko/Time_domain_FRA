@@ -1,11 +1,9 @@
 
-% NOTE: this function replaces
-%     "show_result_debug_2(Result_1, Result_2, Freq, R_Scale, Aster_range)"
 
 % FIXME: R_Scale could be calculated from Range_N
 % FIXME: freq is inside Result struct
 
-function Result = Aster_FRA_result(Result_1, Result_2, freq, Range_N, R_Scale)
+function Result = do_FRA_result(Result_1, Result_2, freq, Range_N, R_Scale)
 arguments
     Result_1
     Result_2
@@ -37,9 +35,9 @@ CH_2_Pe = Output.phi_err;
 
 % CALIBRATION SECTION
 [Res, Phase_diff, Amp_cal_err, Phi_cal_err] = ...
-    Aster_apply_calibration(Range_N, freq, Res, Phase_diff);
+    Aster_FRA.apply_calibration(Range_N, freq, Res, Phase_diff);
 
-[Amp_err_rel, Phi_err_abs] = Aster_get_instr_errors(Range_N);
+[Amp_err_rel, Phi_err_abs] = Aster_FRA.get_instr_errors(Range_N);
 
 % update fundamental's errors
 Res_abs_err = Res*Amp_err_rel;
@@ -170,7 +168,7 @@ function Harm_out_arr = Harm_calc_and_corr(Result, freq, Volt1, ...
 Harms_arr = Result.harm;
 Harms_err_arr = Result.harm_err;
 
-[Amp_err_rel, Phi_err_abs] = Aster_get_instr_errors(Range_N);
+[Amp_err_rel, Phi_err_abs] = Aster_FRA.get_instr_errors(Range_N);
 
 Harm_out_arr = [];
 for i = 1:numel(Harms_arr)
@@ -190,7 +188,7 @@ for i = 1:numel(Harms_arr)
 
     % FIXME: add force flag to calibration to preserve harmonics
     [Harm_res, Harm_phase, Harm_amp_cal_err, Harm_phi_cal_err] = ...
-        Aster_apply_calibration(Range_N, H_freq, Harm_res, Harm_phase);
+        Aster_FRA.apply_calibration(Range_N, H_freq, Harm_res, Harm_phase);
 
     Harm_res_abs_err = Harm_res*Amp_err_rel;
 

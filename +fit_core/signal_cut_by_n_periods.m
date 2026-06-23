@@ -1,3 +1,6 @@
+
+% NOTE: use this for DFT only measurments
+
 % NOTE: if you want to find exact freq in fft - use this to trim data
 % to length of N*(1/freq)
 function [Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq)

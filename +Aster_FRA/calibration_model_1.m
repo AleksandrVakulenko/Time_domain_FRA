@@ -1,9 +1,5 @@
 
-
-
-
-
-function y = model_1(x, x0, p, C, A)
+function y = calibration_model_1(x, x0, p, C, A)
 
 y = C*ones(size(x));
 

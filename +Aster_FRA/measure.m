@@ -1,5 +1,5 @@
 function [Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, ...
-    Used_ranges, Last_used_range] = Aster_FRA_measure(Resources, Aster_addr, ...
+    Used_ranges, Last_used_range] = measure(Resources, Aster_addr, ...
     Settings, Fig, Zest, Fixed_range)
 arguments
     Resources
@@ -50,13 +50,13 @@ end
 Last_used_range = [];
 Gen_type = "Aster_dev";
 Gen_addr = [];
-[Aster, Gen] = Aster_Connect_to_devices(Aster_addr, Gen_type, Gen_addr);
+[Aster, Gen] = Aster_FRA.connect_to_devices(Aster_addr, Gen_type, Gen_addr);
 
 ERR = [];
 try
-    Aster_Gen_initiate(Gen, Gen_Voltage_level, Gen_freq);
+    Aster_FRA.gen_initiate(Gen, Gen_Voltage_level, Gen_freq);
 
-    [Fs_new, Filter_wait] = Aster_ADC_init(Aster, Gen_freq, Harm_num, Times_conf);
+    [Fs_new, Filter_wait] = Aster_FRA.ADC_init(Aster, Gen_freq, Harm_num, Times_conf);
 
     disp(['>>>>>>  Fs = ' num2str(Fs_new, "%0.3f") ' Hz <<<<<<']) % FIXME: disp
 
@@ -74,7 +74,7 @@ try
 
     % FIXME: add more options
     if Auto_range
-        [Range_num_forecast, ~] = Aster_Range_forecaster(Aster, Zest, ...
+        [Range_num_forecast, ~] = Aster_FRA.range_forecaster(Aster, Zest, ...
             Gen_Voltage_level, Gen_freq);
 
         if ~isempty(Range_num_forecast)
@@ -91,9 +91,9 @@ try
     Aster.Gen_direction("Internal");
     Aster.initiate();
 
-    [~, R_Scale, Aster_Range] = Aster_set_range(Aster, Range_init_num);
+    [~, R_Scale, Aster_Range] = Aster_FRA.set_range(Aster, Range_init_num);
     % NOTE: update time and accuracy profiles
-    Time_profile_new = Aster_max_time_profile(Time_profile, Aster_Range);
+    Time_profile_new = Aster_FRA.max_time_profile(Time_profile, Aster_Range);
     [~, ~, ~, Profile] = get_time_config(Period, Harm_num, ...
         Time_profile_new, Harm_profile);
     
@@ -145,9 +145,9 @@ try
                 if any(Aster_Range == Used_ranges) && ~switch_range_force
                     stop = true;
                 else
-                    [flag, R_Scale, Aster_Range] = Aster_set_range(Aster, Aster_Range);
+                    [flag, R_Scale, Aster_Range] = Aster_FRA.set_range(Aster, Aster_Range);
                     % NOTE: update time and accuracy profiles
-                    Time_profile_new = Aster_max_time_profile(Time_profile, Aster_Range);
+                    Time_profile_new = Aster_FRA.max_time_profile(Time_profile, Aster_Range);
                     [~, ~, ~, Profile] = get_time_config(Period, Harm_num, ...
                         Time_profile_new, Harm_profile);
 
@@ -165,13 +165,13 @@ try
         end
     end
 catch ERR
-    Aster_Disconnest_devices(Aster, Gen)
+    Aster_FRA.disconnest_devices(Aster, Gen)
     disp('ERR finish // devices closed') % FIXME: disp
     rethrow(ERR)
 end
 
 if isempty(ERR)
-    Aster_Disconnest_devices(Aster, Gen)
+    Aster_FRA.disconnest_devices(Aster, Gen)
     disp('OK finish') % FIXME: disp
 end
 

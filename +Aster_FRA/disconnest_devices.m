@@ -1,6 +1,9 @@
-function Aster_Disconnest_devices(Aster, Gen)
+
+% FIXME: this function is also a part of FRA toolbox
+
+function disconnest_devices(Aster, Gen)
     if class(Gen) == "Aster_dev"
-        Aster_gen_terminate(Aster);
+        Aster_FRA.gen_terminate(Aster);
     else
         Gen.terminate();
         delete(Gen);

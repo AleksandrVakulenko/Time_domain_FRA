@@ -1,4 +1,9 @@
-function [Aster, Gen] = Aster_Connect_to_devices(Aster_addr, Gen_type, Gen_addr)
+
+% FIXME: this function is also a part of FRA toolbox
+
+% FIXME: check ref to other devices
+
+function [Aster, Gen] = connect_to_devices(Aster_addr, Gen_type, Gen_addr)
 arguments
     Aster_addr
     Gen_type {mustBeMember(Gen_type, ...

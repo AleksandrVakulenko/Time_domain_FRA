@@ -1,6 +1,7 @@
 
+% FIXME: this function is also a part of FRA toolbox
 
-function Aster_switch_to_LCR(Aster_addr)
+function switch_to_LCR(Aster_addr)
 
     Aster = Aster_dev(Aster_addr);
     

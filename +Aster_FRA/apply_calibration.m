@@ -2,7 +2,7 @@
 % FIXME: add force flag to calibration to preserve harmonics
 
 function [Res_out, Phi_out, Amp_cal_err, Phi_cal_err] = ...
-    Aster_apply_calibration(Range_N, Freq_arr, Res_arr, Phi_arr)
+    apply_calibration(Range_N, Freq_arr, Res_arr, Phi_arr)
 
 N1 = numel(Freq_arr);
 N2 = numel(Res_arr);
@@ -22,7 +22,7 @@ for i = 1:N
     Freq = Freq_arr(i);
     Res = Res_arr(i);
     Phi = Phi_arr(i);
-    
+
     [Amp_cal, Phi_cal] = Calibration_function(Range_N, Freq);
 
     if ~isempty(Amp_cal) && ~isnan(Amp_cal) && ~isempty(Phi_cal) && ~isnan(Phi_cal)
@@ -57,90 +57,90 @@ freq_log = log10(Freq);
 switch Range
 
     case 1
-        F_LIMIT = Aster_range_freq_limit(1); % Hz
+        F_LIMIT = Aster_FRA.range_freq_limit(1); % Hz
 
-        Amp_model.foo = "model_1";
+        Amp_model.foo = "Aster_FRA.calibration_model_1";
         Amp_model.A = 0;
         Amp_model.C = 0.9993;
         Amp_model.p = 1;
         Amp_model.x0 = 10;
-        
-        Phi_model.foo = "model_1";
+
+        Phi_model.foo = "Aster_FRA.calibration_model_1";
         Phi_model.A = -0.5781;
         Phi_model.C = -0.01156;
         Phi_model.p = 6.732;
         Phi_model.x0 = 1;
 
     case 2
-        F_LIMIT = Aster_range_freq_limit(2); % Hz
+        F_LIMIT = Aster_FRA.range_freq_limit(2); % Hz
 
-        Amp_model.foo = "model_1";
+        Amp_model.foo = "Aster_FRA.calibration_model_1";
         Amp_model.A = 0;
         Amp_model.C = 0.9998;
         Amp_model.p = 1;
         Amp_model.x0 = 10;
 
-        Phi_model.foo = "model_1";
+        Phi_model.foo = "Aster_FRA.calibration_model_1";
         Phi_model.A = -0.2505;
         Phi_model.C = 0.04411;
         Phi_model.p = 5.794;
         Phi_model.x0 = -1;
 
     case 3
-        F_LIMIT = Aster_range_freq_limit(3); % Hz
+        F_LIMIT = Aster_FRA.range_freq_limit(3); % Hz
 
-        Amp_model.foo = "model_1";
+        Amp_model.foo = "Aster_FRA.calibration_model_1";
         Amp_model.A = 0;
         Amp_model.C = 0.9997;
         Amp_model.p = 1;
         Amp_model.x0 = 10;
 
-        Phi_model.foo = "model_1";
+        Phi_model.foo = "Aster_FRA.calibration_model_1";
         Phi_model.A = -0.2178;
         Phi_model.C = -0.0007526;
         Phi_model.p = 4.582;
         Phi_model.x0 = 0;
 
     case 4
-        F_LIMIT = Aster_range_freq_limit(4); % [Hz]
+        F_LIMIT = Aster_FRA.range_freq_limit(4); % [Hz]
 
-        Amp_model.foo = "model_1";
+        Amp_model.foo = "Aster_FRA.calibration_model_1";
         Amp_model.A = -0.3144;
         Amp_model.C = 1.003;
         Amp_model.p = 9.478;
         Amp_model.x0 = 0.04901;
 
-        Phi_model.foo = "model_2";
+        Phi_model.foo = "Aster_FRA.calibration_model_2";
         Phi_model.A = 0.0005951;
         Phi_model.C = -0.02704;
         Phi_model.p = 1.315;
         Phi_model.x0 = -3.537;
 
     case 5
-        F_LIMIT = Aster_range_freq_limit(5); % Hz
+        F_LIMIT = Aster_FRA.range_freq_limit(5); % Hz
 
-        Amp_model.foo = "model_2";
+        Amp_model.foo = "Aster_FRA.calibration_model_2";
         Amp_model.A = -0.0003747;
         Amp_model.C = 1.016;
         Amp_model.p = 2.065;
         Amp_model.x0 = -1.604;
 
-        Phi_model.foo = "model_2";
+        Phi_model.foo = "Aster_FRA.calibration_model_2";
         Phi_model.A = 6.839e-06;
         Phi_model.C = -0.0005538;
         Phi_model.p = 1.277;
         Phi_model.x0 = -7.655;
 
     case 6
-        F_LIMIT = Aster_range_freq_limit(6); % Hz
+        F_LIMIT = Aster_FRA.range_freq_limit(6); % Hz
 
-        Amp_model.foo = "model_2";
+        Amp_model.foo = "Aster_FRA.calibration_model_2";
         Amp_model.A = -0.001272;
         Amp_model.C = 1.075;
         Amp_model.p = 1.639;
         Amp_model.x0 = -3.243;
 
-        Phi_model.foo = "model_1";
+        Phi_model.foo = "Aster_FRA.calibration_model_1";
         Phi_model.A = 0.5725;
         Phi_model.C = 1.172;
         Phi_model.p = 6.137;
