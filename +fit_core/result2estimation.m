@@ -1,12 +1,12 @@
 
 
-function Estimations_old = result2estimation(Result)
+function Estimations = result2estimation(Result)
 arguments
     Result fit_core.Result_type;
 end
 
 % -----------------------------------------
-Estimations_old = Result.estimations;
+Estimations = Result.estimations;
 % -----------------------------------------
 
 Time = Result.amp_poly.x;
@@ -38,7 +38,7 @@ Estimation_3 = Estimation_1;
 Estimation_3.t_min = Time(3);
 Estimation_3.t_max = Time(3);
 % -----------------------------------------
-Estimations_old = [Estimations_old Estimation_1 Estimation_2 Estimation_3];
+Estimations = [Estimations Estimation_1 Estimation_2 Estimation_3];
 % -----------------------------------------
 end
 

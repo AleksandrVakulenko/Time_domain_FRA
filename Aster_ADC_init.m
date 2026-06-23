@@ -1,6 +1,8 @@
 function [Fs_new, Filter_wait] = Aster_ADC_init(Aster, Gen_freq, ...
     Harm_num, Times_conf)
 
+
+
 if Times_conf.time_profile == "ultra_fast"
     Number_of_periods = 2; % FIXME: magic constant
     Min_filter_freq = 10; % [Hz]
@@ -30,7 +32,13 @@ if Sampling_freq < 200
     Sampling_freq = 200; % FIXME: magic constant
 end
 
-Max_harm = max(Harm_num);
+
+if ~isempty(Harm_num)
+    Max_harm = max(Harm_num);
+else
+    Max_harm = 1;
+end
+
 if Max_harm <= 2
     Max_harm = 2;
 end

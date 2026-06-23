@@ -3,14 +3,10 @@
 % 2) Limit time profile on range 5 up to "fine", on range 6 to "common"
 % 3) 
 
-% TO TEST
-% 1) make_fs_lower function
-% 2) new scoring system
-% 3) 
 
 
 % 23.06.2026
-% 1) One more test
+% 1) 
 % 2) Add LCR meter class
 % 3) Add set_freq and set_amp in Aster hardware
 % 4) Add ADC and DAC scales in Aster hardware.
@@ -20,9 +16,9 @@
 % 24.06.2026
 % 1) Eliminate all magic constants
 % 2) Use residuals to estimate max possible quality
-% 3) harm auto-detector (ALREADY: fit_core.estimate_harms_from_res)
-% 4) Create list of all exit codes
-% 5) Add timer_callback
+% 3) Create list of all exit codes
+% 4) Add timer_callback
+% 5) 
 
 % 25.06.2026
 % 1) Update Debug_msg module

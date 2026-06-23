@@ -1,6 +1,10 @@
 function [Result, Residuals, DEBUG] = fit_channel(T_arr, V_arr, Range, Fs, freq, ...
     Estimations, Properties, Harm_num, Fit_settings)
 
+Time_length = T_arr(end) - T_arr(1);
+Period = 1/freq;
+Period_counter = Time_length/Period;
+
 if ~isempty(Estimations)
 
     if ~isempty(Harm_num)
@@ -63,10 +67,28 @@ if ~isempty(Estimations)
         Refit_flag = true;
     end
     
-    % FIXME: fit residuals here to find lost harms
     if Refit_flag
         [Result, Residuals, DEBUG] = fit_core.any_sin_fit(T_arr, V_arr, freq, ...
             Estimations, Properties, Fitted_harm, Fit_settings);
+    end
+
+    % FIXME: fit residuals here to find lost harms
+    try
+        if Period_counter > 1
+            [Result_harm, RMS_Ratio] = fit_core.Harm_refit(Result, T_arr, V_arr, Fs2);
+            Harm_y = fit_viewer.Harm_calc(Result_harm, T_arr);
+            if ~isempty(Harm_y)
+                V_arr_pure = V_arr - Harm_y;
+                Estimations_pure = fit_core.result2estimation(Result_harm);
+                [Result, Residuals, DEBUG] = fit_core.any_sin_fit(T_arr, V_arr_pure, freq, ...
+                    Estimations_pure, Properties, [], Fit_settings);
+                Result.harm = Result_harm.harm;
+                Result.harm_err = Result_harm.harm_err;
+            end
+            disp(['        RMS_Ratio = ' num2str(RMS_Ratio, '%0.2f')]); % FIXME: disp
+        end
+    catch err
+        rethrow(err) % FIXME: debug
     end
     
 else

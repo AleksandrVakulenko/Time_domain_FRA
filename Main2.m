@@ -1,15 +1,17 @@
 %% TEST FREQ LOOP
 
 
+% FIXME: add LCR terminate before start
+
 Aster_addr = 3;
 
-Harm_num = [1 2 3];
-Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
+Harm_num = [ ];
+Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 
-Gen_Voltage_level = 1; % [V]
-F_min = 0.001;
+Gen_Voltage_level = 2; % [V]
+F_min = 0.05;
 F_max = 300e3;
-F_num = 30;
+F_num = 60;
 
 % Fixed_range = [5];
 
@@ -45,8 +47,6 @@ F_range_LCR = Freq_arr >= 20;
 Freq_arr_Aster = Freq_arr(F_range_Aster);
 Freq_arr_LCR = Freq_arr(F_range_LCR);
 
-Zest = struct('type', 'cap', 'value', 10e-12);
-% Zest = struct('type', 'res', 'value', 10e3);
 % Fig = figure('position', [471 217 690 691]);
 % Ax_arr = create_axes(Fig); % NOTE: old style
 Fig = gui.init_Aster_FRA_gui();
@@ -55,6 +55,9 @@ Stop_button = Fig.UserData.stop_button;
 Resources.stop_button = Stop_button;
 
 
+Zest = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr);
+% Zest = struct('type', 'cap', 'value', 10e-12);
+% Zest = struct('type', 'res', 'value', 10e3);
 
 Timer = tic;
 Result_arr_Aster = [];
@@ -101,8 +104,6 @@ for i = 1:N
     Result_arr_LCR = [Result_arr_LCR LCR_Result];
 end
 
-
-% Result_arr = [Result_arr_Aster Result_arr_LCR];
 
 %%
 
@@ -302,3 +303,20 @@ else
     Axes_arr = [];
 end
 end
+
+
+function Zest = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr)
+% FIXME: it is bad to estimate on single point
+    Harm_num = [1 2 3];
+    Gen_freq = 1;
+    Time_profile = 'ultra_fast';
+    Zest = struct('type', 'res', 'value', 50e3);
+    [Fit_Result, Extra_data] = Test_measurment_function(Resources, Aster_addr, ...
+        Gen_freq, Gen_Voltage_level, Harm_num, Zest, Time_profile, Ax_arr, []);
+
+    Zest = struct('type', 'res', 'value', Fit_Result.res_abs);
+end
+
+
+
+

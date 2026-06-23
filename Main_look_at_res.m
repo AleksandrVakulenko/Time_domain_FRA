@@ -4,7 +4,7 @@ clc
 % % T_arr = T_arr;
 % % Residuals_in = Residuals;
 
-Show_channel = 1;
+Show_channel = 2;
 
 
 

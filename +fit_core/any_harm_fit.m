@@ -26,19 +26,12 @@ if ~isempty(Harm_est)
         HarmN_eq = [HPref num2str(Hn) 'a' '*sin(2*pi*' ...
             num2str(Hn*Freq) F_dev_str '*x + ' HPref num2str(Hn) 'p' '/180*pi)'];
         Eq = [Eq ' + ' HarmN_eq];
-        if Status == "est_1"
-            %FIXME: phi limits?
-            Lower = [Lower Harm_est(i).amp*0.05 Harm_est(i).phi-45];
-            StartPoint = [StartPoint Harm_est(i).amp Harm_est(i).phi];
-            Upper = [Upper Harm_est(i).amp*20 Harm_est(i).phi+45];
-        elseif Status == "fixed"
-            Lower = [Lower Harm_est(i).amp*0.8 Harm_est(i).phi-10];
-            StartPoint = [StartPoint Harm_est(i).amp Harm_est(i).phi];
-            Upper = [Upper Harm_est(i).amp*1.2 Harm_est(i).phi+10];
-        else
-            error("unreachable")
-        end
+        Lower = [Lower Harm_est(i).amp*0.001 Harm_est(i).phi-180];
+        StartPoint = [StartPoint Harm_est(i).amp Harm_est(i).phi];
+        Upper = [Upper Harm_est(i).amp*1000 Harm_est(i).phi+180];
     end
+else
+    % FIXME: what else?
 end
 
 ft = fittype(Eq, 'independent', 'x', 'dependent', 'y');
