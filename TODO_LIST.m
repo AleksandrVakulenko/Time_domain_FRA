@@ -5,13 +5,16 @@
 
 
 
-% 23.06.2026
-% 1) 
-% 2) Add LCR meter class
-% 3) Add set_freq and set_amp in Aster hardware
-% 4) Add ADC and DAC scales in Aster hardware.
-% 5) Add DC offset in Aster hardware
-% 6) Refactor Aster class
+
+% UNDONE !!!
+% 1) Add LCR meter class
+% 2) Add set_freq and set_amp in Aster hardware
+% 3) Add ADC and DAC scales in Aster hardware.
+% 4) Add DC offset in Aster hardware
+% 5) Refactor Aster class
+
+
+
 
 % 24.06.2026
 % 1) Eliminate all magic constants

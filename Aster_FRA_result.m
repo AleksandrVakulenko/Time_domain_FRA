@@ -107,7 +107,7 @@ disp(' ')
 
 warning('|R| may be calculated incorrectly!')
 
-
+% FIXME: use LCR_result here
 Result.res_abs = Res;
 Result.res_abs_err = Res_err;
 
