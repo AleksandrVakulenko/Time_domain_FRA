@@ -23,7 +23,7 @@ if Ratio < 0
     Ratio = 0;
 end
 
-Min_Ratio = 0.8; % FIXME: magic constant
+Min_Ratio = 0.8; % FIXME: get from settings
 
 if Ratio > Min_Ratio
     apply_filter = true;

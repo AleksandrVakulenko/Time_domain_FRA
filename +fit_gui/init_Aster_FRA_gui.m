@@ -41,7 +41,7 @@ hold(Ax2, 'on')
 cla(Ax2)
 
 
-CB = @(a, b) disp('Stop button'); % FIXME: debug
+CB = @(a, b) disp('Stop button is pressed'); % NOTE: default callback of button
 
 Control_Frame = uipanel('parent', Fig, 'position', [0.0 0.5 0.3 0.5]);
 

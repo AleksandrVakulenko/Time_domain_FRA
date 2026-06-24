@@ -59,17 +59,17 @@ end
 Min_fop = max([Min_meas_time/Period Min_fop]);
 
 if Max_fop <= Min_fop
-    Max_fop = Min_fop*1.2;
+    Max_fop = Min_fop*1.2; % NOTE: just to add some space
 end
 
-Absolute_max_FOP = 50; % FIXME: magic constant
+Absolute_max_FOP = 50; % FIXME: get from settings
 
 if Max_fop > Absolute_max_FOP
     Max_fop = Absolute_max_FOP;
 end
 
 if Min_fop > Max_fop
-    Min_fop = Max_fop*0.9; % FIXME: magic constant
+    Min_fop = Max_fop*0.9; % NOTE: just to add some space
 end
 
 % FIXME: maybe add top limit on FOP (~50)

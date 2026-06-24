@@ -2,18 +2,18 @@
 
 % 24.06.2026
 % 1) 
-% 2) Eliminate all magic constants
-% 3) Add timer_callback
-% 4) Use residuals to estimate max possible quality (50 Hz rej)
-% 5) 
-% 6) Add Temp controller class
+% 2) 
+% 3) 
+% 4) 
+% 5) Add timer_callback
+% 6) Use residuals to estimate max possible quality (50 Hz rej)
 % 7) Add accuracy setting to fit function
 % 8) Update Debug_msg module
 % 9) Add freq to ch_data2 (all previously saved data (with ch_data) will be invalidate!)
 % 10) Fit_settings_1.freq_dev_flag in fit_one_channels
 % 11) if RMS_Ratio > 5 in Harm_refit
 % 12) Replace FRA_dev by function handle in data_gathering_loop
-% 13) need to make a RT-FRA function with gathering lood and double fit after it
+% 13) need to make a RT-FRA function with gathering_loop and double_fit after it
 
 % 25.06.2026
 % 1) Add set_freq and set_amp in Aster hardware
@@ -28,14 +28,14 @@
 % 1) 
 % 2) add data saver function
 % 3) One more test
-% 4) Refactor Aster class
+% 4) Use new Settings
 
 
 
 % 29.06.2026
-% 1) place fft functions to its own lib
+% 1) 
 % 2) make Fern module (exclude all Astra functions)
-% 3) 
+% 3) Refactor Aster class
 % 4) Do final refactor
 
 
@@ -56,7 +56,7 @@
 % 02.07.2026
 % 1) use different strategy for different periods
 % 2) investigate "underrange" function behavior
-% 3) 
+% 3) Add Temp controller class
 % 4) 
 
 
@@ -74,7 +74,7 @@
 % 2) [sig_gen:] add underrange (span and mean) test signals
 % 3) DFT vs fft problem (calculating many DFTs) (where?)
 % 4) Remember about f = 0 on fft calc data
-% 5) 
+% 5) Add 50/60 Hz power line freq
 % 6) 
 
 

@@ -94,7 +94,8 @@ Bad_harms = exclude_list;
 
 Diff = (Signal_f - Bad_harms')./repmat(Bad_harms, numel(Signal_f), 1)';
 
-ind = find(abs(Diff) < 0.03); % FIXME: magic constant
+Freq_max_dev = 0.03; % FIXME: get from settings
+ind = find(abs(Diff) < Freq_max_dev);
 [~, j] = ind2sub(size(Diff), ind);
 
 Bad_num = unique(j);

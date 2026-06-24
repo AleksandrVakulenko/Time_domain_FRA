@@ -28,7 +28,7 @@ if ~isempty(Harm_num)
     
     [~, nf_calc] = fit_core.noise_amp_calc(freq, T_arr, V_arr, Fs, F_lim);
 
-    HNR_min_dB = 10; % FIXME: magic constant "harm to noise ratio"
+    HNR_min_dB = 10; % FIXME: get from settings "harm to noise ratio"
 
     k = 0;
     Harm_est = struct('n', [], 'amp', [], 'phi', []);

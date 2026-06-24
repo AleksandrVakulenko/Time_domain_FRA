@@ -24,14 +24,14 @@ Underrange_force_1 = Channel_settings_1.underrange_force;
 MAX_CH1_LIMIT = Channel_settings_1.max_ch1_limit;
 Time_to_underrange_1 = Channel_settings_1.time_to_underrange;
 Overrange_tolerance_1 = Channel_settings_1.overrange_tolerance;
-Time_to_overrange_1 = 0.1; % [s] FIXME: magic constant
+Time_to_overrange_1 = 0.1; % [s] FIXME: move to Channel_settings_1 or delete
 Fs = Channel_settings_1.fs; % NOTE: ch2 fs same as ch1
 
 Underrange_force_2 = Channel_settings_2.underrange_force;
 MAX_CH2_LIMIT = Channel_settings_2.max_ch1_limit;
 Time_to_underrange_2 = Channel_settings_2.time_to_underrange;
 Overrange_tolerance_2 = Channel_settings_2.overrange_tolerance;
-Time_to_overrange_2 = 0.1; % [s] FIXME: magic constant
+Time_to_overrange_2 = 0.1; % [s] FIXME: move to Channel_settings_2 or delete
 
 Times_conf = Profile.times_conf;
 Accuracy_conf = Profile.accuracy_conf;
@@ -56,7 +56,7 @@ else % Max_time >= 1 [s]
                       'do_pre_fit', true);
 end
 
-Prefit_max_points = 10e3; % FIXME: magic constant
+Prefit_max_points = 10e3; % FIXME: get from settings
 % ----------------------------------------------------------------
 
 

@@ -20,7 +20,8 @@ if ~isempty(Estimations)
     Noise_rms = fit_core.noise_rms_calc(V_arr, Fs, freq, Harm_num);
 
     % NOTE: use range oly if it contains more than 100 points
-    if numel(find(Range)) > 100 % FIXME: magic constant
+    Minimum_number_of_points = 100;% FIXME: get from settings
+    if numel(find(Range)) > Minimum_number_of_points
         T_arr = T_arr(Range);
         V_arr = V_arr(Range);
     end

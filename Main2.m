@@ -216,7 +216,7 @@ Period_counter = Ch_data_1.period_counter;
 
 [Properties_1, Properties_2] = fit_core.get_fit_props(Period_counter);
 
-Max_points = 50e3; % FIXME: magic constant
+Max_points = 50e3; % FIXME: get from settings
 
 [Result_1, Residuals_1, DEBUG_1, Result_2, Residuals_2, DEBUG_2] = ...
     fit_core.fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...

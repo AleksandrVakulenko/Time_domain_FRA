@@ -75,8 +75,10 @@ function [range, Top_limit, Bot_limit] = find_outliers_range(Residuals)
 Mean = mean(Residuals);
 Sigma = std(Residuals);
 
-Top_limit = Mean + 3*Sigma; % FIXME: magic constant, need to analyze histogram
-Bot_limit = Mean - 3*Sigma;
+% FIXME: need to analyze histogram
+Sigma_scale = 3; % FIXME: get_from_settings
+Top_limit = Mean + Sigma_scale*Sigma;
+Bot_limit = Mean - Sigma_scale*Sigma;
 
 range = Residuals > Top_limit | Residuals < Bot_limit;
 
