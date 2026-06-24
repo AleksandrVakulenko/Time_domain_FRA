@@ -16,11 +16,11 @@ Signal = 1.0*sin(2*pi*1*Time + 20/180*pi) + ...
 % V_arr_in = Residuals;
 
 tic
-[Amp_DFT, Phi_DFT] = DFT_single_freq(Time, Signal, 1);
+[Amp_DFT, Phi_DFT] = fit_core.DFT_single_freq(Time, Signal, 1);
 disp(['A = ' num2str(Amp_DFT) ' V  |  P = ' num2str(Phi_DFT) ' deg'])
-[Amp_DFT, Phi_DFT] = DFT_single_freq(Time, Signal, 50);
+[Amp_DFT, Phi_DFT] = fit_core.DFT_single_freq(Time, Signal, 50);
 disp(['A = ' num2str(Amp_DFT) ' V  |  P = ' num2str(Phi_DFT) ' deg'])
-[Amp_DFT, Phi_DFT] = DFT_single_freq(Time, Signal, 10);
+[Amp_DFT, Phi_DFT] = fit_core.DFT_single_freq(Time, Signal, 10);
 disp(['A = ' num2str(Amp_DFT) ' V  |  P = ' num2str(Phi_DFT) ' deg'])
 toc
 

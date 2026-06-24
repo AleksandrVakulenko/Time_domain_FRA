@@ -105,7 +105,7 @@ disp(' ')
 
 warning('|R| may be calculated incorrectly!')
 
-% FIXME: use LCR_result here
+% FIXME: use Aster_FRA.LCR_result_type here
 Result.res_abs = Res;
 Result.res_abs_err = Res_err;
 

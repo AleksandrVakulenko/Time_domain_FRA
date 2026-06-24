@@ -1,7 +1,7 @@
 
 % FIXME: add header
 
-classdef LCR_result
+classdef LCR_result_type
 
     properties (Access = public)
 

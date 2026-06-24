@@ -1,48 +1,42 @@
-% NOTE:
-% 1) all Aster specific function are named with prefix "Aster_"
-% 2) Limit time profile on range 5 up to "fine", on range 6 to "common"
-% 3) 
-
-
-
-
-% UNDONE !!!
-% 1) Add LCR meter class
-% 2) Add set_freq and set_amp in Aster hardware
-% 3) Add ADC and DAC scales in Aster hardware.
-% 4) Add DC offset in Aster hardware
-% 5) Refactor Aster class
-
-
 
 
 % 24.06.2026
-% 1) Eliminate all magic constants
-% 2) Use residuals to estimate max possible quality
-% 3) Create list of all exit codes
-% 4) Add timer_callback
+% 1) 
+% 2) Eliminate all magic constants
+% 3) Add timer_callback
+% 4) Use residuals to estimate max possible quality (50 Hz rej)
 % 5) 
+% 6) Add Temp controller class
+% 7) Add accuracy setting to fit function
+% 8) Update Debug_msg module
+% 9) Add freq to ch_data2 (all previously saved data (with ch_data) will be invalidate!)
+% 10) Fit_settings_1.freq_dev_flag in fit_one_channels
+% 11) if RMS_Ratio > 5 in Harm_refit
+% 12) Replace FRA_dev by function handle in data_gathering_loop
 
 % 25.06.2026
-% 1) Update Debug_msg module
-% 2) Add accuracy setting to fit function
-% 3) Add Temp controller class
-% 4) Do refactor
-% 5) Update LCR_measure function
+% 1) Add set_freq and set_amp in Aster hardware
+% 2) Add ADC and DAC scales in Aster hardware.
+% 3) Add DC offset in Aster hardware
+% 4) Add I input protection in Aster hardware
+% 5) Exclude Astra from aDevice
+% 6) Update LCR_measure function
+
 
 % 26.06.2026
-% 1) Add freq to ch_data (all previously saved data will be invalidate!)
+% 1) 
 % 2) add data saver function
 % 3) One more test
-% 4) 
+% 4) Refactor Aster class
 
 
 
 % 29.06.2026
 % 1) place fft functions to its own lib
 % 2) make Fern module (exclude all Astra functions)
-% 3) Exclude Astra from aDevice
-% 4) 
+% 3) 
+% 4) Do final refactor
+
 
 % 30.06.2026
 % 1) 
@@ -50,17 +44,20 @@
 % 3) add more errors calculation (for colplex numbers)
 % 4) update data viewer (to both test or real data)
 
+
 % 01.07.2026
 % 1) use incoming estimations
 % 2) use Estimations for Properties
 % 3) 
 % 4) refactor estimations fix function
 
+
 % 02.07.2026
 % 1) use different strategy for different periods
 % 2) investigate "underrange" function behavior
 % 3) 
 % 4) 
+
 
 % 03.07.2026
 % 1) 

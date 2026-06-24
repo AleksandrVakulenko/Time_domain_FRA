@@ -46,8 +46,8 @@ hold on
 plot(Synth_time, Synth_signal, '-b')
 plot(Synth_time, Signal_filt, '--r')
 
-DFT_single_freq(Synth_time, Synth_signal, 0.05)
-DFT_single_freq(Synth_time, Signal_filt, 0.05)
+fit_core.DFT_single_freq(Synth_time, Synth_signal, 0.05)
+fit_core.DFT_single_freq(Synth_time, Signal_filt, 0.05)
 
 
 %%

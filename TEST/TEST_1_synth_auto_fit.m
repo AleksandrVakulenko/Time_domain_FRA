@@ -65,7 +65,7 @@ Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 Harm_profile = "common"; % "common", "most_accurate"
 %--------------------------------
 
-[Times_conf, Time_printer] = get_time_config(Period, Harm_num, ...
+[Times_conf, Time_printer] = fit_core.get_time_config(Period, Harm_num, ...
     Time_profile, Harm_profile);
 Time_printer(); % FIXME: debug
 
@@ -398,7 +398,7 @@ function Result = DFT_estimation(Time, Signal, Period)
     End_time = Time(end);
     Freq = 1/Period;
 
-    [Amp_DFT, Phi_DFT, Mean] = DFT_single_freq(Time, Signal, Freq);
+    [Amp_DFT, Phi_DFT, Mean] = fit_core.DFT_single_freq(Time, Signal, Freq);
 
     Result = struct(...
         'amp', Amp_DFT, 'phi', Phi_DFT, 'bg', Mean, 'f_dev', NaN, ...

@@ -1,5 +1,6 @@
 %% TEST FREQ LOOP
 
+% FIXME: this function is beyond Real-time FRA module
 
 % FIXME: add LCR terminate before start
 
@@ -97,7 +98,7 @@ for i = 1:N
     disp([num2str(i) '/' num2str(N)])
 
     Gen_freq = Freq_arr_LCR(i);
-    LCR_Result = LCR_measure(Gen_freq, Gen_Voltage_level);
+    LCR_Result = Aster_FRA.LCR_measure(Gen_freq, Gen_Voltage_level, Time_profile);
     LCR_Result.freq = Gen_freq;
     Result_arr_LCR = [Result_arr_LCR LCR_Result];
 end
@@ -213,7 +214,7 @@ end
 % Fitting part
 Period_counter = Ch_data_1.period_counter;
 
-[Properties_1, Properties_2] = get_fit_props(Period_counter);
+[Properties_1, Properties_2] = fit_core.get_fit_props(Period_counter);
 
 Max_points = 50e3; % FIXME: magic constant
 

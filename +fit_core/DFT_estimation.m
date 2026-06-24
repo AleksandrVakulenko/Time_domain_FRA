@@ -10,7 +10,7 @@ function Result = DFT_estimation(Time, Signal, Period)
     if Periods_counter < 0.98 % FIXME: magic constant NOTE: at least one full period
         Result = [];
     else
-        [Amp_DFT, Phi_DFT, Mean] = DFT_single_freq(Time, Signal, Freq);
+        [Amp_DFT, Phi_DFT, Mean] = fit_core.DFT_single_freq(Time, Signal, Freq);
     
         Result = fit_core.Estimation;
         Result.amp = Amp_DFT;

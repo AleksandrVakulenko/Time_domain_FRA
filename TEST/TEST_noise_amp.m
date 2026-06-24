@@ -89,7 +89,7 @@ clc
 % Amp = zeros(size(Freq_list));
 % for i = 1:numel(Freq_list)
 %     Freq = Freq_list(i);
-%     Amp(i) = DFT_single_freq(Synth_time, Synth_signal, Freq);
+%     Amp(i) = fit_core.DFT_single_freq(Synth_time, Synth_signal, Freq);
 % end
 
 figure
@@ -239,7 +239,7 @@ function Amp = find_spectrum_amps(Time, Signal, Freq_list)
         Amp_part = zeros(size(Freq_list_part));
         for k = 1:numel(Freq_list_part)
             Freq = Freq_list_part(k);
-            Amp_part(k) = DFT_single_freq(Time, Signal, Freq);
+            Amp_part(k) = fit_core.DFT_single_freq(Time, Signal, Freq);
         end
         Amp(i) = max(Amp_part);
     end

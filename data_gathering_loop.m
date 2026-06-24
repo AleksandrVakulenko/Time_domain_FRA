@@ -100,7 +100,7 @@ while ~stop
     
     external_stop = fit_gui.stop_check(Stop_button);
     if external_stop
-        Exit_flag = 40;
+        Exit_flag = 40; % NOTE: external break
         break;
     end
 
@@ -159,12 +159,12 @@ while ~stop
     end
 
     if Time_passed > Time_to_overrange_1 && Overload_1.volume > Overrange_tolerance_1
-        Exit_flag = 201; % NOTE: EF 201: overrange
+        Exit_flag = 201; % NOTE: EF 201: overrange ch1
         break;
     end
 
     if Time_passed > Time_to_overrange_2 && Overload_2.volume > Overrange_tolerance_2
-        Exit_flag = 202; % NOTE: EF 202: overrange
+        Exit_flag = 202; % NOTE: EF 202: overrange ch2
         break;
     end
 
@@ -203,7 +203,7 @@ while ~stop
         Ch_data_2 = fit_core.Ch_data(T_arr, V2_arr, Outliers_range_2, Overload_2, ...
             Estimations_2, Times_conf, Accuracy_conf, Fs, Periods_counter);
 
-        [Properties_1, Properties_2] = get_fit_props(Periods_counter);
+        [Properties_1, Properties_2] = fit_core.get_fit_props(Periods_counter);
 
         try
             if Prefit_need_1 && ~Prefit_ready_1
