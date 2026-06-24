@@ -5,7 +5,7 @@
 % c_err for bg
 
 
-classdef Estimation
+classdef Estimation_type
 
 properties (Access = public)
     amp double = NaN

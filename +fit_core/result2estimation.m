@@ -14,7 +14,7 @@ Period = 1/Result.freq;
 
 % disp(['Time nyan = ' num2str(Time)])
 
-Estimation_1 = fit_core.Estimation;
+Estimation_1 = fit_core.Estimation_type;
 
 Estimation_1.amp = Result.amp_poly.p3;
 Estimation_1.phi = Result.phi_poly.p3;

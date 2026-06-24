@@ -12,7 +12,7 @@ function Result = DFT_estimation(Time, Signal, Period)
     else
         [Amp_DFT, Phi_DFT, Mean] = fit_core.DFT_single_freq(Time, Signal, Freq);
     
-        Result = fit_core.Estimation;
+        Result = fit_core.Estimation_type;
         Result.amp = Amp_DFT;
         Result.phi = Phi_DFT;
         Result.bg = Mean;

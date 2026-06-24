@@ -6,7 +6,7 @@ function Result = do_initial_estimation(T_arr, V_arr, Period)
         Start_Phi = 0;
     end
 
-    Result = fit_core.Estimation;
+    Result = fit_core.Estimation_type;
     Result.amp = Span;
     Result.phi = Start_Phi;
     Result.bg = Mean;

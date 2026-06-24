@@ -95,7 +95,7 @@ Result.fit_function = "any_harm_fit";
 Result.freq = Freq;
 Result.harm = harm_out;
 Result.harm_err = harm_err;
-Result.estimations = fit_core.Estimation.empty();
+Result.estimations = fit_core.Estimation_type.empty();
 
 end
 

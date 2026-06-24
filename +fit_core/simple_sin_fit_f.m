@@ -49,7 +49,8 @@ function Result = simple_sin_fit_f(Time, Signal, Freq, Estimations)
     C_err = CI(2);
     P_err = CI(3);
 
-    Result = fit_core.Estimation;
+    % FIXME: maybe bad out name
+    Result = fit_core.Estimation_type;
     Result.amp = A;
     Result.phi = P;
     Result.bg = C;

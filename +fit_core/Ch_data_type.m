@@ -3,14 +3,14 @@
 % class for channel data (from gathering fonction)
 
 
-classdef Ch_data
+classdef Ch_data_type
 
     properties (Access = public)
         time double
         voltage double
         outliers_range logical
         overload
-        estimations fit_core.Estimation
+        estimations fit_core.Estimation_type
         time_conf
         accuracy_conf
         fs (1, 1) double
@@ -18,7 +18,7 @@ classdef Ch_data
     end
 
     methods (Access = public)
-        function obj = Ch_data(time, voltage, outliers_range, overload, ...
+        function obj = Ch_data_type(time, voltage, outliers_range, overload, ...
                 estimations, time_conf, accuracy_conf, fs, period_counter)
             obj.time = time;
             obj.voltage = voltage;
