@@ -16,8 +16,8 @@ Time_profile = "ultra_fast"; % "ultra_fast", "common", "fine", "most_accurate"
 Harm_profile = "common"; % "common", "most_accurate"
 
 
-[Times_conf, Time_printer] = fit_core.get_time_config(Period, Harm_num, ...
-    Time_profile, Harm_profile);
+[Times_conf, Time_printer] = fit_core.get_time_config(Period, Time_profile, ...
+    Harm_profile);
 
 Times_conf
 
@@ -70,7 +70,7 @@ for i = 1:numel(Freq_arr)
     Freq = Freq_arr(i);
     Period = 1/Freq;
 
-    Times_conf = fit_core.get_time_config(Period, Harm_num, Time_profile);
+    Times_conf = fit_core.get_time_config(Period, Time_profile);
     Time_to_measure = Times_conf.min_fop*Period;
     Time_array(i) = Time_to_measure;
 end

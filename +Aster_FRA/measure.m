@@ -35,7 +35,7 @@ else
 end
 
 [Times_conf, Time_printer, ~, Profile] = fit_core.get_time_config(Period, ...
-    Harm_num, Time_profile, Harm_profile);
+    Time_profile, Harm_profile);
 Time_printer(); % FIXME: debug
 
 %--------------------------------
@@ -94,8 +94,8 @@ try
     [~, R_Scale, Aster_Range] = Aster_FRA.set_range(Aster, Range_init_num);
     % NOTE: update time and accuracy profiles
     Time_profile_new = Aster_FRA.max_time_profile(Time_profile, Aster_Range);
-    [~, ~, ~, Profile] = fit_core.get_time_config(Period, Harm_num, ...
-        Time_profile_new, Harm_profile);
+    [~, ~, ~, Profile] = fit_core.get_time_config(Period, Time_profile_new, ...
+        Harm_profile);
     
     adev_utils.Wait(Filter_wait, 'Apply filter'); % FIXME: disp
     Used_ranges = Aster_Range;
@@ -148,7 +148,7 @@ try
                     [flag, R_Scale, Aster_Range] = Aster_FRA.set_range(Aster, Aster_Range);
                     % NOTE: update time and accuracy profiles
                     Time_profile_new = Aster_FRA.max_time_profile(Time_profile, Aster_Range);
-                    [~, ~, ~, Profile] = fit_core.get_time_config(Period, Harm_num, ...
+                    [~, ~, ~, Profile] = fit_core.get_time_config(Period, ...
                         Time_profile_new, Harm_profile);
 
                     adev_utils.Wait(Filter_wait, 'Apply filter'); % FIXME: disp

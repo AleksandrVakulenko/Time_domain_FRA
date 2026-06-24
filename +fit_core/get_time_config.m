@@ -2,10 +2,9 @@
 % FIXME: need refactor
 
 function [Times_conf, printer, Accuracy_conf, Profile] = ...
-    get_time_config(Period, Harm_num, Time_profile, Harm_profile)
+    get_time_config(Period, Time_profile, Harm_profile)
 arguments
     Period double
-    Harm_num double = 1 % FIXME: unused
     Time_profile string {mustBeMember(Time_profile, ...
         ["ultra_fast", "common", "fine", "most_accurate"])} = "common"
     Harm_profile string {mustBeMember(Harm_profile, ...
