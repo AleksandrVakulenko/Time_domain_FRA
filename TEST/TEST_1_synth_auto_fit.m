@@ -185,7 +185,7 @@ Fit_settings_1.freq_dev_const = 0;
 
 disp('---- Channel 1: ----')
 Time_start_1_fit = tic;
-[Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr, V1_arr, Fs, freq, ...
+[Result_1, Residuals_1, DEBUG_1] = fit_channel_local(T_arr, V1_arr, Fs, freq, ...
     Estimations_1, Properties_1, Harm_num_1, Fit_settings_1);
 Time_ch1_fit = toc(Time_start_1_fit);
 disp(['--------------------' newline])
@@ -197,7 +197,7 @@ Fit_settings_2.freq_dev_const = Result_1.f_dev_ppm;
 
 disp('---- Channel 2: ----')
 Time_start_2_fit = tic;
-[Result_2, Residuals_2, DEBUG_2] = fit_channel(T_arr, V2_arr, Fs, freq, ...
+[Result_2, Residuals_2, DEBUG_2] = fit_channel_local(T_arr, V2_arr, Fs, freq, ...
     Estimations_2, Properties_2, Harm_num_2, Fit_settings_2);
 Time_ch2_fit = toc(Time_start_2_fit);
 disp('--------------------')
@@ -263,7 +263,7 @@ end
 
 %%
 
-function [Result, Residuals, DEBUG] = fit_channel(T_arr, V_arr, Fs, freq, ...
+function [Result, Residuals, DEBUG] = fit_channel_local(T_arr, V_arr, Fs, freq, ...
     Estimations, Properties, Harm_num, Fit_settings)
 
 if ~no_estimations(Estimations)

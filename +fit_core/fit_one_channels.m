@@ -23,7 +23,7 @@ Fit_settings_1.freq_dev_flag = true; % FIXME: why it is true?
 Fit_settings_1.freq_dev_const = 0;
 Fit_settings_1.max_points = Max_points;
 
-[Result_1, Residuals_1, DEBUG_1] = fit_channel(T_arr_1, V1_arr, ...
+[Result_1, Residuals_1, DEBUG_1] = fit_core.fit_channel(T_arr_1, V1_arr, ...
     Fit_range, Fs, freq, Estimations_1, Properties, Harm_num_1, Fit_settings_1);
 
 end

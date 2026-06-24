@@ -1,6 +1,8 @@
 
 % FIXME: move to FFT module
 
+% FIMXE: unused function
+
 function [T_arr_filt, Signal_filt_1] = ...
     fft_filter_single_ch(Time_arr, V1_arr,freq , Fs, Filter_freq)
 
