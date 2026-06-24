@@ -6,6 +6,8 @@ classdef LCR_result_type
     properties (Access = public)
 
         freq doube; % Measurment frequency
+        Voltage_amp double; % Measurment voltage level
+        Voltage_DC double; % Measurment DC bias level
 
         res_abs double; % Resistance absolute value
         res_abs_err double; % Error of resistance absolute value

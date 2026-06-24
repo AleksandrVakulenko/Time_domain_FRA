@@ -4,6 +4,7 @@
 
 % FIXME: add LCR terminate before start
 
+LCR_type = {"LCR_E4980AL", []};
 Aster_addr = 3;
 
 Harm_num = [ ];
@@ -98,7 +99,7 @@ for i = 1:N
     disp([num2str(i) '/' num2str(N)])
 
     Gen_freq = Freq_arr_LCR(i);
-    LCR_Result = Aster_FRA.LCR_measure(Gen_freq, Gen_Voltage_level, Time_profile);
+    LCR_Result = Aster_FRA.LCR_measure(LCR_type, Gen_freq, Gen_Voltage_level, Time_profile);
     LCR_Result.freq = Gen_freq;
     Result_arr_LCR = [Result_arr_LCR LCR_Result];
 end

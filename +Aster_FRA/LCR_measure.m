@@ -1,62 +1,75 @@
 
 
-function [Result] = LCR_measure(Gen_freq, Gen_Voltage_level, LCR_serial_num, Time_profile)
+function [Result] = LCR_measure(LCR_type, Gen_freq, Gen_Voltage_level, Time_profile)
 arguments
+    LCR_type
     Gen_freq
     Gen_Voltage_level
-    LCR_serial_num = []
     Time_profile string {mustBeMember(Time_profile, ...
         ["ultra_fast", "common", "fine", "most_accurate"])} = "common"
 end
 
+% FIXME: replace by Aster_FRA.LCR_result_type.empty()
+Result = [];
+
+LCR_dev = feval(LCR_type{1}, LCR_type{2});
+
+if ~isa(LCR_dev, "LCR_meter_traits")
+    delete(LCR_dev);
+    error('Wrong type of LCR dev class, not an LCR_meter_traits')
+end
+
+try
     ignore_flag = false;
-    
-    LCR_gen_freq = Gen_freq;
-    if LCR_gen_freq < 20 || LCR_gen_freq > 300e3 % FIXME: get lim from device
+
+    Limits = LCR_dev.get_max_amp_and_freq();
+
+    Min_amp = Limits.amp_min;
+    Max_amp = Limits.amp_max;
+    Min_freq = Limits.freq_min;
+    Max_freq = Limits.freq_max;
+
+    if Gen_freq < Min_freq || Gen_freq > Max_freq
         ignore_flag = true;
     end
-    
-    LCR_gen_voltage = Gen_Voltage_level;
-    if LCR_gen_voltage > 2 % FIXME: get_limit from dev
-        LCR_gen_voltage = 2;
+
+    if Gen_Voltage_level > Max_amp
+        Gen_Voltage_level = Max_amp;
     end
-    
-    
-    Z = [];
-    Phi = [];
+
+    if Gen_Voltage_level < Min_amp
+        Gen_Voltage_level = Min_amp;
+    end
+
     if ~ignore_flag
-        LCR_dev = LCR_E4980AL(LCR_serial_num); % FIXME: use any LCR type
-        try
-            LCR_dev.set_volt(LCR_gen_voltage);
-            LCR_dev.set_freq(LCR_gen_freq);
-            LCR_dev.set_speed('medium', 2); % FIXME: magic constant
-            LCR_dev.set_measurment_function("Z-thd");
-            pause(0.1);
-            for i = 1:5
-                disp(i)
-                [Z(i), Phi(i)] = LCR_dev.get_readings;
-            end
-        catch err
-            delete(LCR_dev);
-            rethrow(err);
-        end
-        
-        delete(LCR_dev);
+        Gen_Voltage_level = LCR_dev.set_amplitude(Gen_Voltage_level);
+        Gen_freq = LCR_dev.set_freq(Gen_freq);
+        [R_abs, Phi_deg, R_abs_err, Phi_deg_err] = ...
+            LCR_dev.get_R_Phi_with_errors(Time_profile);
+
+        % FIXME: replace by Aster_FRA.LCR_result_type class
+        % FIXME: use in output: 1) Gen_Voltage_level 2) Gen_freq
+        Result.res_abs = R_abs;
+        Result.res_abs_err = R_abs_err;
+
+        Result.phi = Phi_deg;
+        Result.phi_err = Phi_deg_err;
+
+        Result.cap_par = [];
+        Result.r_scale = [];
+        Result.current = [];
+        Result.current_error = [];
+        Result.voltage = [];
+        Result.voltage_error = [];
+
     end
-    
-    % FIXME: replace by Aster_FRA.LCR_result_type class
-    Result.res_abs = mean(Z);
-    Result.res_abs_err = 3*std(Z);
-    
-    Result.phi = mean(Phi);
-    Result.phi_err = 3*std(Phi);
-    
-    Result.cap_par = [];
-    Result.r_scale = [];
-    Result.current = [];
-    Result.current_error = [];
-    Result.voltage = [];
-    Result.voltage_error = [];
+
+catch err
+    delete(LCR_dev);
+    rethrow(err);
+end
+
+delete(LCR_dev);
 
 end
 

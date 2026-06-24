@@ -2,11 +2,10 @@
 
 % UNSORTED
 % 1) Use residuals to estimate max possible quality (50 Hz rej)
-% 2) Update Debug_msg module
+% 2) Add some control for console print
 % 3) Add freq to ch_data2 (all previously saved data (with ch_data) will be invalidate!)
 % 4) Fit_settings_1.freq_dev_flag in fit_one_channels
-% 5) Replace FRA_dev by function handle in data_gathering_loop
-% 6) need to make a RT-FRA function with gathering_loop and double_fit after it
+% 5) need to make a RT-FRA function with gathering_loop and double_fit after it
 
 % ------------------------------------------------------------------------------
 
