@@ -1,11 +1,10 @@
 
 
 % UNSORTED
-% 1) Use residuals to estimate max possible quality (50 Hz rej)
-% 2) Add some control for console print
-% 3) Add freq to ch_data2 (all previously saved data (with ch_data) will be invalidate!)
-% 4) Fit_settings_1.freq_dev_flag in fit_one_channels
-% 5) need to make a RT-FRA function with gathering_loop and double_fit after it
+% 1) Add some control for console print
+% 2) Add freq to ch_data2 (all previously saved data (with ch_data) will be invalidate!)
+% 3) Fit_settings_1.freq_dev_flag in fit_one_channels
+% 4) need to make a RT-FRA function with gathering_loop and double_fit after it
 
 % ------------------------------------------------------------------------------
 
@@ -14,8 +13,7 @@
 % 2) Add set_freq and set_amp in Aster hardware
 % 3) Add DC offset in Aster hardware
 % 4) Add I input protection in Aster hardware
-% 5) Update LCR_measure function
-% 6) 
+% 5) 
 
 
 % 26.06.2026

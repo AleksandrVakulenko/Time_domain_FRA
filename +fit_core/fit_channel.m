@@ -7,6 +7,16 @@ Period_counter = Time_length/Period;
 
 if ~isempty(Estimations)
 
+    if freq > 5 % FIXME: magic constant
+        % NOTE: add 50 Hz rejection
+        % FIXME: add ability to switch on 60 Hz
+        Rej_freq = 50;
+        Rej_BW = 2; % FIXME: magic constant
+        Rej_freq_low = Rej_freq-Rej_BW/2;
+        Rej_freq_high = Rej_freq+Rej_BW/2;
+        V_arr = fft_band_rejection(V_arr, Fs, -60, Rej_freq_low, Rej_freq_high);
+    end
+
     if ~isempty(Harm_num)
         try % FIXME: debug
             Harm_est = fit_core.estimate_harmonics(T_arr, V_arr, Fs, freq, Harm_num);
