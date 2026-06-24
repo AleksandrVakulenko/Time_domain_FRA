@@ -3,12 +3,19 @@
 
 function [Score, max_score] = score_calc_ch(Result, Target)
 
+max_score = 23; 
+
+if ~isempty(Result)
+    Score = -inf;
+    return;
+end
+
 [A_err_prc, P_err_deg, C_err_prc] = fit_viewer.carrier_error_calc(Result);
 
 Amp_err_target = Target.amp_err_prc;
 Phi_err_target = Target.phi_err_deg;
 
-max_score = 23; 
+
 
 Score = 0;
 if A_err_prc < 0.2*Amp_err_target
