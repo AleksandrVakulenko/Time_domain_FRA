@@ -44,8 +44,7 @@ if apply_filter
     Signal_filt_1(range) = [];
     Signal_filt_2(range) = [];
 else
-    % FIXME: disp
-    warning(['Filter does not applied: ' num2str(Ratio) ' < ' num2str(Min_Ratio)]);
+    % FIXME: if we care about this then add output apply_filter flag
 end
 
 end

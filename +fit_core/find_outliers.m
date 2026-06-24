@@ -103,13 +103,12 @@ end
 function [mu_start, sigma_start] = estimate_mu_sigma(Residuals)
 
 std(Residuals)
-P10 = prctile(Residuals, 50 - 18);
+P10 = prctile(Residuals, 50 - 18); % Gauss settings
 P90 = prctile(Residuals, 50 + 18);
 
-% disp(['== ' num2str(P90-P10)])
-
-mu_start = mean(Residuals); % FIXME
-sigma_start = P90-P10; % FIXME
+% FIXME: why? it looks good for gauss
+mu_start = mean(Residuals);
+sigma_start = P90-P10;
 
 end
 

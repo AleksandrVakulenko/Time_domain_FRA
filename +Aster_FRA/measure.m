@@ -36,7 +36,7 @@ end
 
 [Times_conf, Time_printer, ~, Profile] = fit_core.get_time_config(Period, ...
     Time_profile, Harm_profile);
-Time_printer(); % FIXME: debug
+Time_printer(); % FIXME: disp
 
 %--------------------------------
 Time_to_underrange = 0.1*Period; % [s]

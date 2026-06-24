@@ -60,13 +60,7 @@ else
     error('unreachable')
 end
 
-% FIXME: debug print
-disp(['Amp type: ' char(Amp_type)]);
-disp(['Phi type: ' char(Phi_type)]);
-disp(['BG type: ' char(BG_type)]);
-
 Est_time_norm = Est_time/Period;
-
 
 % D = 0; % FIXME: freq dev start value
 % Lower = [-300];
@@ -206,11 +200,6 @@ opts.TolX = 1e-12; % FIXME: default
 opts.TolFun = 1e-12; % default
 opts.Display = 'off';
 
-% FIXME: debug, comment or delete 3 lines
-% disp(Eq)
-% coeffnames(ft)
-% disp(num2str(StartPoint'))
-
 opts.Lower = Lower;
 opts.StartPoint = StartPoint;
 opts.Upper = Upper;
@@ -221,9 +210,7 @@ DEBUG.StartPoint = StartPoint;
 DEBUG.coeffnames = coeffnames(ft);
 DEBUG.X_arr = X_arr;
 
-% disp('--- Main fit call ---') % FIXME: debug
 [fitresult, gof, output] = fit(Time', Signal', ft, opts);
-% disp('--- Main fit call end ---') % FIXME: debug
 
 Residuals = output.residuals';
 

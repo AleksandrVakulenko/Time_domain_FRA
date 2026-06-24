@@ -20,8 +20,6 @@ Periods_counter_1 = Time_length_1/Period;
 range = [Estimations_1.source] == "fit_res";
 if any(range)
     Estimations_1 = Estimations_1(range);
-    disp(['use new type of estimation processing with: ' ...
-        num2str(numel(find(range))) ' fit estimations'])
 else
     Estimations_1 = finish_estimations(Estimations_1, T_arr_1, V1_arr, Period);
     Estimations_1 = estimation_fix(Estimations_1, Periods_counter_1, freq);
@@ -72,7 +70,9 @@ else
 %     Freq = 1/Period;
 %     Init_values = fit_core.do_initial_estimation(T_arr, V_arr, Period);
 %     Result = fit_core.simple_sin_fit_f(T_arr, V_arr, Freq, Init_values);
-disp('!!!!!!!!!!')
+
+    % FIXME: maybe there are some problems here
+
     Estimations(1).t_min = 0;
     Estimations(1).t_max = 0;
     Estimations(1).status = 'fixed';
@@ -97,15 +97,6 @@ Estimations_norm = Estimations_all(est_range_norm);
 Estimations_low = Estimations_all(est_range_low);
 Estimations_extra = Estimations_all(est_range_extra);
 
-% 
-% disp('-----------')
-% % FIXME: nyan
-% Estimations
-% isempty(Estimations)
-% [Estimations.legacy_status]
-% [Estimations_low.legacy_status]
-% [Estimations_extra.legacy_status]
-% disp('-----------')
 
 Period = 1/freq;
 % NOTE: delete early estimations
@@ -130,29 +121,18 @@ N_norm = numel(Estimations_norm);
 N_low = numel(Estimations_low);
 N_extra = numel(Estimations_extra);
 
+% FIXME: maybe export some flag from here?
 if N_norm <= 1 && N_low <= 1 && N_extra > 0
     Estimations = Estimations_all;
-    disp([newline '! YOLO FIT ! („• ֊ •„)' newline])
+    % NOTE: is it enougth?
 elseif N_norm < 5
     Estimations = [Estimations_norm Estimations_low];
-    disp([newline '! FIT by bad estimations ! ⸜(｡˃ ᵕ ˂ )⸝♡' newline])
+    % NOTE: maybe problems
 elseif N_norm >= 5 
     Estimations = Estimations_norm;
-    disp([newline '! OK, we have something ! (˶ᵔ ᵕ ᵔ˶) ‹𝟹' newline])
+    % NOTE: no problems
 else
     error('ER_1134') % FIXME: check this
 end
-
-% % NOTE: Replce estimations (is none) by bad estimations
-% if numel(Estimations_norm)<2 && isempty(Estimations_low) && ...
-%         ~isempty(Estimations_extra)
-%     disp([newline '! YOLO FIT ! („• ֊ •„)' newline])
-%     Estimations = Estimations_extra;
-% elseif isempty(Estimations_norm) && ~isempty(Estimations_low)
-%     disp([newline '! FIT by bad estimations ! ⸜(｡˃ ᵕ ˂ )⸝♡' newline])
-%     Estimations = Estimations_low;
-% else
-%     disp([newline '! OK, we have something ! (˶ᵔ ᵕ ᵔ˶) ‹𝟹' newline])
-% end
 
 end

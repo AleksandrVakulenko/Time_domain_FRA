@@ -45,7 +45,7 @@ if ~isempty(Estimations)
 
     Refit_flag = false;
 
-    % NOTE: analize residuals here
+    % NOTE: analize residuals here (it is already done below)
     if ~isempty(Harm_num)
         % FIXME: is it better to use full Fs?
         Harm_est_2 = fit_core.estimate_harms_from_res(T_arr, Residuals, freq, ...
@@ -55,12 +55,12 @@ if ~isempty(Estimations)
     end
     
     if ~isempty(Harm_est_2) && ~isempty(Result.harm)
+        % FIXME: bad legacy code
         Fitted_harm = Result.harm;
         for i = 1:numel(Harm_est_2)
             hn = Harm_est_2(i).n;
             ind = find([Fitted_harm.n] == hn);
             if ~isempty(ind)
-                disp(['Harm ' num2str(ind)]) % FIXME: disp
                 Fitted_harm(ind).amp = Fitted_harm(ind).amp + Harm_est_2(i).amp;
                 Fitted_harm(ind).phi = Harm_est_2(i).phi;
             end
@@ -73,27 +73,23 @@ if ~isempty(Estimations)
             Estimations, Properties, Fitted_harm, Fit_settings);
     end
 
-    % FIXME: fit residuals here to find lost harms
-    try
-        if Period_counter > 1
-            [Result_harm, RMS_Ratio] = fit_core.Harm_refit(Result, T_arr, V_arr, Fs2);
-            Harm_y = fit_viewer.Harm_calc(Result_harm, T_arr);
-            if ~isempty(Harm_y)
-                V_arr_pure = V_arr - Harm_y;
-                Estimations_pure = fit_core.result2estimation(Result_harm);
-                [Result, Residuals, DEBUG] = fit_core.any_sin_fit(T_arr, V_arr_pure, freq, ...
-                    Estimations_pure, Properties, [], Fit_settings);
-                Result.harm = Result_harm.harm;
-                Result.harm_err = Result_harm.harm_err;
-            end
-            disp(['        RMS_Ratio = ' num2str(RMS_Ratio, '%0.2f')]); % FIXME: disp
+    % NOTE: harm redefine
+    if Period_counter > 1
+        [Result_harm, RMS_Ratio] = fit_core.Harm_refit(Result, T_arr, V_arr, Fs2);
+        Harm_y = fit_viewer.Harm_calc(Result_harm, T_arr);
+        if ~isempty(Harm_y)
+            V_arr_pure = V_arr - Harm_y;
+            Estimations_pure = fit_core.result2estimation(Result_harm);
+            [Result, Residuals, DEBUG] = fit_core.any_sin_fit(T_arr, V_arr_pure, freq, ...
+                Estimations_pure, Properties, [], Fit_settings);
+            Result.harm = Result_harm.harm;
+            Result.harm_err = Result_harm.harm_err;
         end
-    catch err
-        rethrow(err) % FIXME: debug
+        disp(['        RMS_Ratio = ' num2str(RMS_Ratio, '%0.2f')]); % FIXME: disp
     end
     
 else
-    disp('NO ESTIMATIONS FOR FIT'); % FIXME: disp
+    disp('NO ESTIMATIONS FOR FIT'); % FIXME: disp; do something with it
     Result = [];
     Residuals = [];
     DEBUG = [];

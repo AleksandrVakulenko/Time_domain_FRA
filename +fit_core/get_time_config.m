@@ -133,6 +133,7 @@ Freq = 1/Period;
 
 Min_time = Times_conf.min_fop*Period;
 Max_time = Times_conf.max_fop*Period;
+% FIXME: disp
 disp('------ TIME CONFIG ------')
 disp(['Profile: "' char(Time_profile) '"'])
 disp(['Freq = ' num2str(Freq) ' Hz'])

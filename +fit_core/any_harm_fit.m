@@ -49,9 +49,7 @@ opts.Upper = Upper;
 DEBUG.StartPoint = StartPoint;
 DEBUG.coeffnames = coeffnames(ft);
 
-% disp('--- Main fit call ---') % FIXME: debug
 [fitresult, gof, output] = fit(Time', Signal', ft, opts);
-% disp('--- Main fit call end ---') % FIXME: debug
 
 Residuals = output.residuals';
 

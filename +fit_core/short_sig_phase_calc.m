@@ -44,10 +44,6 @@ Zeros_inside = Zeros(range_inside);
 range_close = (Zeros > x(1) - 0.6*Period) & (Zeros < x(end) + 0.6*Period);
 Zeros_close = Zeros(range_close);
 
-% disp(['Zeros: ' num2str(Zeros)])
-% disp(['Zeros inside: ' num2str(Zeros_inside)])
-% disp(['Zeros close: ' num2str(Zeros_close)])
-
 
 switch numel(Zeros_close)
 case 0
