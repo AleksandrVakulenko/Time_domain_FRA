@@ -11,9 +11,9 @@
 % 8) Update Debug_msg module
 % 9) Add freq to ch_data2 (all previously saved data (with ch_data) will be invalidate!)
 % 10) Fit_settings_1.freq_dev_flag in fit_one_channels
-% 11) if RMS_Ratio > 5 in Harm_refit
-% 12) Replace FRA_dev by function handle in data_gathering_loop
-% 13) need to make a RT-FRA function with gathering_loop and double_fit after it
+% 11) Replace FRA_dev by function handle in data_gathering_loop
+% 12) need to make a RT-FRA function with gathering_loop and double_fit after it
+
 
 % 25.06.2026
 % 1) Add set_freq and set_amp in Aster hardware
