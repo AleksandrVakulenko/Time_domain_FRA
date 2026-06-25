@@ -104,7 +104,7 @@ end
 function Times_conf = get_time_conf_common(Period, Harm_mult)
     Times_conf.period_for_harm_det = Harm_mult;
     Times_conf.min_meas_time = 0.5; % [s]
-    Times_conf.min_fop = 1.0; % [1]
+    Times_conf.min_fop = 1.1; % [1]
     Times_conf.max_fop = 2.0; % [1]
 end
 

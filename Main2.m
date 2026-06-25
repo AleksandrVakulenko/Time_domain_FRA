@@ -8,16 +8,17 @@ LCR_type = {"LCR_E4980AL", []};
 Aster_addr = 3;
 
 Harm_num = [ ];
-Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
 
-Gen_Voltage_level = 2; % [V]
-F_min = 0.05;
+Gen_Voltage_level = 0.1; % [V]
+F_min = 0.1;
 F_max = 300e3;
-F_num = 60;
+F_num = 31;
 
 % Fixed_range = [5];
 
 Freq_arr = 10.^linspace(log10(F_min), log10(F_max), F_num);
+% Freq_arr = repmat(Freq_arr, 1, 5);
 % Freq_arr = 0.5;
 
 Sample.info = "test";
@@ -49,7 +50,7 @@ F_range_LCR = Freq_arr >= 20;
 Freq_arr_Aster = Freq_arr(F_range_Aster);
 Freq_arr_LCR = Freq_arr(F_range_LCR);
 
-Fig = fit_gui.init_FRA_gui();
+Fig = fit_gui.init_Aster_FRA_gui();
 Ax_arr = [Fig.UserData.axes_top Fig.UserData.axes_bot];
 Stop_button = Fig.UserData.stop_button;
 Resources.stop_button = Stop_button;
@@ -104,6 +105,7 @@ for i = 1:N
     Result_arr_LCR = [Result_arr_LCR LCR_Result];
 end
 
+disp('Finish')
 
 %%
 
@@ -134,7 +136,7 @@ plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.-r')
 ylabel('|R|, Ohm')
 xlabel('f, Hz')
 set(gca, 'xscale', 'log')
-% set(gca, 'yscale', 'log')
+set(gca, 'yscale', 'log')
 grid on
 grid minor
 box on

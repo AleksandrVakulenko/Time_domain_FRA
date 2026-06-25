@@ -14,7 +14,7 @@ Result = [];
 
 LCR_dev = feval(LCR_type{1}, LCR_type{2});
 
-if ~isa(LCR_dev, "LCR_meter_traits")
+if ~isa(LCR_dev, "adev_traits.LCR_meter_traits")
     delete(LCR_dev);
     error('Wrong type of LCR dev class, not an LCR_meter_traits')
 end

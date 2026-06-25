@@ -64,6 +64,8 @@ Prefit_max_points = 10e3; % FIXME: get from settings
 T_arr = [];
 V1_arr = [];
 V2_arr = [];
+V1_arr_raw = [];
+V2_arr_raw = [];
 
 % FIXME: need refactor
 Estimations_1 = fit_core.Estimation_type.empty;
@@ -89,6 +91,7 @@ Prefit_ready_2 = false;
 
 % Common data -------------------------
 stop = false;
+Ready_to_stop = false;
 Exit_flag = 0;
 First_time = true;
 Fit_local_timer = [];
@@ -120,12 +123,30 @@ while ~stop
     T_part = T_part - Time_shift;
 
     T_arr = [T_arr T_part];
-    V1_arr = [V1_arr V1_part];
-    V2_arr = [V2_arr V2_part];
+    V1_arr_raw = [V1_arr_raw V1_part];
+    V2_arr_raw = [V2_arr_raw V2_part];
 
+    % NOTE: this part is a 50 Hz rejection filter
+    if Freq > 2 && Fs > 200 % FIXME: magic constant
+        % FIXME: add ability to switch on 60 Hz
+        Rej_freq = 50;
+        Rej_span = 2; % FIXME: magic constant
+        Rej_freq_low = Rej_freq - Rej_span/2;
+        Rej_freq_high = Rej_freq + Rej_span/2;
+        V1_arr = fft_band_rejection(V1_arr_raw, Fs, -60, Rej_freq_low, Rej_freq_high);
+        V2_arr = fft_band_rejection(V2_arr_raw, Fs, -60, Rej_freq_low, Rej_freq_high);
+    else
+        V1_arr = V1_arr_raw;
+        V2_arr = V2_arr_raw;
+    end
+    
     Time_passed = T_arr(end);
     Periods_counter = Time_passed/Period;
     
+    if Time_passed > Min_time && Ready_to_stop
+        stop = true; % FIXME: maybe break here?
+    end
+
     %--------------------------------
     Overload_1.range = abs(V1_arr) > MAX_CH1_LIMIT;
     Overload_1.count = numel(find(Overload_1.range));
@@ -259,13 +280,13 @@ while ~stop
                     Estimations_2 = fit_core.result2estimation(Result_2);
 
                     if Score_1 > 0 && Score2 > 0
-                        stop = true;
+                        Ready_to_stop = true;
                     end
                 end
             end
         catch err
             warning('fit error')
-            rethrow(err);
+            rethrow(err); % FIXME: maybe just continue
         end
     end
 

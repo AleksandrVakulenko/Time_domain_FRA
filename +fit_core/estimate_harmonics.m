@@ -27,6 +27,10 @@ if ~isempty(Harm_num)
     % NOTE: do not use for noise amp calc
     
     [~, nf_calc] = fit_core.noise_amp_calc(freq, T_arr, V_arr, Fs, F_lim);
+    if isempty(nf_calc)
+        Harm_est = [];
+        return;
+    end
 
     HNR_min_dB = 10; % FIXME: get from settings "harm to noise ratio"
 

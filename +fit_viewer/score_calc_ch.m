@@ -5,7 +5,7 @@ function [Score, max_score] = score_calc_ch(Result, Target)
 
 max_score = 23; 
 
-if ~isempty(Result)
+if isempty(Result)
     Score = -inf;
     return;
 end

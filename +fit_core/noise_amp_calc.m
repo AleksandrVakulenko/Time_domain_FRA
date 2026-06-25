@@ -16,8 +16,9 @@ end
 [Time, Signal] = fit_core.signal_cut_by_n_periods(Time, Signal, freq);
 
 if isempty(Signal)
-    % FIXME: bad code
-    error('Signal length is less than 1 period')
+    Noise_amp = [];
+    noise_floor = [];
+    return;
 end
 
 % NOISE FIND FULL FREQ --------------------
