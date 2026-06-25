@@ -54,7 +54,7 @@ Gen_addr = [];
 
 ERR = [];
 try
-    Gen_initiate(Gen, Gen_Voltage_level, Gen_freq);
+    Gen_initiate(Gen, Gen_Voltage_level, Gen_freq, Gen_Offset_level);
 
     [Fs_new, Filter_wait] = Aster_FRA.ADC_init(Aster, Gen_freq, Harm_num, Times_conf);
 

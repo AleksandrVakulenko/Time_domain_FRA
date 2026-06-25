@@ -10,7 +10,8 @@ Aster_addr = 3;
 Harm_num = [ ];
 Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
 
-Gen_Voltage_level = 0.1; % [V]
+Gen_Voltage_level = 1.0; % [V]
+DC_bias = 0;
 F_min = 0.1;
 F_max = 300e3;
 F_num = 31;
@@ -23,7 +24,7 @@ Freq_arr = 10.^linspace(log10(F_min), log10(F_max), F_num);
 
 Sample.info = "test";
 
-Fixed_range = [];
+Fixed_range = [1];
 Run_num = 2;
 
 % Fixed_range = 6;
@@ -70,7 +71,7 @@ for i = 1:N
     Gen_freq = Freq_arr_Aster(i);
 %     Gen_Voltage_level = Voltage_amp_arr(i);
     [Fit_Result, Extra_data] = Test_measurment_function(Resources, Aster_addr, ...
-        Gen_freq, Gen_Voltage_level, Harm_num, Z_est, Time_profile, Ax_arr, Fixed_range);
+        Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Z_est, Time_profile, Ax_arr, Fixed_range);
     Fit_Result.freq = Gen_freq;
     Result_arr_Aster = [Result_arr_Aster Fit_Result];
     Extra_data_arr = [Extra_data_arr Extra_data];
@@ -125,10 +126,10 @@ Phi_err_Aster = [Result_arr_Aster.phi_err];
 
 subplot(2, 1, 1)
 hold on
-% errorbar(Freq_arr_plot_LCR, Res_LCR, Res_err_LCR, '-.b')
-% errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '--.r')
-plot(Freq_arr_plot_LCR, 1./(2*pi*Res_LCR.*Freq_arr_plot_LCR)*1e12, '.-b')
-plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.-r')
+errorbar(Freq_arr_plot_LCR, Res_LCR, Res_err_LCR, '-.b')
+errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '--.r')
+% plot(Freq_arr_plot_LCR, 1./(2*pi*Res_LCR.*Freq_arr_plot_LCR)*1e12, '.-b')
+% plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.-r')
 % plot(Res./Res*100, '-b')
 % plot((Res+Res_err)./Res*100, '--b')
 % plot((Res-Res_err)./Res*100, '--b')
@@ -186,12 +187,12 @@ Used_ranges = Extra_data.used_ranges;
 %% TEST MEASUREMENT FUNCTNION
 
 function [Fit_Result, Extra_data] = Test_measurment_function(Resources, ...
-    Aster_addr, Gen_freq, Gen_Voltage_level, Harm_num, Zest, Time_profile, ...
+    Aster_addr, Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Zest, Time_profile, ...
     Fig_or_ax, Fixed_range)
 
 %--------------------------------
 Freq = Gen_freq;
-Gen_Offset_level = 0; % [V] % FIXME: unused
+Gen_Offset_level = DC_bias; % [V] % FIXME: unused
 Harm_profile = "common"; % "common", "most_accurate"
 %--------------------------------
 
@@ -287,10 +288,11 @@ function Zest = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr)
 % FIXME: it is bad to estimate on single point
     Harm_num = [1 2 3];
     Gen_freq = 1;
+    DC_bias = 0;
     Time_profile = 'ultra_fast';
     Zest = struct('type', 'res', 'value', 50e3);
     [Fit_Result, Extra_data] = Test_measurment_function(Resources, Aster_addr, ...
-        Gen_freq, Gen_Voltage_level, Harm_num, Zest, Time_profile, Ax_arr, []);
+        Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Zest, Time_profile, Ax_arr, []);
 
     Zest = struct('type', 'res', 'value', Fit_Result.res_abs);
 end

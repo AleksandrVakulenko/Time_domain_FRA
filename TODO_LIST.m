@@ -9,11 +9,10 @@
 % ------------------------------------------------------------------------------
 
 % 25.06.2026
-% 1) Add ADC and DAC scales in Aster hardware.
-% 2) Add set_freq and set_amp in Aster hardware
-% 3) Add DC offset in Aster hardware
-% 4) Add I input protection in Aster hardware
-% 5) 
+% 1) Add set_freq and set_amp in Aster hardware
+% 2) Add I input protection in Aster hardware
+% 3) Update Gen_initiate.m function to use of DC bias
+% 4) New auto-range function
 
 
 % 26.06.2026

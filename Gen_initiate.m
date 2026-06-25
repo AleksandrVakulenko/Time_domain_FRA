@@ -3,8 +3,13 @@
 
 % FIXME: unused function
 
-function Gen_initiate(Gen, Gen_Voltage_level, Gen_freq)
-
+function Gen_initiate(Gen, Gen_Voltage_level, Gen_freq, DC_bias)
+arguments
+    Gen
+    Gen_Voltage_level
+    Gen_freq
+    DC_bias = 0
+end
     if class(Gen) == "SR860_dev"
         Gen.set_gen_config(Gen_Voltage_level, Gen_freq, Gen_Offset_level);
         Gen.initiate();
@@ -15,7 +20,7 @@ function Gen_initiate(Gen, Gen_Voltage_level, Gen_freq)
         Gen.set_offset(Gen_Offset_level);
         Gen.initiate();
     elseif class(Gen) == "Aster_dev"
-        Aster_FRA.gen_init(Gen, Gen_Voltage_level, Gen_freq);
+        Aster_FRA.gen_init(Gen, Gen_Voltage_level, Gen_freq, DC_bias);
     else
         error('Wong gen class')
     end
