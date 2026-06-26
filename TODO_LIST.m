@@ -2,24 +2,26 @@
 
 % UNSORTED
 % 1) Add some control for console print
-% 2) Add freq to ch_data2 (all previously saved data (with ch_data) will be invalidate!)
+% 2) Update Gen_initiate.m function to use of DC bias
 % 3) Fit_settings_1.freq_dev_flag in fit_one_channels
 % 4) need to make a RT-FRA function with gathering_loop and double_fit after it
+% 5) Exclude Astra from aDevice
+% 6) Use new Settings
+% 7) add data saver function
+% 8) FIX harmonics with NaN values
+% 9) 
+% 10) 
 
 % ------------------------------------------------------------------------------
 
-% 25.06.2026
-% 1) Add set_freq and set_amp in Aster hardware
-% 2) Add I input protection in Aster hardware
-% 3) Update Gen_initiate.m function to use of DC bias
-% 4) New auto-range function
-
 
 % 26.06.2026
-% 1) Exclude Astra from aDevice
-% 2) add data saver function
-% 3) One more test
-% 4) Use new Settings
+% 1) Add freq to ch_data2 (all previously saved data (with ch_data) will be invalidate!)
+% 2) Add set_freq and set_amp in Aster hardware
+% 3) Add I input protection in Aster hardware
+% 4) Add ADC_1 ranges in Aster hardware
+% 5) One more test
+% 6) 
 
 % ------------------------------------------------------------------------------
 

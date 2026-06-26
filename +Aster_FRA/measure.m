@@ -26,12 +26,16 @@ Overrange_tolerance = 0.2; % [%] // FIXME: debug value
 MAX_CH1_LIMIT = 10;
 MAX_CH2_LIMIT = 5;
 
-if ~isempty(Fixed_range) && any(Fixed_range == [1 2 3 4 5 6])
+if ~isempty(Fixed_range) && any(Fixed_range == [1 2 3 4 5 6]) % FIXME: ranges list
     Underrange_force_2 = true;
     Overrange_tolerance = 100; % [%]
     Auto_range = false;
 else
     Auto_range = true;
+    Possible_ranges = get_possible_ranges(Freq);
+    if isempty(Possible_ranges)
+        error(['No Range is avilable for f = ' num2str(Freq), ' Hz'])
+    end
 end
 
 [Times_conf, Time_printer, ~, Profile] = fit_core.get_time_config(Period, ...
@@ -39,7 +43,7 @@ end
 Time_printer(); % FIXME: disp
 
 %--------------------------------
-Time_to_underrange = 0.1*Period; % [s]
+Time_to_underrange = 0.1*Period; % [s] / FIXME: why?
 
 % FIXME: debug
 if Time_to_underrange < 0.3
@@ -72,7 +76,6 @@ try
     Channel_settings_2.overrange_tolerance = Overrange_tolerance;
     Channel_settings_2.fs = Fs_new;
 
-    % FIXME: add more options
     if Auto_range
         [Range_num_forecast, ~] = Aster_FRA.range_forecaster(Aster, Zest, ...
             Gen_Voltage_level, Gen_freq);
@@ -81,6 +84,10 @@ try
             Range_init_num = Range_num_forecast;
         else
             Range_init_num = 1;
+        end
+        if ~any(Range_init_num == Possible_ranges)
+            Range_init_num = max(Possible_ranges);
+            Channel_settings_2.underrange_force = true;
         end
     else
         Range_init_num = Fixed_range;
@@ -127,7 +134,11 @@ try
                 stop = true;
             elseif Exit_flag == 102
                 Aster_Range = Aster_Range + 1;
-                need_to_switch_range = true;
+                if ~any(Aster_Range == Possible_ranges)
+                    Channel_settings_2.underrange_force = true;
+                else
+                    need_to_switch_range = true;
+                end
             elseif Exit_flag == 202
                 Aster_Range = Aster_Range - 1;
                 need_to_switch_range = true;
@@ -170,11 +181,8 @@ catch ERR
     rethrow(ERR)
 end
 
-if isempty(ERR)
-    Aster_FRA.disconnest_devices(Aster, Gen)
-    disp('OK finish') % FIXME: disp
-end
 
+Aster_FRA.disconnest_devices(Aster, Gen)
 Accuracy_conf = Profile.accuracy_conf;
 
 Full_main_time = toc(Full_main_time_counter);
