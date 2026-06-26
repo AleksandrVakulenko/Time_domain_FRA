@@ -219,10 +219,10 @@ while ~stop
         Fit_local_timer = tic;
 
         Ch_data_1 = fit_core.Ch_data_type(T_arr, V1_arr, Outliers_range_1, Overload_1, ...
-            Estimations_1, Times_conf, Accuracy_conf, Fs, Periods_counter);
+            Estimations_1, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
 
         Ch_data_2 = fit_core.Ch_data_type(T_arr, V2_arr, Outliers_range_2, Overload_2, ...
-            Estimations_2, Times_conf, Accuracy_conf, Fs, Periods_counter);
+            Estimations_2, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
 
         [Properties_1, Properties_2] = fit_core.get_fit_props(Periods_counter);
 
@@ -327,12 +327,11 @@ else
     Outliers_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1);
     Outliers_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2);
 
-    % FIXME: add Time_profile and freq to Ch_data_type
     Ch_data_1 = fit_core.Ch_data_type(T_arr, V1_arr, Outliers_range_1, Overload_1, ...
-        Estimations_1, Times_conf, Accuracy_conf, Fs, Periods_counter);
+        Estimations_1, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
 
     Ch_data_2 = fit_core.Ch_data_type(T_arr, V2_arr, Outliers_range_2, Overload_2, ...
-        Estimations_2, Times_conf, Accuracy_conf, Fs, Periods_counter);
+        Estimations_2, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
 end
 
 end

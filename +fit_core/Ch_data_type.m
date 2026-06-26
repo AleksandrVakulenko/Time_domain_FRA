@@ -14,12 +14,13 @@ classdef Ch_data_type
         time_conf
         accuracy_conf
         fs (1, 1) double
+        freq (1, 1) double
         period_counter (1, 1) double
     end
 
     methods (Access = public)
         function obj = Ch_data_type(time, voltage, outliers_range, overload, ...
-                estimations, time_conf, accuracy_conf, fs, period_counter)
+                estimations, time_conf, accuracy_conf, fs, freq, period_counter)
             obj.time = time;
             obj.voltage = voltage;
             obj.outliers_range = outliers_range;
@@ -28,6 +29,7 @@ classdef Ch_data_type
             obj.time_conf = time_conf;
             obj.accuracy_conf = accuracy_conf;
             obj.fs = fs;
+            obj.freq = freq;
             obj.period_counter = period_counter;
         end
     end
