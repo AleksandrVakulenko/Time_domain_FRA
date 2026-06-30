@@ -13,6 +13,8 @@ arguments
 end
 
 Stop_button = Resources.stop_button;
+Underrange_ind = Resources.underrange_ind;
+Underrange_ind_set_f = Underrange_ind.UserData;
 
 Axes_arr = fit_gui.init_gather_axes(Fig_or_ax);
 
@@ -110,10 +112,9 @@ while ~stop
     [T_part, V1_part, V2_part] = FRA_dev.get_VV();
     V2_part = -V2_part; % FIXME: add setting for inversion CH2 (Aster ch2 inv)
 
-    % FIXME: debug
+    % FIXME: add max time for empty input
     if isempty(T_part)
         continue
-%         stop = true;
     end
     
     if First_time
@@ -127,14 +128,15 @@ while ~stop
     V2_arr_raw = [V2_arr_raw V2_part];
 
     % NOTE: this part is a 50 Hz rejection filter
-    if Freq > 2 && Fs > 200 % FIXME: magic constant
+    % FIXME: sometimes it does worse
+    if ((Freq > 2 && Freq < 45) || Freq > 55) && Fs > 200 % FIXME: magic constant
         % FIXME: add ability to switch on 60 Hz
         Rej_freq = 50;
         Rej_span = 2; % FIXME: magic constant
         Rej_freq_low = Rej_freq - Rej_span/2;
         Rej_freq_high = Rej_freq + Rej_span/2;
-        V1_arr = fft_band_rejection(V1_arr_raw, Fs, -60, Rej_freq_low, Rej_freq_high);
-        V2_arr = fft_band_rejection(V2_arr_raw, Fs, -60, Rej_freq_low, Rej_freq_high);
+        V1_arr = fft_band_rejection(V1_arr_raw, Fs, -30, Rej_freq_low, Rej_freq_high);
+        V2_arr = fft_band_rejection(V2_arr_raw, Fs, -30, Rej_freq_low, Rej_freq_high);
     else
         V1_arr = V1_arr_raw;
         V2_arr = V2_arr_raw;
@@ -144,7 +146,7 @@ while ~stop
     Periods_counter = Time_passed/Period;
     
     if Time_passed > Min_time && Ready_to_stop
-        stop = true; % FIXME: maybe break here?
+        break;
     end
 
     %--------------------------------
@@ -167,7 +169,8 @@ while ~stop
     Underrange_1 = check_underrange(V1_arr, Underrange_1, Underrange_force_1);
     Underrange_2 = check_underrange(V2_arr, Underrange_2, Underrange_force_2);
 
-    disp_underrange(Underrange_1, Underrange_2); % FIXME: disp
+%     disp_underrange(Underrange_1, Underrange_2); % FIXME: disp
+    Underrange_ind_set_f(Underrange_1 || Underrange_2);
 
     if Underrange_1 && Time_passed > Time_to_underrange_1
         Exit_flag = 101; % NOTE: EF 101: underrange ch1
@@ -352,6 +355,7 @@ end
 
 
 function Underrange = check_underrange(V_arr, Underrange, Underrange_force)
+% FIXME: add results amp check
 if Underrange
     [Mean, Span, ~, ~] = fit_core.singal_stats(V_arr);
     if Underrange_force

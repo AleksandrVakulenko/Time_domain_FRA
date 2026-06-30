@@ -53,12 +53,38 @@ Stop_button = uicontrol('parent', Control_Frame, ...
                    'Callback', CB, ...
                    'BackgroundColor', [0.95 0.73 0.73]);
 
+Underrange_ind_12 = uicontrol('parent', Control_Frame, ...
+                   'Style', 'pushbutton', ...
+                   'units', 'normalized', ...
+                   'position', [0.64,0.9175,0.35,0.075], ...
+                   'string', 'Underrange', ...
+                   'BackgroundColor', [0.80 0.80 0.80], ...
+                   'Enable', 'inactive', ...
+                   'Visible', 'on');
+Underrange_ind_12.UserData = @(x) set_underrange(x, Underrange_ind_12);
+
+
 Stop_button.UserData = struct('stop', false);
 Stop_button.Callback = @fit_gui.stop_callback;
 
-Data = struct('axes_top', Ax1, 'axes_bot', Ax2, 'stop_button', Stop_button);
+Data = struct('axes_top', Ax1, 'axes_bot', Ax2, ...
+              'stop_button', Stop_button, ...
+              'underrange_ind', Underrange_ind_12);
+
 Fig.UserData = Data;
 
 end
 
+
+
+
+function set_underrange(arg, Underrange_button)
+
+if arg
+    Underrange_button.BackgroundColor = [224 31 31]/255;
+else
+    Underrange_button.BackgroundColor = [0.80 0.80 0.80];
+end
+
+end
 

@@ -25,6 +25,7 @@ for i = 1:N
 
     [Amp_cal, Phi_cal] = Calibration_function(Range_N, Freq);
 
+    % FIXME: split in two if
     if ~isempty(Amp_cal) && ~isnan(Amp_cal) && ~isempty(Phi_cal) && ~isnan(Phi_cal)
         % FIXME: experimental part
         Alpha_min = 0.85;

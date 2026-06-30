@@ -8,23 +8,43 @@ LCR_type = {"LCR_E4980AL", []};
 Aster_addr = 3;
 
 Harm_num = [ ];
-Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "ultra_fast"; % "ultra_fast", "common", "fine", "most_accurate"
 
 Gen_Voltage_level = 1.0; % [V]
-DC_bias = 0;
-F_min = 0.1;
+DC_bias = 0.0;
+F_min = 0.001;
 F_max = 300e3;
-F_num = 31;
+F_num = 33;
 
 % Fixed_range = [5];
 
 Freq_arr = 10.^linspace(log10(F_min), log10(F_max), F_num);
+Freq_arr = [1.55096e+02
+9.69352e+01
+6.05845e+01
+3.78653e+01
+2.36658e+01
+1.47911e+01
+9.24446e+00
+5.77779e+00
+3.61112e+00
+2.25695e+00
+1.41059e+00
+8.81621e-01
+5.51013e-01
+3.44383e-01
+2.15239e-01
+1.34525e-01
+1.00000e-01
+5.00000e-02
+1.00000e-02
+];
 % Freq_arr = repmat(Freq_arr, 1, 5);
 % Freq_arr = 0.5;
 
 Sample.info = "test";
 
-Fixed_range = [1];
+Fixed_range = [ ];
 Run_num = 2;
 
 % Fixed_range = 6;
@@ -55,6 +75,7 @@ Fig = fit_gui.init_Aster_FRA_gui();
 Ax_arr = [Fig.UserData.axes_top Fig.UserData.axes_bot];
 Stop_button = Fig.UserData.stop_button;
 Resources.stop_button = Stop_button;
+Resources.underrange_ind = Fig.UserData.underrange_ind;
 
 
 Z_est = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr);
@@ -70,7 +91,7 @@ for i = 1:N
 
     Gen_freq = Freq_arr_Aster(i);
 %     Gen_Voltage_level = Voltage_amp_arr(i);
-    [Fit_Result, Extra_data] = Test_measurment_function(Resources, Aster_addr, ...
+    [Fit_Result, Extra_data] = single_freq_measurment(Resources, Aster_addr, ...
         Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Z_est, Time_profile, Ax_arr, Fixed_range);
     Fit_Result.freq = Gen_freq;
     Result_arr_Aster = [Result_arr_Aster Fit_Result];
@@ -126,10 +147,10 @@ Phi_err_Aster = [Result_arr_Aster.phi_err];
 
 subplot(2, 1, 1)
 hold on
-errorbar(Freq_arr_plot_LCR, Res_LCR, Res_err_LCR, '-.b')
-errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '--.r')
-% plot(Freq_arr_plot_LCR, 1./(2*pi*Res_LCR.*Freq_arr_plot_LCR)*1e12, '.-b')
-% plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.-r')
+% errorbar(Freq_arr_plot_LCR, Res_LCR, Res_err_LCR, '.b')
+% errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
+plot(Freq_arr_plot_LCR, 1./(2*pi*Res_LCR.*Freq_arr_plot_LCR)*1e12, '.-b')
+plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.-r')
 % plot(Res./Res*100, '-b')
 % plot((Res+Res_err)./Res*100, '--b')
 % plot((Res-Res_err)./Res*100, '--b')
@@ -144,8 +165,8 @@ box on
 
 subplot(2, 1, 2)
 hold on
-errorbar(Freq_arr_plot_LCR, Phi_LCR, Phi_err_LCR, '.-b')
-errorbar(Freq_arr_plot_Aster, Phi_Aster, Phi_err_Aster, '.--r')
+errorbar(Freq_arr_plot_LCR, Phi_LCR, Phi_err_LCR, '.b')
+errorbar(Freq_arr_plot_Aster, Phi_Aster, Phi_err_Aster, '.r')
 % plot(Freq_arr_plot_Aster, abs(tan((Phi_Aster+90)/180*pi)))
 % plot(Freq_arr, Phi_err)
 % plot(Phi_err, '--b')
@@ -186,7 +207,7 @@ Used_ranges = Extra_data.used_ranges;
 
 %% TEST MEASUREMENT FUNCTNION
 
-function [Fit_Result, Extra_data] = Test_measurment_function(Resources, ...
+function [Fit_Result, Extra_data] = single_freq_measurment(Resources, ...
     Aster_addr, Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Zest, Time_profile, ...
     Fig_or_ax, Fixed_range)
 
@@ -291,10 +312,16 @@ function Zest = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr)
     DC_bias = 0;
     Time_profile = 'ultra_fast';
     Zest = struct('type', 'res', 'value', 50e3);
-    [Fit_Result, Extra_data] = Test_measurment_function(Resources, Aster_addr, ...
+    Fit_Result = single_freq_measurment(Resources, Aster_addr, ...
         Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Zest, Time_profile, Ax_arr, []);
 
-    Zest = struct('type', 'res', 'value', Fit_Result.res_abs);
+    % --- FXIME: debug section ---
+    Res = Fit_Result.res_abs;
+    Cap = 1/(2*pi*Res*Gen_freq);
+    Zest = struct('type', 'cap', 'value', Cap);
+    % --- NOTE: end of debug section ---
+
+%     Zest = struct('type', 'res', 'value', Fit_Result.res_abs);
 end
 
 

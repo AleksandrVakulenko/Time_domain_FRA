@@ -7,12 +7,12 @@ arguments
     DC_bias = 0
 end
 
-% FIXME: add DC_bias; now it is wrong settings
+Abs_max = abs(Gen_Voltage_level) + abs(DC_bias);
 
-if Gen_Voltage_level >= 0.04
+if Abs_max >= 0.04
     High_voltage_mode(Aster, Gen_Voltage_level, Gen_freq, DC_bias)
 else
-    Low_voltage_mode(Aster, Gen_Voltage_level, Gen_freq)
+    Low_voltage_mode(Aster, Gen_Voltage_level, Gen_freq, DC_bias)
 end
 
 end
@@ -40,7 +40,7 @@ end
 
 
 
-function Low_voltage_mode(Aster, Gen_Voltage_level, Gen_freq)
+function Low_voltage_mode(Aster, Gen_Voltage_level, Gen_freq, DC_bias)
 
 if Gen_Voltage_level > 10e-3
     MUX_SETTING = 1;
@@ -54,7 +54,7 @@ else
     end
 end
 
-Aster.Generator_waveform(Gen_Voltage_level, Gen_freq, "sin")
+Aster.Generator_waveform(Gen_Voltage_level, Gen_freq, "sin", DC_bias)
 Aster.Gen_direction("Internal"); % FIXME: no effect if Aster.set_connection_mode("I2V");
 Aster.Generator_out_active(1);
 Aster.Generator_out_opamp("OPA182");

@@ -32,7 +32,7 @@ if ~isempty(Fixed_range) && any(Fixed_range == [1 2 3 4 5 6]) % FIXME: ranges li
     Auto_range = false;
 else
     Auto_range = true;
-    Possible_ranges = get_possible_ranges(Freq);
+    Possible_ranges = Aster_FRA.get_possible_ranges(Freq);
     if isempty(Possible_ranges)
         error(['No Range is avilable for f = ' num2str(Freq), ' Hz'])
     end
