@@ -13,7 +13,7 @@
 % 2) 
 % 3) add more errors calculation (for colplex numbers)
 % 4) add data saver function
-% 5) investigate "underrange" function behavior
+% 5) 
 % 6) update GUI
 % 7) Add +fit_exec to run other task in gathering loop
 % 8) make Fern module (exclude all Astra functions)

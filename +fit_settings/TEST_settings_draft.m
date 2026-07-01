@@ -26,7 +26,7 @@ Settings_struct.min_number_of_points_to_fit = 100;
 Settings_struct.max_points_to_fit = 50e3;
 
 % data_gathering_loop : Prefit_max_points
-Settings_struct.max_points_to_pre_fit = 10e3;
+Settings_struct.max_points_to_pre_fit = 20e3;
 
 
 

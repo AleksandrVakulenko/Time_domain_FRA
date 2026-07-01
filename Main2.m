@@ -87,6 +87,7 @@ for i = 1:N
     Result_arr_Aster = [Result_arr_Aster Fit_Result];
     Extra_data_arr = [Extra_data_arr Extra_data];
 
+    % FIXME: it is bad in shuffled freq array
     Z_est = struct('type', 'res', 'value', Fit_Result.res_abs);
 end
 

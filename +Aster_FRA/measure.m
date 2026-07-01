@@ -43,6 +43,7 @@ end
 Time_printer(); % FIXME: disp
 
 %--------------------------------
+% FIXME: maybe this value should be placed inside gathering loop
 Time_to_underrange = 0.1*Period; % [s] / FIXME: why?
 
 % FIXME: debug

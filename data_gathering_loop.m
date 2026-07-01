@@ -58,7 +58,7 @@ else % Max_time >= 1 [s]
                       'do_pre_fit', true);
 end
 
-Prefit_max_points = 10e3; % FIXME: get from settings
+Prefit_max_points = 20e3; % FIXME: get from settings
 % ----------------------------------------------------------------
 
 
@@ -126,28 +126,28 @@ while ~stop
     T_arr = [T_arr T_part];
     V1_arr_raw = [V1_arr_raw V1_part];
     V2_arr_raw = [V2_arr_raw V2_part];
-
-    % NOTE: this part is a 50 Hz rejection filter
-    % FIXME: sometimes it does worse
-    if ((Freq > 2 && Freq < 45) || Freq > 55) && Fs > 200 % FIXME: magic constant
-        % FIXME: add ability to switch on 60 Hz
-        Rej_freq = 50;
-        Rej_span = 2; % FIXME: magic constant
-        Rej_freq_low = Rej_freq - Rej_span/2;
-        Rej_freq_high = Rej_freq + Rej_span/2;
-        V1_arr = fft_band_rejection(V1_arr_raw, Fs, -30, Rej_freq_low, Rej_freq_high);
-        V2_arr = fft_band_rejection(V2_arr_raw, Fs, -30, Rej_freq_low, Rej_freq_high);
-    else
-        V1_arr = V1_arr_raw;
-        V2_arr = V2_arr_raw;
-    end
     
     Time_passed = T_arr(end);
     Periods_counter = Time_passed/Period;
-    
+
     if Time_passed > Min_time && Ready_to_stop
-        break;
+        stop = true;
     end
+
+    [Cut_FOP_first_1, Cut_FOP_first_2] = left_cut_volume(Period_counter);
+    [V1_arr, Cut_FOP_filter_1] = fit_core.do_power_line_filter(T_arr, ...
+        V1_arr_raw, Fs, Freq);
+    [V2_arr, Cut_FOP_filter_2] = fit_core.do_power_line_filter(T_arr, ...
+        V2_arr_raw, Fs, Freq);
+    Outliers_force_range_1 = fit_core.get_force_outliers(Time, Freq, ...
+        Cut_FOP_filter_1, Cut_FOP_first_1);
+    Outliers_force_range_2 = fit_core.get_force_outliers(Time, Freq, ...
+        Cut_FOP_filter_2, Cut_FOP_first_2);
+
+    Outliers_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1, ...
+        Outliers_force_range_1);
+    Outliers_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2, ...
+        Outliers_force_range_2);
 
     %--------------------------------
     Overload_1.range = abs(V1_arr) > MAX_CH1_LIMIT;
@@ -166,8 +166,12 @@ while ~stop
         disp(['Overload Ch 2: ' num2str(Overload_2.volume*100, '%0.2f') ' %']) % FIXME: disp
     end
 
-    Underrange_1 = check_underrange(V1_arr, Underrange_1, Underrange_force_1);
-    Underrange_2 = check_underrange(V2_arr, Underrange_2, Underrange_force_2);
+    if Underrange_1
+        Underrange_1 = check_underrange(V1_arr, Underrange_force_1);
+    end
+    if Underrange_2
+        Underrange_2 = check_underrange(V2_arr, Underrange_force_2);
+    end
 
 %     disp_underrange(Underrange_1, Underrange_2); % FIXME: disp
     Underrange_ind_set_f(Underrange_1 || Underrange_2);
@@ -235,8 +239,9 @@ while ~stop
                 [Result_1] = fit_core.fit_one_channels(Ch_data_1, Properties_1, ...
                     Harm_num, Prefit_max_points);
                 if ~isempty(Result_1)
-                    [Outliers_range_1, ~] = ...
-                        fit_core.find_outliers(Ch_data_1, Result_1);
+                    Outliers_range_1 = fit_core.find_outliers(Ch_data_1, Result_1);
+                    Outliers_range_1 = fit_core.unite_outliers(Outliers_range_1, ...
+                        Outliers_force_range_1);
                     [Score_1, ~] = fit_viewer.score_calc_ch(Result_1, Accuracy_conf);
                     Estimations_1 = fit_core.result2estimation(Result_1);
                     if Score_1 > 0
@@ -251,8 +256,9 @@ while ~stop
                 [Result_2] = fit_core.fit_one_channels(Ch_data_2, Properties_2, ...
                     Harm_num, Prefit_max_points);
                 if ~isempty(Result_2)
-                    [Outliers_range_2, Outliers_volume_2] = ...
-                        fit_core.find_outliers(Ch_data_2, Result_2);
+                    Outliers_range_2 = fit_core.find_outliers(Ch_data_2, Result_2);
+                    Outliers_range_2 = fit_core.unite_outliers(Outliers_range_2, ...
+                        Outliers_force_range_2);
                     [Score_2, ~] = fit_viewer.score_calc_ch(Result_2, Accuracy_conf);
                     Estimations_2 = fit_core.result2estimation(Result_2);
                     if Score_2 > 0
@@ -268,10 +274,12 @@ while ~stop
                     fit_core.fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, ...
                     Properties_2, Harm_num, Prefit_max_points);
                 if ~isempty(Result_1) && ~isempty(Result_2)
-                    [Outliers_range_1, Outliers_volume_1] = ...
-                        fit_core.find_outliers(Ch_data_1, Result_1);
-                    [Outliers_range_2, Outliers_volume_2] = ...
-                        fit_core.find_outliers(Ch_data_2, Result_2);
+                    Outliers_range_1 = fit_core.find_outliers(Ch_data_1, Result_1);
+                    Outliers_range_1 = fit_core.unite_outliers(Outliers_range_1, ...
+                        Outliers_force_range_1);
+                    Outliers_range_2 = fit_core.find_outliers(Ch_data_2, Result_2);
+                    Outliers_range_2 = fit_core.unite_outliers(Outliers_range_2, ...
+                        Outliers_force_range_2);
 
                     [Score_1, Score2, ~, ~] = ...
                         fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
@@ -293,9 +301,6 @@ while ~stop
         end
     end
 
-    Outliers_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1);
-    Outliers_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2);
-
     if numel(Axes_arr) == 2 && all(isvalid(Axes_arr))
         style_num = 2;
 
@@ -304,12 +309,14 @@ while ~stop
 
         data_gather_plot(Ax1, T_arr, V1_arr, ...
             Outliers_range_1, Result_1, style_num);
+        % FIXME: do not toush axes labels and titles
         title(['Ch 1 (PC: ' num2str(Periods_counter, '%0.3f') ')'], 'Parent', Ax1);
         xlabel('t, s', 'Parent', Ax1)
         ylabel('V1, V', 'Parent', Ax1)
 
         data_gather_plot(Ax2, T_arr, V2_arr, ...
             Outliers_range_2, Result_2, style_num);
+        % FIXME: do not toush axes labels and titles
         title('Ch 2', 'Parent', Ax2);
         xlabel('t, s', 'Parent', Ax2);
         ylabel('V2, V', 'Parent', Ax2);
@@ -326,9 +333,11 @@ if Exit_flag == 40
     Ch_data_1 = fit_core.Ch_data_type.empty();
     Ch_data_2 = fit_core.Ch_data_type.empty();
 else
-    % NOTE: where are breaks in while loop
-    Outliers_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1);
-    Outliers_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2);
+    % NOTE: where are breaks in while loop (so do uppend_outliers one more time)
+    Outliers_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1, ...
+        Outliers_force_range_1);
+    Outliers_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2, ...
+        Outliers_force_range_2);
 
     Ch_data_1 = fit_core.Ch_data_type(T_arr, V1_arr, Outliers_range_1, Overload_1, ...
         Estimations_1, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
@@ -354,42 +363,51 @@ function Fit_time_step = prefit_time_step(Period)
 end
 
 
-function Underrange = check_underrange(V_arr, Underrange, Underrange_force)
-% FIXME: add results amp check
-if Underrange
-    [Mean, Span, ~, ~] = fit_core.singal_stats(V_arr);
-    if Underrange_force
-        Underrange_level = 0; % FIXME: remake it
+function Underrange = check_underrange(V_arr, Underrange_force)
+% FIXME: this function should be upgraded and properly tested
+
+if Underrange_force
+    Underrange = false;
+    return;
+end
+
+[Mean, Span, ~, ~] = fit_core.singal_stats(V_arr);
+
+Underrange_level = 0.01; % FIXME: magic constant
+
+% FIXME: bad (maybe) condition
+Cond1 = abs(Mean) < Underrange_level;
+Cond2 = Span < Underrange_level;
+ 
+% disp(['und_lvl: ' num2str(Underrange_level) newline ...
+%     '  Mean = ' num2str(abs(Mean)) ' V' newline ...
+%     '  Span = ' num2str(Span) ' V' newline ...
+%     'C1 = ' num2str(Cond1) ' C2 = ' num2str(Cond2) newline])
+
+if ~Cond1 && ~Cond2
+    Underrange = false;
+end
+
+end
+
+
+
+function [Cut_FOP_first_1, Cut_FOP_first_2] = left_cut_volume(Period_counter)
+
+    % FIXME: magic constants here
+    if Period_counter > 10 
+        Cut_FOP_first_1 = 0.15*Period_counter;
+        Cut_FOP_first_2 = 0.15*Period_counter;
+    elseif Period_counter > 5
+        Cut_FOP_first_1 = 0.1*Period_counter;
+        Cut_FOP_first_2 = 0.1*Period_counter;
     else
-        Underrange_level = 0.01; % FIXME: magic constant
+        Cut_FOP_first_1 = 0;
+        Cut_FOP_first_2 = 0;
     end
-    % FIXME: bad (maybe) condition
-    Cond1 = abs(Mean) < Underrange_level;
-    Cond2 = Span < Underrange_level;
-
-%     disp(['und_lvl: ' num2str(Underrange_level) newline ...
-%         '  Mean = ' num2str(abs(Mean)) ' V' newline ...
-%         '  Span = ' num2str(Span) ' V' newline ...
-%         'C1 = ' num2str(Cond1) ' C2 = ' num2str(Cond2) newline])
-
-    if ~Cond1 && ~Cond2
-        Underrange = false;
-    end
-end
-end
-
-
-function disp_underrange(Underrange_1, Underrange_2)
-
-if Underrange_1 && Underrange_2
-    disp('Underrande: CH1 CH2')
-elseif Underrange_1
-    disp('Underrande: CH1')
-elseif Underrange_2
-    disp('Underrande:     CH2')
-end
 
 end
+
 
 
 
