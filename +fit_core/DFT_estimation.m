@@ -20,7 +20,7 @@ function Result = DFT_estimation(Time, Signal, Period)
         % FIXME: add errors
         Result.t_min = Start_time;
         Result.t_max = End_time;
-        Result.z = 0;
+        Result.z = 0; % NOTE: could not be calculated here; maybe set NaN (if poossible)
         Result.status = "ok";
         Result.source = "DFT";
     end

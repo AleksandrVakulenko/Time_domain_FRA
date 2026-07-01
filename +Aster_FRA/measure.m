@@ -24,7 +24,7 @@ Underrange_force_1 = true; % NOTE: for low input voltage level
 Underrange_force_2 = false;
 Overrange_tolerance = 0.2; % [%] // FIXME: debug value
 MAX_CH1_LIMIT = 10;
-MAX_CH2_LIMIT = 5;
+MAX_CH2_LIMIT = 5; % FIXME: maybe 6?
 
 if ~isempty(Fixed_range) && any(Fixed_range == [1 2 3 4 5 6]) % FIXME: ranges list
     Underrange_force_2 = true;
@@ -78,7 +78,7 @@ try
 
     if Auto_range
         [Range_num_forecast, ~] = Aster_FRA.range_forecaster(Aster, Zest, ...
-            Gen_Voltage_level, Gen_freq);
+            Gen_Voltage_level, Gen_freq); % FIXME: use DC bias here too
 
         if ~isempty(Range_num_forecast)
             Range_init_num = Range_num_forecast;

@@ -23,7 +23,7 @@ properties (Access = public)
 
     Period_counter double = NaN
 
-    z double = NaN
+    z double = NaN % NOTE: sin background = bg + time * z
     status string {mustBeMember(status, ["empty", "fixed", "ok"])} ...
         = "empty"
     legacy_status string {mustBeMember(legacy_status, ["", "low", "extra"])} ...

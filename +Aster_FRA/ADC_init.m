@@ -51,6 +51,6 @@ Filter_wait = Number_of_periods/ADC_filter_Fc;
 
 Fs_new = Aster.ADC_send_freq(Sampling_freq);
 Aster.ADC_filter(ADC_filter_Fc);
-Aster.set_ADC_2_range(6); % FIXME: check it
+% Aster.set_ADC_2_range(12); % FIXME: check it
 
 end
