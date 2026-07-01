@@ -9,8 +9,8 @@
 
 
 % UNSORTED
-% 1) Fit_settings_1.freq_dev_flag in fit_one_channels
-% 2) FIX harmonics with NaN values
+% 1) 
+% 2) 
 % 3) add more errors calculation (for colplex numbers)
 % 4) add data saver function
 % 5) investigate "underrange" function behavior

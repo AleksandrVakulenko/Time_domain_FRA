@@ -54,9 +54,7 @@ Phase_diff_error = sqrt(Phase_diff_error^2 + Phi_cal_err^2 + Phi_err_abs^2);
 Harm_2_out_arr = Harm_calc_and_corr(Result_2, freq, Volt1, ...
     Volt1_err, CH_1_P, CH_1_Pe, R_Scale, Range_N);
 
-
-
-
+Harm_2_out_arr = Nan_harm_clear(Harm_2_out_arr);
 
 
 % Res_cplx = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
@@ -207,6 +205,17 @@ end
 
 end
 
+
+function Harm_2_out_arr = Nan_harm_clear(Harm_2_out_arr)
+Range = false(1, numel(Harm_2_out_arr));
+for i = 1:numel(Harm_2_out_arr)
+    Res = Harm_2_out_arr(i).res;
+    if isnan(Res)
+        Range(i) = true;
+    end
+end
+Harm_2_out_arr(Range) = [];
+end
 
 
 

@@ -19,7 +19,7 @@ end
 
 Estimations_1 = fit_core.estimation_processing(Ch_data);
 
-Fit_settings_1.freq_dev_flag = true; % FIXME: why it is true?
+Fit_settings_1.freq_dev_flag = false; % FIXME: maybe put in input args
 Fit_settings_1.freq_dev_const = 0;
 Fit_settings_1.max_points = Max_points;
 
