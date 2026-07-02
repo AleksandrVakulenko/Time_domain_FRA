@@ -29,7 +29,7 @@ if Fs > 1000 && Freq > Min_freq_to_filt && ...
 else
     Signal_f = Signal;
     Cut_FOP = 0;
-    disp('NO FILTER')
+%     disp('NO FILTER')
 end
 
 end

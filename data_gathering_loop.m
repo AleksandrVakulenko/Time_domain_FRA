@@ -134,19 +134,19 @@ while ~stop
         stop = true;
     end
 
-    [Cut_FOP_first_1, Cut_FOP_first_2] = left_cut_volume(Period_counter);
+    [Cut_FOP_first_1, Cut_FOP_first_2] = left_cut_volume(Periods_counter);
     [V1_arr, Cut_FOP_filter_1] = fit_core.do_power_line_filter(T_arr, ...
         V1_arr_raw, Fs, Freq);
     [V2_arr, Cut_FOP_filter_2] = fit_core.do_power_line_filter(T_arr, ...
         V2_arr_raw, Fs, Freq);
-    Outliers_force_range_1 = fit_core.get_force_outliers(Time, Freq, ...
+    Outliers_force_range_1 = fit_core.get_force_outliers(T_arr, Freq, ...
         Cut_FOP_filter_1, Cut_FOP_first_1);
-    Outliers_force_range_2 = fit_core.get_force_outliers(Time, Freq, ...
+    Outliers_force_range_2 = fit_core.get_force_outliers(T_arr, Freq, ...
         Cut_FOP_filter_2, Cut_FOP_first_2);
 
-    Outliers_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1, ...
+    Exclude_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1, ...
         Outliers_force_range_1);
-    Outliers_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2, ...
+    Exclude_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2, ...
         Outliers_force_range_2);
 
     %--------------------------------
@@ -225,10 +225,10 @@ while ~stop
         
         Fit_local_timer = tic;
 
-        Ch_data_1 = fit_core.Ch_data_type(T_arr, V1_arr, Outliers_range_1, Overload_1, ...
+        Ch_data_1 = fit_core.Ch_data_type(T_arr, V1_arr, Exclude_range_1, Overload_1, ...
             Estimations_1, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
 
-        Ch_data_2 = fit_core.Ch_data_type(T_arr, V2_arr, Outliers_range_2, Overload_2, ...
+        Ch_data_2 = fit_core.Ch_data_type(T_arr, V2_arr, Exclude_range_2, Overload_2, ...
             Estimations_2, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
 
         [Properties_1, Properties_2] = fit_core.get_fit_props(Periods_counter);
@@ -240,7 +240,7 @@ while ~stop
                     Harm_num, Prefit_max_points);
                 if ~isempty(Result_1)
                     Outliers_range_1 = fit_core.find_outliers(Ch_data_1, Result_1);
-                    Outliers_range_1 = fit_core.unite_outliers(Outliers_range_1, ...
+                    Exclude_range_1 = fit_core.unite_outliers(Outliers_range_1, ...
                         Outliers_force_range_1);
                     [Score_1, ~] = fit_viewer.score_calc_ch(Result_1, Accuracy_conf);
                     Estimations_1 = fit_core.result2estimation(Result_1);
@@ -257,7 +257,7 @@ while ~stop
                     Harm_num, Prefit_max_points);
                 if ~isempty(Result_2)
                     Outliers_range_2 = fit_core.find_outliers(Ch_data_2, Result_2);
-                    Outliers_range_2 = fit_core.unite_outliers(Outliers_range_2, ...
+                    Exclude_range_2 = fit_core.unite_outliers(Outliers_range_2, ...
                         Outliers_force_range_2);
                     [Score_2, ~] = fit_viewer.score_calc_ch(Result_2, Accuracy_conf);
                     Estimations_2 = fit_core.result2estimation(Result_2);
@@ -275,10 +275,10 @@ while ~stop
                     Properties_2, Harm_num, Prefit_max_points);
                 if ~isempty(Result_1) && ~isempty(Result_2)
                     Outliers_range_1 = fit_core.find_outliers(Ch_data_1, Result_1);
-                    Outliers_range_1 = fit_core.unite_outliers(Outliers_range_1, ...
+                    Exclude_range_1 = fit_core.unite_outliers(Outliers_range_1, ...
                         Outliers_force_range_1);
                     Outliers_range_2 = fit_core.find_outliers(Ch_data_2, Result_2);
-                    Outliers_range_2 = fit_core.unite_outliers(Outliers_range_2, ...
+                    Exclude_range_2 = fit_core.unite_outliers(Outliers_range_2, ...
                         Outliers_force_range_2);
 
                     [Score_1, Score2, ~, ~] = ...
@@ -308,14 +308,14 @@ while ~stop
         Ax2 = Axes_arr(2);
 
         data_gather_plot(Ax1, T_arr, V1_arr, ...
-            Outliers_range_1, Result_1, style_num);
+            Exclude_range_1, Result_1, style_num);
         % FIXME: do not toush axes labels and titles
         title(['Ch 1 (PC: ' num2str(Periods_counter, '%0.3f') ')'], 'Parent', Ax1);
         xlabel('t, s', 'Parent', Ax1)
         ylabel('V1, V', 'Parent', Ax1)
 
         data_gather_plot(Ax2, T_arr, V2_arr, ...
-            Outliers_range_2, Result_2, style_num);
+            Exclude_range_2, Result_2, style_num);
         % FIXME: do not toush axes labels and titles
         title('Ch 2', 'Parent', Ax2);
         xlabel('t, s', 'Parent', Ax2);
@@ -334,15 +334,15 @@ if Exit_flag == 40
     Ch_data_2 = fit_core.Ch_data_type.empty();
 else
     % NOTE: where are breaks in while loop (so do uppend_outliers one more time)
-    Outliers_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1, ...
+    Exclude_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1, ...
         Outliers_force_range_1);
-    Outliers_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2, ...
+    Exclude_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2, ...
         Outliers_force_range_2);
 
-    Ch_data_1 = fit_core.Ch_data_type(T_arr, V1_arr, Outliers_range_1, Overload_1, ...
+    Ch_data_1 = fit_core.Ch_data_type(T_arr, V1_arr, Exclude_range_1, Overload_1, ...
         Estimations_1, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
 
-    Ch_data_2 = fit_core.Ch_data_type(T_arr, V2_arr, Outliers_range_2, Overload_2, ...
+    Ch_data_2 = fit_core.Ch_data_type(T_arr, V2_arr, Exclude_range_2, Overload_2, ...
         Estimations_2, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
 end
 
@@ -386,6 +386,8 @@ Cond2 = Span < Underrange_level;
 
 if ~Cond1 && ~Cond2
     Underrange = false;
+else
+    Underrange = true;
 end
 
 end

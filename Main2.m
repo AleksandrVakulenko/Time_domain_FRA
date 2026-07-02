@@ -8,13 +8,13 @@ LCR_type = {"LCR_E4980AL", []};
 Aster_addr = 3;
 
 Harm_num = [ ];
-Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 
 Gen_Voltage_level = 1.0; % [V]
 DC_bias = 0.0;
-F_min = 0.01;
+F_min = 0.005;
 F_max = 300e3;
-F_num = 33;
+F_num = 40;
 
 % Fixed_range = [5];
 
@@ -67,9 +67,11 @@ catch err
 end
 delete(LCR_dev);
 
-Z_est = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr);
+Results_arr_PRE = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr);
 % Zest = struct('type', 'cap', 'value', 10e-12);
 % Zest = struct('type', 'res', 'value', 10e3);
+disp('PRE MEASURMENTS FINISH')
+pause(1);
 
 Timer = tic;
 Result_arr_Aster = [];
@@ -80,6 +82,10 @@ for i = 1:N
 
     Gen_freq = Freq_arr_Aster(i);
 %     Gen_Voltage_level = Voltage_amp_arr(i);
+
+    Zmodel = LCR_res_to_Zmodel(Result_arr_Aster, Results_arr_PRE);
+    Z_est = struct('type', 'res', 'value', Zmodel(Gen_freq));
+
     [Fit_Result, Extra_data] = single_freq_measurment(Resources, Aster_addr, ...
         Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Z_est, Time_profile, ...
         Ax_arr, Fixed_range);
@@ -88,7 +94,6 @@ for i = 1:N
     Extra_data_arr = [Extra_data_arr Extra_data];
 
     % FIXME: it is bad in shuffled freq array
-    Z_est = struct('type', 'res', 'value', Fit_Result.res_abs);
 end
 
 Full_time = toc(Timer);
@@ -138,10 +143,10 @@ Phi_err_Aster = [Result_arr_Aster.phi_err];
 
 subplot(2, 1, 1)
 hold on
-errorbar(Freq_arr_plot_LCR, Res_LCR, Res_err_LCR, '.b')
-errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
-% plot(Freq_arr_plot_LCR, 1./(2*pi*Res_LCR.*Freq_arr_plot_LCR)*1e12, '.-b')
-% plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.-r')
+errorbar(Freq_arr_plot_LCR, Res_LCR.*Freq_arr_plot_LCR, Res_err_LCR.*Freq_arr_plot_LCR, '.b')
+errorbar(Freq_arr_plot_Aster, Res_Aster.*Freq_arr_plot_Aster, Res_err_Aster.*Freq_arr_plot_Aster, '.r')
+% plot(Freq_arr_plot_LCR, 1./(2*pi*Res_LCR.*Freq_arr_plot_LCR)*1e12, '.b')
+% plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.r')
 % plot(Res./Res*100, '-b')
 % plot((Res+Res_err)./Res*100, '--b')
 % plot((Res-Res_err)./Res*100, '--b')
@@ -158,7 +163,7 @@ subplot(2, 1, 2)
 hold on
 errorbar(Freq_arr_plot_LCR, Phi_LCR, Phi_err_LCR, '.b')
 errorbar(Freq_arr_plot_Aster, Phi_Aster, Phi_err_Aster, '.r')
-% plot(Freq_arr_plot_Aster, abs(tan((Phi_Aster+90)/180*pi)))
+% plot(Freq_arr_plot_Aster, abs(tan((Phi_Aster+90)/180*pi)), '.b')
 % plot(Freq_arr, Phi_err)
 % plot(Phi_err, '--b')
 ylabel('Phi, deg')
@@ -295,21 +300,27 @@ end
 
 
 
-function Zest = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr)
+function Results_arr_PRE = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr)
 % NOTE: bad version
 % FIXME: it is bad to estimate on single point
     Harm_num = [1 2 3];
-    Gen_freq = 1;
+    Gen_freq = [1 70];
     DC_bias = 0;
     Time_profile = 'ultra_fast';
-    Zest = struct('type', 'res', 'value', 50e3);
-    Fit_Result = single_freq_measurment(Resources, Aster_addr, ...
-        Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Zest, Time_profile, Ax_arr, []);
+    Zest = struct('type', 'res', 'value', 50e3); % FIXME: magic constant
+    Fit_Result_1 = single_freq_measurment(Resources, Aster_addr, ...
+        Gen_freq(1), Gen_Voltage_level, DC_bias, Harm_num, Zest, Time_profile, Ax_arr, []);
 
+    Fit_Result_2 = single_freq_measurment(Resources, Aster_addr, ...
+        Gen_freq(2), Gen_Voltage_level, DC_bias, Harm_num, Zest, Time_profile, Ax_arr, []);
+    
+    Results_arr_PRE = [Fit_Result_1 Fit_Result_2];
+    
+    
     % --- FXIME: debug section ---
-    Res = Fit_Result.res_abs;
-    Cap = 1/(2*pi*Res*Gen_freq);
-    Zest = struct('type', 'cap', 'value', Cap);
+%     Res = Fit_Result.res_abs;
+%     Cap = 1/(2*pi*Res*Gen_freq);
+%     Zest = struct('type', 'cap', 'value', Cap);
     % --- NOTE: end of debug section ---
 
 %     Zest = struct('type', 'res', 'value', Fit_Result.res_abs);
