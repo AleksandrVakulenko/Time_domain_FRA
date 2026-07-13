@@ -194,6 +194,12 @@ if ~isempty(Harm_est)
     end
 end
 
+% NOTE: once some lower limit turned out to be greater than the upper one
+inds = Lower >= Upper;
+Lower(inds) = -inf;
+Upper(inds) = inf;
+
+
 ft = fittype(Eq, 'independent', 'x', 'dependent', 'y');
 opts = fitoptions('Method', 'NonlinearLeastSquares');
 opts.TolX = 1e-12; % FIXME: default
