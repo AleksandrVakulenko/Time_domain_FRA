@@ -1,6 +1,6 @@
 function [Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, ...
     Used_ranges, Last_used_range] = measure(Resources, Aster_addr, ...
-    Settings, Fig, Zest, Fixed_range)
+    Settings, Fig, Zest, Fixed_range, Self_cal_mode)
 arguments
     Resources
     Aster_addr
@@ -8,6 +8,7 @@ arguments
     Fig = []
     Zest = []
     Fixed_range = []
+    Self_cal_mode = false
 end
 
 Gen_Voltage_level = Settings.amp;
@@ -95,9 +96,20 @@ try
     end
 
     Aster.set_connection_mode("I2V");
-    Aster.ADC_1_direction("internal");
-    Aster.Gen_direction("Internal");
-    Aster.initiate();
+    Aster.ADC_1_direction("internal"); % "internal", "external"
+    Aster.ADC_2_direction("internal"); % "internal", "external"
+%     Aster.Gen_direction("Internal"); % "Internal", "Lock_in", "LCR", "External"
+    Aster.initiate(); % FIXME: updates current direction to internal I2V
+    % FIXME: Self_cal_mode is now in debug state (need refactor)
+    if Self_cal_mode
+        Aster.Self_calibration_select("CAP_200p"); % "none", "CAP_200p", "RES_10M", "BOTH"
+        Aster.Current_direction("GND"); % "GND", "I2V", "LCR", "Redirection"
+        Aster.Gen_direction("External"); % "Internal", "Lock_in", "LCR", "External"
+    else
+        Aster.Self_calibration_select("none");
+        Aster.Current_direction("I2V");
+        Aster.Gen_direction("Internal");
+    end
 
     [~, R_Scale, Aster_Range] = Aster_FRA.set_range(Aster, Range_init_num);
     % NOTE: update time and accuracy profiles

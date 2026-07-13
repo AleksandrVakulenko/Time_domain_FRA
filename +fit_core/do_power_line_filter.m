@@ -22,6 +22,12 @@ end
 Rej_freq_low = Rej_freq - Rej_span/2;
 Rej_freq_high = Rej_freq + Rej_span/2;
 
+if Rej_freq_low < Rej_freq*0.8 || Rej_freq_high > Rej_freq*1.2
+    Signal_f = Signal;
+    Cut_FOP = 0;
+    return;
+end
+
 if Fs > 1000 && Freq > Min_freq_to_filt && ...
         (Freq < 0.9*Rej_freq_low || Freq > 1.1*Rej_freq_high)
     Signal_f = fft_band_rejection(Signal, Fs, -120, Rej_freq_low, Rej_freq_high);

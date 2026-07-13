@@ -21,7 +21,8 @@ else
     error('wrong channel number')
 end
 
-
+Freq = Result_1.freq;
+Period = 1./Freq;
 
 % Estimations_in = Estimations_extra;
 % Estimations_in = Estimations_low;

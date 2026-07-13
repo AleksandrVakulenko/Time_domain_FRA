@@ -1,3 +1,59 @@
+
+clc
+
+V_in = 0.1;
+Freq = 0.03;
+
+Cap = 200e-12;
+
+
+R_FB_arr = [200 10e3 1e6 100e6 10e9 1e12];
+
+Range_N = 6;
+
+Res_FB = R_FB_arr(Range_N);
+
+C_res = 1./(2*pi*Freq*Cap);
+
+Cur = V_in/C_res;
+
+Vout = Cur*Res_FB;
+
+disp(['Range : ' num2str(Range_N)])
+disp(['V_in = ' num2str(V_in, '%0.2f') ' V'])
+disp(['Freq = ' num2str(Freq, '%0.4f') ' Hz'])
+disp(['Vout = ' num2str(Vout, '%0.2f') ' V'])
+
+
+%%
+
+Fixed_range_6 =     [6      6     6     6     6     6     6     6];
+Gen_voltage_arr_6 = [0.75   0.35  0.16  0.10  0.06  0.03  0.02  0.015];
+Freq_arr_6 =        [0.005  0.01  0.02  0.03  0.05  0.1   0.15  0.2];
+
+Fixed_range_5 =     [5     5     5     5     5     5    5     5     5];
+Gen_voltage_arr_5 = [5.00  5.00  5.00  3.50  1.50  0.5  0.25  0.20  0.15];
+Freq_arr_5 =        [0.01  0.02  0.05  0.1   0.2   0.5  1.0   1.5   2.0];
+
+Fixed_range_4 =     [4     4     4     4     4     4     4     4     4     4     4     4];
+Gen_voltage_arr_4 = [5.00  5.00  5.00  5.00  5.00  5.00  3.00  1.60  1.20  0.90  0.60  0.50];
+Freq_arr_4 =        [0.1   0.2   0.5   1.0   2.0   5.0   10.0  20.0  30.0  40.0  60.0  70.0];
+
+Fixed_range_3 =     [3    3    3    3    3    3    3    3    3    3     3     3     3     3     3     3     3];
+Gen_voltage_arr_3 = [5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0   5.0   5.0   5.0   5.0   5.0   5.0   5.0];
+Freq_arr_3 =        [5    10   20   30   40   60   70   80   90   110   120   130   140   160   170   180   195];
+
+Fixed_range_arr = [Fixed_range_6 Fixed_range_5 Fixed_range_4 Fixed_range_3]; 
+Gen_voltage_arr = [Gen_voltage_arr_6 Gen_voltage_arr_5 Gen_voltage_arr_4 Gen_voltage_arr_3];
+Freq_arr = [Freq_arr_6 Freq_arr_5 Freq_arr_4 Freq_arr_3];
+
+
+
+
+
+
+
+
 %% TEST FREQ LOOP
 
 % FIXME: this function is beyond Real-time FRA module
@@ -5,51 +61,13 @@
 % FIXME: add LCR terminate before start
 
 LCR_type = {"LCR_E4980AL", []};
-Aster_addr = 3;
+Aster_addr = 6;
 
 Harm_num = [ ];
 Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 
-Gen_Voltage_level = 1.0; % [V]
-DC_bias = 0.0;
-F_min = 0.1;
-F_max = 300e3;
-F_num = 25;
-
-% Fixed_range = [5];
-
-Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
-    "shuffle", "on", "repeat", 1);
-% Freq_arr = 0.1;
-
 Sample.info = "test";
 
-Fixed_range = [ ];
-Run_num = 2;
-
-% Fixed_range = 6;
-% Cal_cap_N = 1; % 10 pF
-% Voltage_amp_arr = [    10    10    10     5      3      1    0.5   0.25  ];
-% Freq_arr =        [0.001  0.002  0.005  0.01  0.02   0.05   0.1   0.2  ];
-
-% Fixed_range = 4;
-% Cal_cap_N = 3; % 1 nF
-% Freq_arr =        [0.05   0.1    0.2   0.5   1    2   4   8   22    55    95];
-% Voltage_amp_arr = ones(size(Freq_arr))*5;
-% Voltage_amp_arr = [2  2  2  2  2];
-% Freq_arr =        [95    125    140   180  195];
-
-% Fixed_range = 4;
-% Cal_cap_N = 3; % 1 nF
-% Voltage_amp_arr = [  10    10     10    10     10    10    5    5   5  5   2.5  1  0.5];
-% Freq_arr =        [0.01   0.02   0.05   0.1    0.2   0.5   1    2   4   8   22    55    69];
-
-
-F_range_Aster = Freq_arr <= 200;
-F_range_LCR = Freq_arr >= 20;
-
-Freq_arr_Aster = Freq_arr(F_range_Aster);
-Freq_arr_LCR = Freq_arr(F_range_LCR);
 
 Fig = fit_gui.init_Aster_FRA_gui();
 Ax_arr = [Fig.UserData.axes_top Fig.UserData.axes_bot];
@@ -58,16 +76,28 @@ Resources.stop_button = Stop_button;
 Resources.underrange_ind = Fig.UserData.underrange_ind;
 
 % NOTE: terminate LCR
-LCR_dev = feval(LCR_type{1}, LCR_type{2});
 try
-    LCR_dev.terminate;
-catch err
-    delete(LCR_dev);
-    rethrow(err);
+    LCR_dev = feval(LCR_type{1}, LCR_type{2});
+    LCR_active = true;
+catch
+    LCR_active = false;
 end
-delete(LCR_dev);
 
-Results_arr_PRE = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr);
+if LCR_active
+    try
+        LCR_dev.terminate;
+    catch err
+        delete(LCR_dev);
+        rethrow(err);
+    end
+    delete(LCR_dev);
+else
+    disp('NO LCR device')
+end
+
+
+% Results_arr_PRE = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr);
+Results_arr_PRE = [];
 % Zest = struct('type', 'cap', 'value', 10e-12);
 % Zest = struct('type', 'res', 'value', 10e3);
 disp('PRE MEASURMENTS FINISH')
@@ -76,19 +106,22 @@ pause(1);
 Timer = tic;
 Result_arr_Aster = [];
 Extra_data_arr = [];
-N = numel(Freq_arr_Aster);
+N = numel(Gen_voltage_arr);
 for i = 1:N
     disp([num2str(i) '/' num2str(N)])
 
-    Gen_freq = Freq_arr_Aster(i);
-%     Gen_Voltage_level = Voltage_amp_arr(i);
+    Fixed_range = Fixed_range_arr(i);
+    Gen_Voltage_level = Gen_voltage_arr(i);
+    Gen_freq = Freq_arr(i);
+    Self_cal_mode = true;
+    DC_bias = 0;
 
     Zmodel = LCR_res_to_Zmodel(Result_arr_Aster, Results_arr_PRE);
     Z_est = struct('type', 'res', 'value', Zmodel(Gen_freq));
 
     [Fit_Result, Extra_data] = single_freq_measurment(Resources, Aster_addr, ...
         Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Z_est, Time_profile, ...
-        Ax_arr, Fixed_range, false);
+        Ax_arr, Fixed_range, Self_cal_mode);
     Fit_Result.freq = Gen_freq;
     Result_arr_Aster = [Result_arr_Aster Fit_Result];
     Extra_data_arr = [Extra_data_arr Extra_data];
@@ -97,31 +130,12 @@ for i = 1:N
 end
 
 Full_time = toc(Timer);
-Time_to_compare = sum(2./Freq_arr_Aster);
+Time_to_compare = sum(2./Freq_arr);
 disp(['Full time: ' num2str(Full_time/60, '%0.1f') ' min | NC_time ~ ' ...
     num2str(Time_to_compare/60, '%0.1f') ' min | ratio = ' ...
     num2str(Full_time/Time_to_compare, '%0.1f') ])
 
 
-if ~isempty(Fixed_range)
-    Save_file = ['Calibration_data_2/' 'C' num2str(Fixed_range, '%02d') ...
-        '_' num2str(Run_num, '%02d') '.mat'];
-    save(Save_file, "Result_arr_Aster", "Extra_data_arr", "Voltage_amp_arr", ...
-        "Freq_arr_Aster", "Full_time", "Sample")
-end
-
-Aster_FRA.switch_to_LCR(Aster_addr);
-
-Result_arr_LCR = [];
-N = numel(Freq_arr_LCR);
-for i = 1:N
-    disp([num2str(i) '/' num2str(N)])
-
-    Gen_freq = Freq_arr_LCR(i);
-    LCR_Result = Aster_FRA.LCR_measure(LCR_type, Gen_freq, Gen_Voltage_level, Time_profile);
-    LCR_Result.freq = Gen_freq;
-    Result_arr_LCR = [Result_arr_LCR LCR_Result];
-end
 
 disp('Finish')
 
@@ -129,11 +143,6 @@ disp('Finish')
 
 figure('position', [468 218 686 783])
 
-Freq_arr_plot_LCR = [Result_arr_LCR.freq];
-Res_LCR = [Result_arr_LCR.res_abs];
-Res_err_LCR = [Result_arr_LCR.res_abs_err];
-Phi_LCR = [Result_arr_LCR.phi];
-Phi_err_LCR = [Result_arr_LCR.phi_err];
 
 Freq_arr_plot_Aster = [Result_arr_Aster.freq];
 Res_Aster = [Result_arr_Aster.res_abs];
@@ -143,12 +152,8 @@ Phi_err_Aster = [Result_arr_Aster.phi_err];
 
 subplot(2, 1, 1)
 hold on
-% errorbar(Freq_arr_plot_LCR, Res_LCR, Res_err_LCR, '.b')
 % errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
-
-% errorbar(Freq_arr_plot_LCR, Res_LCR.*Freq_arr_plot_LCR, Res_err_LCR.*Freq_arr_plot_LCR, '.b')
 % errorbar(Freq_arr_plot_Aster, Res_Aster.*Freq_arr_plot_Aster, Res_err_Aster.*Freq_arr_plot_Aster, '.r')
-plot(Freq_arr_plot_LCR, 1./(2*pi*Res_LCR.*Freq_arr_plot_LCR)*1e12, '.b')
 plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.r')
 % plot(Res./Res*100, '-b')
 % plot((Res+Res_err)./Res*100, '--b')
@@ -164,7 +169,6 @@ box on
 
 subplot(2, 1, 2)
 hold on
-errorbar(Freq_arr_plot_LCR, Phi_LCR, Phi_err_LCR, '.b')
 errorbar(Freq_arr_plot_Aster, Phi_Aster, Phi_err_Aster, '.r')
 % plot(Freq_arr_plot_Aster, abs(tan((Phi_Aster+90)/180*pi)), '.b')
 % plot(Freq_arr, Phi_err)

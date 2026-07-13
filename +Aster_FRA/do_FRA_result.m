@@ -193,6 +193,7 @@ for i = 1:numel(Harms_arr)
     Harm_res_err = sqrt(Harm_res_err^2 + Harm_amp_cal_err^2 + Harm_res_abs_err^2);
     Harm_res_phi_err = sqrt(Harm_res_phi_err^2 + Harm_phi_cal_err^2 + Phi_err_abs^2);
 
+    % FIXME: must be a type
     Harm_out.n = Hn;
     Harm_out.res = Harm_res;
     Harm_out.res_err = Harm_res_err;
