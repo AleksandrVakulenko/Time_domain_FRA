@@ -339,6 +339,15 @@ else
     Exclude_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2, ...
         Outliers_force_range_2);
 
+    if isempty(Estimations_1)
+        Estimations_1 = fit_core.do_estimations(fit_core.Estimation_type.empty, ...
+            T_arr, V1_arr, Freq, Periods_counter);
+    end
+    if isempty(Estimations_2)
+        Estimations_2 = fit_core.do_estimations(fit_core.Estimation_type.empty, ...
+            T_arr, V2_arr, Freq, Periods_counter);
+    end
+
     Ch_data_1 = fit_core.Ch_data_type(T_arr, V1_arr, Exclude_range_1, Overload_1, ...
         Estimations_1, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
 
