@@ -59,16 +59,30 @@ elseif numel(Estimations) == 0
 else
     error('unreachable')
 end
+Est_phi
+% ------------------------------------------------
+% NOTE: Phi correction
+% ------------------------------------------------
+% neg_phi_range = Est_phi < 0;
+% if ~isempty(neg_phi_range)
+%     % NOTE: this code fixes Phi array in case of somthing like this:
+%     % [179.2 179.8 -179.8 178.7]
+%     % then mean() and fit() could no work on 180[deg] crossover
+%     Min_phi = min(Est_phi);
+%     Phi_shift = ceil(abs(Min_phi)/360)*360;
+%     Est_phi(neg_phi_range) = Est_phi(neg_phi_range) + Phi_shift;
+% end
+Est_time_der = Est_time(2:end);
+Est_phi_der = diff(Est_phi);
 
-neg_phi_range = Est_phi < 0;
-if ~isempty(neg_phi_range)
-    % NOTE: this code fixes Phi array in case of somthing like this:
-    % [179.2 179.8 -179.8 178.7]
-    % then mean() and fit() could no work on 180[deg] crossover
-    Min_phi = min(Est_phi);
-    Phi_shift = ceil(abs(Min_phi)/360)*360;
-    Est_phi(neg_phi_range) = Est_phi(neg_phi_range) + Phi_shift;
-end
+Range = Est_phi_der < -180;
+Est_phi([false Range]) = Est_phi([false Range]) + 360;
+
+Range = Est_phi_der > 180;
+Est_phi([false Range]) = Est_phi([false Range]) - 360;
+% ------------------------------------------------
+% Est_phi
+% ------------------------------------------------
 
 Est_time_norm = Est_time/Period;
 
@@ -139,7 +153,7 @@ switch BG_type
         error('unreachable')
 end
 
-Phi_dev = 20; % FIXME: magic constant
+Phi_dev = 120; % FIXME: magic constant
 switch Phi_type
     case "const"
         Phi_str = fit_core.func_constructor([], 'p');
