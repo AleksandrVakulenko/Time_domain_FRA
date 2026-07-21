@@ -60,6 +60,16 @@ else
     error('unreachable')
 end
 
+neg_phi_range = Est_phi < 0;
+if ~isempty(neg_phi_range)
+    % NOTE: this code fixes Phi array in case of somthing like this:
+    % [179.2 179.8 -179.8 178.7]
+    % then mean() and fit() could no work on 180[deg] crossover
+    Min_phi = min(Est_phi);
+    Phi_shift = ceil(abs(Min_phi)/360)*360;
+    Est_phi(neg_phi_range) = Est_phi(neg_phi_range) + Phi_shift;
+end
+
 Est_time_norm = Est_time/Period;
 
 % D = 0; % FIXME: freq dev start value
@@ -158,6 +168,13 @@ switch Phi_type
     otherwise
         error('unreachable')
 end
+
+% FIXME: delete this part
+% disp('------------------------')
+% Lower
+% StartPoint
+% Upper
+% disp('------------------------')
 
 Freq_dev_range = [-100 100]; % FIXME: debug
 if Freq_dev_flag
