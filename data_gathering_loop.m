@@ -59,6 +59,15 @@ else % Max_time >= 1 [s]
 end
 
 Prefit_max_points = 20e3; % FIXME: get from settings
+if Freq > 1
+    Prefit_max_points = Max_FOP*100;
+end
+if Freq > 5
+    Prefit_max_points = Max_FOP*25;
+end
+if Freq > 10
+    Prefit_max_points = Max_FOP*10;
+end
 % ----------------------------------------------------------------
 
 
@@ -243,9 +252,9 @@ while ~stop
                     Exclude_range_1 = fit_core.unite_outliers(Outliers_range_1, ...
                         Outliers_force_range_1);
                     [Score_1, ~] = fit_viewer.score_calc_ch(Result_1, Accuracy_conf);
-                    Estimations_1 = fit_core.result2estimation(Result_1);
                     if Score_1 > 0
                         Prefit_ready_1 = true;
+                        Estimations_1 = fit_core.result2estimation(Result_1);
                     end
                     disp(['Score: ' num2str(Score_1)]); % FIXME: disp
                 end
@@ -260,9 +269,9 @@ while ~stop
                     Exclude_range_2 = fit_core.unite_outliers(Outliers_range_2, ...
                         Outliers_force_range_2);
                     [Score_2, ~] = fit_viewer.score_calc_ch(Result_2, Accuracy_conf);
-                    Estimations_2 = fit_core.result2estimation(Result_2);
                     if Score_2 > 0
                         Prefit_ready_2 = true;
+                        Estimations_2 = fit_core.result2estimation(Result_2);
                     end
                     disp(['Score: ' num2str(Score_2)]); % FIXME: disp
                 end
@@ -287,11 +296,10 @@ while ~stop
                     disp(['--- Scores: ---' newline 'Ch1: ' num2str(Score_1) newline ...
                         'Ch2: ' num2str(Score2) newline '---------------']) % FIXME: disp
 
-                    Estimations_1 = fit_core.result2estimation(Result_1);
-                    Estimations_2 = fit_core.result2estimation(Result_2);
-
                     if Score_1 > 0 && Score2 > 0
                         Ready_to_stop = true;
+                        Estimations_1 = fit_core.result2estimation(Result_1);
+                        Estimations_2 = fit_core.result2estimation(Result_2);
                     end
                 end
             end

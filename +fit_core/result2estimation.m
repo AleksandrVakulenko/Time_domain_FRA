@@ -1,4 +1,6 @@
 
+% FIXME: implicit passing of an argument (Estimations) to a function:
+% use the second argument instead of Result.estimations
 
 function Estimations = result2estimation(Result)
 arguments
