@@ -29,6 +29,18 @@ if options.repeat > 1
     Freq_arr = reshape(Freq_arr, 1, numel(Freq_arr));
 end
 
+Freq_arr = sort(Freq_arr);
+
+Freq_arr(Freq_arr > F_max) = F_max;
+range = Freq_arr == F_max;
+if numel(find(range)) > 1
+    inds = find(range);
+    ind = inds(1);
+    range(ind) = false;
+    Freq_arr(range) = [];
+end
+
+
 if options.shuffle == "on"
     N = numel(Freq_arr);
     ind = randperm(N);

@@ -1,7 +1,9 @@
 function [Fs_new, Filter_wait] = ADC_init(Aster, Gen_freq, ...
     Harm_num, Times_conf)
 
-
+% NOTE: try to avoid zones without data transmission;
+% + Aster limit is 20e3
+LIMIT_FS = 10e3;
 
 if Times_conf.time_profile == "ultra_fast"
     Number_of_periods = 2; % FIXME: magic constant
@@ -48,6 +50,10 @@ if ADC_filter_Fc < Min_filter_freq
     ADC_filter_Fc = Min_filter_freq;
 end
 Filter_wait = Number_of_periods/ADC_filter_Fc;
+
+if Sampling_freq > LIMIT_FS
+    Sampling_freq = LIMIT_FS;
+end
 
 Fs_new = Aster.ADC_send_freq(Sampling_freq);
 Aster.ADC_filter(ADC_filter_Fc);

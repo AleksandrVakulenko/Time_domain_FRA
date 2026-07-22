@@ -45,25 +45,29 @@ if Periods_counter >= 1
     [out_time2, out_sig2] = fit_core.get_one_period(T_arr, V_arr, Period, "last", 1.1);
 
     Result1 = fit_core.DFT_estimation(out_time1, out_sig1, Period);
-    Result1.t_min = 0;
-    Result1.t_max = 0;
-    Result1.status = 'fixed';
+    if ~isempty(Result1)
+        Result1.t_min = 0;
+        Result1.t_max = 0;
+        Result1.status = 'fixed';
 
-    if ~isempty(Result1) && ~isnan(Result1.amp)
-        Estimations = [Estimations Result1];
-    else
-        error('err EF2'); % FIXME: undone
+        if ~isnan(Result1.amp)
+            Estimations = [Estimations Result1];
+        else
+            error('err EF2'); % FIXME: undone // maybe unreachable
+        end
     end
 
     Result2 = fit_core.DFT_estimation(out_time2, out_sig2, Period);
-    Result2.t_min = T_arr(end);
-    Result2.t_max = T_arr(end);
-    Result2.status = 'fixed';
+    if ~isempty(Result2)
+        Result2.t_min = T_arr(end);
+        Result2.t_max = T_arr(end);
+        Result2.status = 'fixed';
 
-    if ~isempty(Result2) && ~isnan(Result2.amp)
-        Estimations = [Estimations Result2];
-    else
-        error('err EF4'); % FIXME: undone
+        if ~isnan(Result2.amp)
+            Estimations = [Estimations Result2];
+        else
+            error('err EF4'); % FIXME: undone // maybe unreachable
+        end
     end
 
 else

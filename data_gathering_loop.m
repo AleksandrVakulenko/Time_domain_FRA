@@ -47,6 +47,11 @@ Time_profile = Times_conf.time_profile; % NOTE: unused
 Max_time = Max_FOP*Period;
 Min_time = Min_FOP*Period;
 
+if Min_time < 0.1
+    % NOTE: paranoid programming
+    Min_time = 0.1;
+end
+
 if Max_time < 0.25 % [s]
     Strategy = struct('do_estimations', false, ...
                       'do_pre_fit', false);

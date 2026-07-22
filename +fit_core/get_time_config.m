@@ -61,7 +61,7 @@ if Max_fop <= Min_fop
     Max_fop = Min_fop*1.2; % NOTE: just to add some space
 end
 
-Absolute_max_FOP = 50; % FIXME: get from settings
+Absolute_max_FOP = 30; % FIXME: get from settings
 
 if Max_fop > Absolute_max_FOP
     Max_fop = Absolute_max_FOP;

@@ -42,10 +42,9 @@ if ~isempty(Estimations)
     [T_arr, V_arr, ~, Fs2] = fit_core.make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
         freq, Harm_num, Max_points);
 
-    if Fs2 ~= Fs
-        % FIXME: disp
-        warning(['Sampling freq reduced: ' num2str(Fs) ' -> ' num2str(Fs2)])
-    end
+%     if Fs2 ~= Fs
+%         warning(['Sampling freq reduced: ' num2str(Fs) ' -> ' num2str(Fs2)])
+%     end
 
     % NOTE: fit with harmonics estimations
     [Result, Residuals, DEBUG] = fit_core.any_sin_fit(T_arr, V_arr, freq, ...

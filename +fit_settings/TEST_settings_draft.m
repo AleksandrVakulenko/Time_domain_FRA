@@ -14,7 +14,7 @@ Settings_struct.min_period_number_ref_to_old_in_filter = 0.8;
 Settings_struct.sigma_scale_to_find_outlier = 3;
 
 % fit_core : get_time_config : Absolute_max_FOP
-Settings_struct.absolute_max_number_of_gatherd_periods = 50;
+Settings_struct.absolute_max_number_of_gatherd_periods = 30;
 
 % fit_core : noise_amp_calc : exclude_bad_freq : Freq_max_dev
 Settings_struct.max_freq_deviation_in_fft = 0.03;

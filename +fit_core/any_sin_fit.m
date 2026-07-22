@@ -59,7 +59,7 @@ elseif numel(Estimations) == 0
 else
     error('unreachable')
 end
-Est_phi
+% Est_phi
 % ------------------------------------------------
 % NOTE: Phi correction
 % ------------------------------------------------
@@ -81,7 +81,6 @@ Est_phi([false Range]) = Est_phi([false Range]) + 360;
 Range = Est_phi_der > 180;
 Est_phi([false Range]) = Est_phi([false Range]) - 360;
 % ------------------------------------------------
-% Est_phi
 % ------------------------------------------------
 
 Est_time_norm = Est_time/Period;
