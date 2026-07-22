@@ -17,6 +17,7 @@ Gen_Offset_level = Settings.dc; % FIXME: unused
 Harm_num = Settings.harm_num;
 Time_profile = Settings.time_profile;
 Harm_profile = Settings.harm_profile;
+Use_power_line_filter = Settings.use_power_line_filter;
 
 Full_main_time_counter = tic; % FIXME: debug
 Freq = Gen_freq;
@@ -129,8 +130,11 @@ try
 
         Aster.CMD_data_stream(1);
 
+        Settings_g.use_power_line_filter = Use_power_line_filter;
+        Settings_g.channel_settings_1 = Channel_settings_1;
+        Settings_g.channel_settings_2 = Channel_settings_2;
         [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(Resources, ...
-            Aster, Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig);
+            Aster, Freq, Harm_num, Profile, Settings_g, Fig);
 
         Aster.CMD_data_stream(0);
 

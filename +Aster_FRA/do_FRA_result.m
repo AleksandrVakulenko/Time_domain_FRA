@@ -28,6 +28,49 @@ Volt2_err = Output.amp_err;
 CH_2_P = Output.phi;
 CH_2_Pe = Output.phi_err;
 
+% NOTE: try to add amplitude error inherited from low signal to range_max ratio
+% SECTION A00:
+Vmax_1 = 10; % FIXME: may be not
+Vmax_2 = 5; % FIXME: may be not
+Ratio = Volt1/Vmax_1;
+Err_eq_amp = @(Ratio) 0.00558./(Ratio*1000) - 0.00035; % NOTE: (experimentally selected)
+Err_new_1 = Err_eq_amp(Ratio);
+if Err_new_1 < 0.05/100
+    Err_new_1 = 0;
+end
+Err_new_1 = Volt1*Err_new_1;
+Err_new_1 = Err_new_1*2.0; % NOTE: scale (experimentally selected)
+Volt1_err = sqrt(Volt1_err^2 + Err_new_1^2);
+
+Ratio = Volt2/Vmax_2;
+Err_new_2 = Err_eq_amp(Ratio);
+if Err_new_2 < 0.05/100
+    Err_new_2 = 0;
+end
+Err_new_2 = Volt2*Err_new_2;
+Err_new_2 = Err_new_2*2.0; % NOTE: scale (experimentally selected)
+Volt2_err = sqrt(Volt2_err^2 + Err_new_2^2);
+
+Ratio = Volt1/Vmax_1;
+Err_eq_phi = @(Ratio) 0.1931./(Ratio*1000) + 0.030; % NOTE: (experimentally selected)
+Err_new_1 = Err_eq_phi(Ratio);
+if Err_new_1 < 0.035
+    Err_new_1 = 0;
+end
+Err_new_1 = Err_new_1*1.3; % NOTE: scale (experimentally selected)
+CH_1_Pe = sqrt(CH_1_Pe^2 + Err_new_1^2);
+
+Ratio = Volt2/Vmax_2;
+Err_eq_phi = @(Ratio) 0.1931./(Ratio*1000) + 0.030; % NOTE: (experimentally selected)
+Err_new_2 = Err_eq_phi(Ratio);
+if Err_new_2 < 0.035
+    Err_new_2 = 0;
+end
+Err_new_2 = Err_new_2*1.3; % NOTE: scale (experimentally selected)
+CH_2_Pe = sqrt(CH_2_Pe^2 + Err_new_2^2);
+% END OF SECTION A00
+% -----------------------------------------------------------------------------
+
 % CALC fundamental Res and Phi with errors
 [Res, Res_err, Phase_diff, Phase_diff_error] = calc_res_phi(Volt1, ...
     Volt1_err, Volt2, Volt2_err, R_Scale, CH_1_P, CH_1_Pe, CH_2_P, CH_2_Pe);

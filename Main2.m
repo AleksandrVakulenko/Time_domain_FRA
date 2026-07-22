@@ -97,7 +97,9 @@ for i = 1:N
 end
 
 Full_time = toc(Timer);
-Time_to_compare = sum(2./Freq_arr_Aster);
+Time_to_compare = 2./Freq_arr_Aster;
+Time_to_compare(Time_to_compare < 1) = 1;
+Time_to_compare = sum(Time_to_compare);
 disp(['Full time: ' num2str(Full_time/60, '%0.1f') ' min | NC_time ~ ' ...
     num2str(Time_to_compare/60, '%0.1f') ' min | ratio = ' ...
     num2str(Full_time/Time_to_compare, '%0.1f') ])
@@ -222,6 +224,7 @@ Settings.dc = Gen_Offset_level;
 Settings.harm_num = Harm_num;
 Settings.time_profile = Time_profile;
 Settings.harm_profile = Harm_profile;
+Settings.use_power_line_filter = Use_power_line_filter;
 
 % Measurement part
 [Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, ...

@@ -3,23 +3,24 @@ function [Fs_new, Filter_wait] = ADC_init(Aster, Gen_freq, ...
 
 % NOTE: try to avoid zones without data transmission;
 % + Aster limit is 20e3
-LIMIT_FS = 10e3;
+LIMIT_FS_MIN = 10e3; % [Hz]
+LIMIT_FS_MAX = 200; % [Hz]
 
 if Times_conf.time_profile == "ultra_fast"
-    Number_of_periods = 2; % FIXME: magic constant
+    Number_of_periods = 2;
     Min_filter_freq = 10; % [Hz]
 elseif Times_conf.time_profile == "common"
-    Number_of_periods = 5; % FIXME: magic constant
+    Number_of_periods = 5;
     Min_filter_freq = 2; % [Hz]
 else
-    Number_of_periods = 5; % FIXME: magic constant
+    Number_of_periods = 5;
     Min_filter_freq = 0.5; % [Hz[
 end
 
 % Fs = 10e3; % FIXME: get from device!
 
 if Times_conf.time_profile == "ultra_fast"
-    Sampling_freq = 5000*Gen_freq; % FIXME: magic constant
+    Sampling_freq = 5000*Gen_freq;
 elseif Times_conf.time_profile == "common"
     Sampling_freq = 2500*Gen_freq;
 elseif Times_conf.time_profile == "fine"
@@ -30,10 +31,13 @@ else
     Sampling_freq = 1000*Gen_freq;
 end
 
-if Sampling_freq < 200
-    Sampling_freq = 200; % FIXME: magic constant
+if Sampling_freq < LIMIT_FS_MAX
+    Sampling_freq = LIMIT_FS_MAX;
 end
 
+if Sampling_freq > LIMIT_FS_MIN
+    Sampling_freq = LIMIT_FS_MIN;
+end
 
 if ~isempty(Harm_num)
     Max_harm = max(Harm_num);
@@ -51,9 +55,7 @@ if ADC_filter_Fc < Min_filter_freq
 end
 Filter_wait = Number_of_periods/ADC_filter_Fc;
 
-if Sampling_freq > LIMIT_FS
-    Sampling_freq = LIMIT_FS;
-end
+
 
 Fs_new = Aster.ADC_send_freq(Sampling_freq);
 Aster.ADC_filter(ADC_filter_Fc);

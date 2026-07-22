@@ -1,5 +1,5 @@
 function [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(Resources, ...
-    FRA_dev, Freq, Harm_num, Profile, Channel_settings_1, Channel_settings_2, Fig_or_ax)
+    FRA_dev, Freq, Harm_num, Profile, Settings, Fig_or_ax)
 
 arguments
     Resources
@@ -7,8 +7,7 @@ arguments
     Freq
     Harm_num
     Profile
-    Channel_settings_1
-    Channel_settings_2
+    Settings
     Fig_or_ax = []
 end
 
@@ -20,6 +19,10 @@ Axes_arr = fit_gui.init_gather_axes(Fig_or_ax);
 
 Period = 1/Freq;
 Harm_num(Harm_num == 1) = [];
+
+Use_power_line_filter = Settings.use_power_line_filter;
+Channel_settings_1 = Settings.channel_settings_1;
+Channel_settings_2 = Settings.channel_settings_2;
 
 % ----------------------------------------------------------------
 Underrange_force_1 = Channel_settings_1.underrange_force;
@@ -37,7 +40,6 @@ Time_to_overrange_2 = 0.1; % [s] FIXME: move to Channel_settings_2 or delete
 
 Times_conf = Profile.times_conf;
 Accuracy_conf = Profile.accuracy_conf;
-
 % ----------------------------------------------------------------
 Min_FOP = Times_conf.min_fop;
 Max_FOP = Times_conf.max_fop;
@@ -149,10 +151,18 @@ while ~stop
     end
 
     [Cut_FOP_first_1, Cut_FOP_first_2] = left_cut_volume(Periods_counter);
-    [V1_arr, Cut_FOP_filter_1] = fit_core.do_power_line_filter(T_arr, ...
-        V1_arr_raw, Fs, Freq);
-    [V2_arr, Cut_FOP_filter_2] = fit_core.do_power_line_filter(T_arr, ...
-        V2_arr_raw, Fs, Freq);
+
+    if Use_power_line_filter
+        [V1_arr, Cut_FOP_filter_1] = fit_core.do_power_line_filter(T_arr, ...
+            V1_arr_raw, Fs, Freq);
+        [V2_arr, Cut_FOP_filter_2] = fit_core.do_power_line_filter(T_arr, ...
+            V2_arr_raw, Fs, Freq);
+    else
+        V1_arr = V1_arr_raw;
+        V2_arr = V2_arr_raw;
+        Cut_FOP_filter_1 = 0;
+        Cut_FOP_filter_2 = 0;
+    end
     Outliers_force_range_1 = fit_core.get_force_outliers(T_arr, Freq, ...
         Cut_FOP_filter_1, Cut_FOP_first_1);
     Outliers_force_range_2 = fit_core.get_force_outliers(T_arr, Freq, ...

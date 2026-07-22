@@ -20,11 +20,11 @@ end
 
 function High_voltage_mode(Aster, Gen_Voltage_level, Gen_freq, DC_bias)
 
-if Gen_freq < 2
+if Gen_freq < 1 % FIXME: bust be = 2
     MUX_SETTING = 3;
-elseif Gen_freq < 20
+elseif Gen_freq < 25
     MUX_SETTING = 2;
-elseif Gen_freq < 500
+elseif Gen_freq < 250
     MUX_SETTING = 1;
 else
     MUX_SETTING = 0;

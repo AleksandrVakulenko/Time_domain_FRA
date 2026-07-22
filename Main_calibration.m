@@ -1,15 +1,15 @@
 
 clc
 
-V_in = 3.00;
-Freq = 0.0005;
+V_in = 5.00;
+Freq = 0.5;
 
 Cap = 200e-12;
 
 
 R_FB_arr = [200 10e3 1e6 100e6 10e9 1e12];
 
-Range_N = 6;
+Range_N = 3;
 
 Res_FB = R_FB_arr(Range_N);
 
@@ -71,16 +71,27 @@ Fixed_range_arr = [Fixed_range_6 Fixed_range_5 Fixed_range_4 Fixed_range_3];
 Gen_voltage_arr = [Gen_voltage_arr_6 Gen_voltage_arr_5 Gen_voltage_arr_4 Gen_voltage_arr_3];
 Freq_arr = [Freq_arr_6 Freq_arr_5 Freq_arr_4 Freq_arr_3];
 
-%% RANGE N 3
+%% RANGE N 4
 
-F_min = 1;
-F_max = 200;
-F_num = 450;
+F_min = 0.05;
+F_max = 70;
+F_num = 100;
 Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
     "shuffle", "off", "repeat", 1);
+Gen_voltage_arr_4 = 24.18./Freq_arr+0.3114;
+Gen_voltage_arr_4(Gen_voltage_arr_4 > 5) = 5;
+Fixed_range_arr = 4*ones(size(Freq_arr));
 
-Fixed_range_arr = 3*ones(size(Freq_arr));
+
+%% RANGE N 3
+
+F_min = 0.5;
+F_max = 200;
+F_num = 100;
+Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
+    "shuffle", "off", "repeat", 1);
 Gen_voltage_arr = 5*ones(size(Freq_arr));
+Fixed_range_arr = 3*ones(size(Freq_arr));
 
 
 %% TEST FREQ LOOP
@@ -248,6 +259,7 @@ function [Fit_Result, Extra_data] = single_freq_measurment(Resources, ...
 Freq = Gen_freq;
 Gen_Offset_level = DC_bias; % [V] % FIXME: unused
 Harm_profile = "common"; % "common", "most_accurate"
+Use_power_line_filter = false; % FIXME: must be an argument
 %--------------------------------
 
 Settings.amp = Gen_Voltage_level;
@@ -256,6 +268,7 @@ Settings.dc = Gen_Offset_level;
 Settings.harm_num = Harm_num;
 Settings.time_profile = Time_profile;
 Settings.harm_profile = Harm_profile;
+Settings.use_power_line_filter = Use_power_line_filter;
 
 % Measurement part
 [Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, ...

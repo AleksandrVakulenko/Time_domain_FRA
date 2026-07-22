@@ -95,7 +95,7 @@ if ~isempty(Estimations)
             Result.harm = Result_harm.harm;
             Result.harm_err = Result_harm.harm_err;
         end
-        disp(['        RMS_Ratio = ' num2str(RMS_Ratio, '%0.2f')]); % FIXME: disp
+%         disp(['        RMS_Ratio = ' num2str(RMS_Ratio, '%0.2f')]); % FIXME: disp
     end
     
 else

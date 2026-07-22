@@ -42,7 +42,7 @@ for i = 1:N
         Res_out(i) = Res*Amp_cal; % "*" is res, "/" is cur amp
         Phi_out(i) = Phi - Phi_cal;
         Amp_cal_err(i) = 0; % FIXME: undone
-        Phi_cal_err(i) = 0.2*Phi_cal; % FIXME: magic constant
+        Phi_cal_err(i) = 0.1*Phi_cal; % FIXME: magic constant
     end
 end
 
