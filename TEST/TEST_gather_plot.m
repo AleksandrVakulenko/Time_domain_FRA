@@ -53,13 +53,13 @@ if numel(Axes_arr) == 2 && all(isvalid(Axes_arr))
     Ax1 = Axes_arr(1);
     Ax2 = Axes_arr(2);
 
-    data_gather_plot(Ax1, T_arr, V1_arr, ...
+    fit_viewer.data_gather_plot(Ax1, T_arr, V1_arr, ...
         Outliers_range_1, Result_1, style_num);
     title(['Ch 1 (PC: ' num2str(Periods_counter, '%0.3f') ')'], 'Parent', Ax1);
     xlabel('t, s', 'Parent', Ax1)
     ylabel('V1, V', 'Parent', Ax1)
 
-    data_gather_plot(Ax2, T_arr, V2_arr, ...
+    fit_viewer.data_gather_plot(Ax2, T_arr, V2_arr, ...
         Outliers_range_2, Result_2, style_num);
     title('Ch 2', 'Parent', Ax2);
     xlabel('t, s', 'Parent', Ax2);

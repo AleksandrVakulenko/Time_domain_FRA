@@ -330,14 +330,14 @@ while ~stop
         Ax1 = Axes_arr(1);
         Ax2 = Axes_arr(2);
 
-        data_gather_plot(Ax1, T_arr, V1_arr, ...
+        fit_viewer.data_gather_plot(Ax1, T_arr, V1_arr, ...
             Exclude_range_1, Result_1, style_num);
         % FIXME: do not toush axes labels and titles
         title(['Ch 1 (PC: ' num2str(Periods_counter, '%0.3f') ')'], 'Parent', Ax1);
         xlabel('t, s', 'Parent', Ax1)
         ylabel('V1, V', 'Parent', Ax1)
 
-        data_gather_plot(Ax2, T_arr, V2_arr, ...
+        fit_viewer.data_gather_plot(Ax2, T_arr, V2_arr, ...
             Exclude_range_2, Result_2, style_num);
         % FIXME: do not toush axes labels and titles
         title('Ch 2', 'Parent', Ax2);

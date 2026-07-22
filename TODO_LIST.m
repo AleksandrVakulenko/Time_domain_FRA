@@ -9,7 +9,7 @@
 
 
 % UNSORTED
-% 1) Do not use prefit result if residuals are too big
+% 1) 
 % 2) 
 % 3) add more errors calculation (for colplex numbers)
 % 4) add data saver function

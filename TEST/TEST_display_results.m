@@ -1,4 +1,5 @@
 
+% NOTE: maybe this file is useless
 
 %% OLD way; get result from External data
 

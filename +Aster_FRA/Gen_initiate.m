@@ -1,7 +1,5 @@
 
-% FIXME: this is not an Astra specific function !
-
-% FIXME: unused function
+% NOTE: it is an Aster specific functions as it is not belong to real-time FRA module
 
 function Gen_initiate(Gen, Gen_Voltage_level, Gen_freq, DC_bias)
 arguments
