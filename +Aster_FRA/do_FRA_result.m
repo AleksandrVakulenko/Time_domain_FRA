@@ -72,7 +72,7 @@ CH_2_Pe = sqrt(CH_2_Pe^2 + Err_new_2^2);
 % -----------------------------------------------------------------------------
 
 % CALC fundamental Res and Phi with errors
-[Res, Res_err, Phase_diff, Phase_diff_error] = calc_res_phi(Volt1, ...
+[Res, Res_err_fit, Phase_diff, Phase_diff_error_fit] = calc_res_phi(Volt1, ...
     Volt1_err, Volt2, Volt2_err, R_Scale, CH_1_P, CH_1_Pe, CH_2_P, CH_2_Pe);
 
 
@@ -84,8 +84,11 @@ CH_2_Pe = sqrt(CH_2_Pe^2 + Err_new_2^2);
 
 % update fundamental's errors
 Res_abs_err = Res*Amp_err_rel;
-Res_err = sqrt(Res_err^2 + Amp_cal_err^2 + Res_abs_err^2);
-Phase_diff_error = sqrt(Phase_diff_error^2 + Phi_cal_err^2 + Phi_err_abs^2);
+Res_err_full = sqrt(Res_err_fit^2 + Amp_cal_err^2 + Res_abs_err^2);
+Res_err_fit = sqrt(Res_err_fit^2 + Amp_cal_err^2);
+
+Phase_diff_error_full = sqrt(Phase_diff_error_fit^2 + Phi_cal_err^2 + Phi_err_abs^2);
+Phase_diff_error_fit = sqrt(Phase_diff_error_fit^2 + Phi_cal_err^2);
 
 
 % NOTE: CH1 harmonics should not be converted to resistance
@@ -124,11 +127,11 @@ fit_viewer.print_f_dev(Result_2.f_dev_ppm, Result_2.f_dev_ppm_err);
 
 disp(' ')
 
-fit_viewer.print_res(Res, Res_err)
+fit_viewer.print_res(Res, Res_err_full)
 % Cap = 1/(6.28*freq*Res);
 % Cap_err = 1/(6.28*freq*Res^2)*Res_err;
 % print_cap(Cap, Cap_err)
-fit_viewer.print_phi(Phase_diff, Phase_diff_error)
+fit_viewer.print_phi(Phase_diff, Phase_diff_error_full)
 
 disp(' ')
 
@@ -148,10 +151,12 @@ warning('|R| may be calculated incorrectly!')
 
 % FIXME: use Aster_FRA.LCR_result_type here
 Result.res_abs = Res;
-Result.res_abs_err = Res_err;
+Result.res_abs_err = Res_err_full;
+Result.res_abs_err_fit = Res_err_fit;
 
 Result.phi = Phase_diff;
-Result.phi_err = Phase_diff_error;
+Result.phi_err = Phase_diff_error_full;
+Result.phi_err_fit = Phase_diff_error_fit;
 
 Result.harm2 = Harm_2_out_arr;
 
