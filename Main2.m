@@ -216,6 +216,7 @@ function [Fit_Result, Extra_data] = single_freq_measurment(Resources, ...
 Freq = Gen_freq;
 Gen_Offset_level = DC_bias; % [V] % FIXME: unused
 Harm_profile = "common"; % "common", "most_accurate"
+Use_power_line_filter = false; % FIXME: must be an argument
 %--------------------------------
 
 Settings.amp = Gen_Voltage_level;

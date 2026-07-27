@@ -59,28 +59,14 @@ elseif numel(Estimations) == 0
 else
     error('unreachable')
 end
+
+% ------------------------------------------------
 % Est_phi
-% ------------------------------------------------
 % NOTE: Phi correction
-% ------------------------------------------------
-% neg_phi_range = Est_phi < 0;
-% if ~isempty(neg_phi_range)
-%     % NOTE: this code fixes Phi array in case of somthing like this:
-%     % [179.2 179.8 -179.8 178.7]
-%     % then mean() and fit() could no work on 180[deg] crossover
-%     Min_phi = min(Est_phi);
-%     Phi_shift = ceil(abs(Min_phi)/360)*360;
-%     Est_phi(neg_phi_range) = Est_phi(neg_phi_range) + Phi_shift;
-% end
-Est_time_der = Est_time(2:end);
-Est_phi_der = diff(Est_phi);
-
-Range = Est_phi_der < -180;
-Est_phi([false Range]) = Est_phi([false Range]) + 360;
-
-Range = Est_phi_der > 180;
-Est_phi([false Range]) = Est_phi([false Range]) - 360;
-% ------------------------------------------------
+% NOTE: this code fixes Phi array in case of somthing like this:
+% [179.2 179.8 -179.8 178.7]
+Est_phi = Phase_array_align(Est_phi);
+% Est_phi
 % ------------------------------------------------
 
 Est_time_norm = Est_time/Period;
@@ -416,6 +402,43 @@ end
 
 
 
+function Est_phi = Phase_array_align(Est_phi)
+
+for i = 1:numel(Est_phi)
+
+    if Est_phi(i) > 180
+        V = floor(Est_phi(i)/360)*360;
+        Est_phi(i) = Est_phi(i) - V;
+    end
+
+    if Est_phi(i) < -180
+        V = floor(abs(Est_phi(i))/360)*360;
+        Est_phi(i) = Est_phi(i) + V;
+    end
+
+end
+
+
+Est_phi_der = diff(Est_phi);
+Range_1 = Est_phi_der <= -180;
+Range_2 = Est_phi_der >= 180;
+Range = false(size(Range_1));
+Flag = false;
+for k = 1:numel(Range_1)
+    if Range_1(k)
+        Flag = true;
+    elseif Range_2(k)
+        Flag = false;
+    end
+    Range(k) = Flag;
+end
+if any(Range)
+    Est_phi([false Range]) = Est_phi([false Range]) + 360;
+end
+
+
+
+end
 
 
 
