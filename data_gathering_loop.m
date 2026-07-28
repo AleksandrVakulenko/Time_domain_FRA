@@ -12,16 +12,10 @@ arguments
 end
 
 Stop_button = Resources.stop_button;
-if ~isvalid(Stop_button)
-    Stop_button = [];
-end
 
 Underrange_ind = Resources.underrange_ind;
-if ~isvalid(Underrange_ind)
-    Underrange_ind_set_f = @(x) x; % NOTE: "do nothing" finction
-else
-    Underrange_ind_set_f = Underrange_ind.UserData;
-end
+Underrange_ind_set_f = Underrange_ind.UserData;
+
 
 
 Axes_arr = fit_gui.init_gather_axes(Fig_or_ax);
@@ -214,7 +208,7 @@ while ~stop
         Underrange_2 = check_underrange(V2_arr, Underrange_force_2);
     end
 
-    Underrange_ind_set_f(Underrange_1 || Underrange_2);
+    Underrange_ind_set_f_wrapper(Underrange_ind_set_f, Underrange_1, Underrange_2);
 
     if Underrange_1 && Time_passed > Time_to_underrange_1
         Exit_flag = 101; % NOTE: EF 101: underrange ch1
@@ -462,7 +456,21 @@ function [Cut_FOP_first_1, Cut_FOP_first_2] = left_cut_volume(Period_counter)
 end
 
 
-
+function Underrange_ind_set_f_wrapper(Underrange_ind_set_f, Underrange_1, Underrange_2)
+if Underrange_1 || Underrange_2
+    try
+        Underrange_ind_set_f(Underrange_1 || Underrange_2);
+    catch
+        if Underrange_1 && ~Underrange_2
+            disp('Underrange on CH1')
+        elseif ~Underrange_1 && Underrange_2
+            disp('Underrange on CH2')
+        elseif Underrange_1 && Underrange_2
+            disp('Underrange on CH1 and CH2')
+        end
+    end
+end
+end
 
 
 
