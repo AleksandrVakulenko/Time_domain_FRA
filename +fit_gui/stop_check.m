@@ -1,6 +1,10 @@
 
 
 function stop = stop_check(button)
-    stop = button.UserData.stop;
+    if ~isempty(button)
+        stop = button.UserData.stop;
+    else
+        stop = false;
+    end
 end
 

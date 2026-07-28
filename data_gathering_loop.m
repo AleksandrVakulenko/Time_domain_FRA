@@ -12,8 +12,17 @@ arguments
 end
 
 Stop_button = Resources.stop_button;
+if ~isvalid(Stop_button)
+    Stop_button = [];
+end
+
 Underrange_ind = Resources.underrange_ind;
-Underrange_ind_set_f = Underrange_ind.UserData;
+if ~isvalid(Underrange_ind)
+    Underrange_ind_set_f = @(x) x; % NOTE: "do nothing" finction
+else
+    Underrange_ind_set_f = Underrange_ind.UserData;
+end
+
 
 Axes_arr = fit_gui.init_gather_axes(Fig_or_ax);
 
@@ -110,6 +119,7 @@ Prefit_ready_2 = false;
 % Common data -------------------------
 stop = false;
 Ready_to_stop = false;
+Early_finish_possible = false;
 Exit_flag = 0;
 First_time = true;
 Fit_local_timer = [];
@@ -148,6 +158,13 @@ while ~stop
 
     if Time_passed > Min_time && Ready_to_stop
         stop = true;
+    end
+
+    % NOTE: try to make low freq measurements faster
+    if (isempty(Harm_num) || max(Harm_num) <= 2) && Period >= 1000
+        if Early_finish_possible
+            stop = true;
+        end
     end
 
     [Cut_FOP_first_1, Cut_FOP_first_2] = left_cut_volume(Periods_counter);
@@ -197,7 +214,6 @@ while ~stop
         Underrange_2 = check_underrange(V2_arr, Underrange_force_2);
     end
 
-%     disp_underrange(Underrange_1, Underrange_2); % FIXME: disp
     Underrange_ind_set_f(Underrange_1 || Underrange_2);
 
     if Underrange_1 && Time_passed > Time_to_underrange_1
@@ -305,7 +321,7 @@ while ~stop
                     Exclude_range_2 = fit_core.unite_outliers(Outliers_range_2, ...
                         Outliers_force_range_2);
 
-                    [Score_1, Score2, ~, ~] = ...
+                    [Score_1, Score2, ~, Max_score] = ...
                         fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
 
                     disp(['--- Scores: ---' newline 'Ch1: ' num2str(Score_1) newline ...
@@ -315,6 +331,9 @@ while ~stop
                         Ready_to_stop = true;
                         Estimations_1 = fit_core.result2estimation(Result_1);
                         Estimations_2 = fit_core.result2estimation(Result_2);
+                    end
+                    if Score_1 > Max_score/2 && Score_2 > Max_score/2
+                        Early_finish_possible = true;
                     end
                 end
             end
