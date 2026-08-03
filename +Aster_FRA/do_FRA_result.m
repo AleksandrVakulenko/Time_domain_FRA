@@ -3,14 +3,20 @@
 % FIXME: R_Scale could be calculated from Range_N
 % FIXME: freq is inside Result struct
 
-function Result = do_FRA_result(Result_1, Result_2, freq, Range_N, R_Scale)
+function Result = do_FRA_result(Result_1, Result_2, freq, Range_N, R_Scale, options)
 arguments
     Result_1
     Result_2
     freq
     Range_N
     R_Scale = []
+    options.disp_flag {mustBeMember(options.disp_flag, ["on", "off"])} = "on"
+    options.use_correction {mustBeMember(options.use_correction, ...
+        ["none", "1st", "both"])} = "both"
 end
+
+use_correction = options.use_correction;
+disp_flag = options.disp_flag == "on";
 
 if isempty(R_Scale)
     R_Scale = Aster_r_scale(Range_N);
@@ -77,19 +83,28 @@ CH_2_Pe = sqrt(CH_2_Pe^2 + Err_new_2^2);
 
 
 % CALIBRATION SECTION
-[Res, Phase_diff, Amp_cal_err, Phi_cal_err] = ...
-    Aster_FRA.apply_calibration(Range_N, freq, Res, Phase_diff);
+if use_correction == "both" || use_correction == "1st"
+    [Res, Phase_diff, Amp_cal_err, Phi_cal_err] = ...
+        Aster_FRA.apply_calibration(Range_N, freq, Res, Phase_diff);
 
-[Amp_err_rel, Phi_err_abs] = Aster_FRA.get_instr_errors(Range_N);
+    [Amp_err_rel, Phi_err_abs] = Aster_FRA.get_instr_errors(Range_N);
 
-% update fundamental's errors
-Res_abs_err = Res*Amp_err_rel;
-Res_err_full = sqrt(Res_err_fit^2 + Amp_cal_err^2 + Res_abs_err^2);
-Res_err_fit = sqrt(Res_err_fit^2 + Amp_cal_err^2);
+    % update fundamental's errors
+    Res_abs_err = Res*Amp_err_rel;
+    Res_err_full = sqrt(Res_err_fit^2 + Amp_cal_err^2 + Res_abs_err^2);
+    Res_err_fit = sqrt(Res_err_fit^2 + Amp_cal_err^2);
 
-Phase_diff_error_full = sqrt(Phase_diff_error_fit^2 + Phi_cal_err^2 + Phi_err_abs^2);
-Phase_diff_error_fit = sqrt(Phase_diff_error_fit^2 + Phi_cal_err^2);
+    Phase_diff_error_full = sqrt(Phase_diff_error_fit^2 + Phi_cal_err^2 + Phi_err_abs^2);
+    Phase_diff_error_fit = sqrt(Phase_diff_error_fit^2 + Phi_cal_err^2);
 
+else
+
+    Res_abs_err = Res_err_fit;
+    Res_err_full = Res_err_fit;
+
+    Phase_diff_error_full = Phase_diff_error_fit;
+
+end
 
 % NOTE: CH1 harmonics should not be converted to resistance
 % FIXME: find a way to use voltage harmonics
@@ -121,7 +136,7 @@ Zfull = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
 [C_ser, R_ser] = fit_viewer.RC_calc_series(Zfull, freq);
 
 
-
+if disp_flag
 fit_viewer.print_f_dev(Result_1.f_dev_ppm, Result_1.f_dev_ppm_err);
 fit_viewer.print_f_dev(Result_2.f_dev_ppm, Result_2.f_dev_ppm_err);
 
@@ -148,6 +163,8 @@ fit_viewer.print_res(R_ser)
 disp(' ')
 
 warning('|R| may be calculated incorrectly!')
+
+end
 
 % FIXME: use Aster_FRA.LCR_result_type here
 Result.res_abs = Res;

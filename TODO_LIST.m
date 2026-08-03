@@ -9,7 +9,7 @@
 
 
 % UNSORTED
-% 1) 
+% 1) add new scoring system based on max possible quality for current signal
 % 2) 
 % 3) add more errors calculation (for colplex numbers)
 % 4) add data saver function
