@@ -43,6 +43,7 @@ Time_to_overrange_2 = 0.1; % [s] FIXME: move to Channel_settings_2 or delete
 
 Times_conf = Profile.times_conf;
 Accuracy_conf = Profile.accuracy_conf;
+
 % ----------------------------------------------------------------
 Min_FOP = Times_conf.min_fop;
 Max_FOP = Times_conf.max_fop;
@@ -155,11 +156,26 @@ while ~stop
     end
 
     % NOTE: try to make low freq measurements faster
-    if (isempty(Harm_num) || max(Harm_num) <= 2) && Period >= 1000
+    if Time_profile == "ultra_fast" || Time_profile ==  "common"
         if Early_finish_possible
-            stop = true;
+                stop = true;
         end
+    elseif Time_profile == "fine"
+        if (isempty(Harm_num) || max(Harm_num) <= 2) && Period >= 10
+            if Early_finish_possible
+                stop = true;
+            end
+        end
+    elseif Time_profile == "most_accurate"
+        if (isempty(Harm_num) || max(Harm_num) <= 2) && Period >= 500
+            if Early_finish_possible
+                stop = true;
+            end
+        end
+    else
+
     end
+
 
     [Cut_FOP_first_1, Cut_FOP_first_2] = left_cut_volume(Periods_counter);
 
