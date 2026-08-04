@@ -38,6 +38,8 @@ disp('FINISH')
 
 Result_arr_Aster_nc = [];
 
+Calibration_set = Cal_data_get_f();
+Timer = tic;
 for i = 1:numel(Result_ch1_arr)
     disp([num2str(i) '/' num2str(numel(Result_ch1_arr))])
 
@@ -47,13 +49,16 @@ for i = 1:numel(Result_ch1_arr)
     Aster_range = Range_used(i);
 
     Fit_Result = Aster_FRA.do_FRA_result(Result_1, Result_2, Freq, ...
-        Aster_range, [], "use_correction", "none", "disp_flag", "off");
+        Aster_range, [], "use_correction", "both", "disp_flag", "off", ...
+        "calibration_set", Calibration_set);
 
     Result_arr_Aster_nc = [Result_arr_Aster_nc Fit_Result];
 
 
 end
-
+Time = toc(Timer);
+Time_per_cal = Time/numel(Result_ch1_arr);
+disp(['Time per single calibration: ' num2str(Time_per_cal*1e3, '%0.1f') ' ms'])
 
 %%
 %%
@@ -153,7 +158,7 @@ hold on
 
 Ranges_freq_low_lim = [1  1  2  0.1  5e-4  1e-6];
 
-for i = 1:1
+for i = 1:4
 RN = Data_range(i);
 Freq = Data_Freq{i};
 Freq_log = log10(Freq);
@@ -196,16 +201,16 @@ inds = err_rel < 0.005;
 col = Ranges_color(i);
 
 subplot(2, 1, 1)
-plot(Freq, Cap, '.', 'Color', col);
+% plot(Freq, Cap, '.', 'Color', col);
 % plot(Freq, Res, '.', 'Color', col);
 % plot(Freq, RF, '.', 'Color', col);
-% errorbar(Freq, RF, RF_err, '.', 'Color', col)
+errorbar(Freq, RF, RF_err, '.', 'Color', col)
 % errorbar(Freq(inds), RF(inds), RF_err(inds), '.', 'Color', col)
 % plot(Freq, err_rel, '.')
 
 subplot(2, 1, 2)
-plot(Freq, Phi, '.', 'Color', col);
-% errorbar(Freq, Phi, Phi_err, '.', 'Color', col)
+% plot(Freq, Phi, '.', 'Color', col);
+errorbar(Freq, Phi, Phi_err, '.', 'Color', col)
 
 end
 

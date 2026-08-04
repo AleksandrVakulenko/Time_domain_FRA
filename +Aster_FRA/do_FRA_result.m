@@ -10,13 +10,16 @@ arguments
     freq
     Range_N
     R_Scale = []
+    options.calibration_set = []
     options.disp_flag {mustBeMember(options.disp_flag, ["on", "off"])} = "on"
     options.use_correction {mustBeMember(options.use_correction, ...
         ["none", "1st", "both"])} = "both"
+    % FIXME: 1st and both is legacy, there is no 1st and 2nd anymore
 end
 
 use_correction = options.use_correction;
 disp_flag = options.disp_flag == "on";
+Calibration_set = options.calibration_set;
 
 if isempty(R_Scale)
     R_Scale = Aster_r_scale(Range_N);
@@ -85,7 +88,7 @@ CH_2_Pe = sqrt(CH_2_Pe^2 + Err_new_2^2);
 % CALIBRATION SECTION
 if use_correction == "both" || use_correction == "1st"
     [Res, Phase_diff, Amp_cal_err, Phi_cal_err] = ...
-        Aster_FRA.apply_calibration(Range_N, freq, Res, Phase_diff);
+        Aster_FRA.apply_calibration(Range_N, freq, Res, Phase_diff, Calibration_set);
 
     [Amp_err_rel, Phi_err_abs] = Aster_FRA.get_instr_errors(Range_N);
 
@@ -113,7 +116,7 @@ end
 
 % get harmonics info
 Harm_2_out_arr = Harm_calc_and_corr(Result_2, freq, Volt1, ...
-    Volt1_err, CH_1_P, CH_1_Pe, R_Scale, Range_N);
+    Volt1_err, CH_1_P, CH_1_Pe, R_Scale, Range_N, Calibration_set);
 
 Harm_2_out_arr = Nan_harm_clear(Harm_2_out_arr);
 
@@ -137,32 +140,32 @@ Zfull = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
 
 
 if disp_flag
-fit_viewer.print_f_dev(Result_1.f_dev_ppm, Result_1.f_dev_ppm_err);
-fit_viewer.print_f_dev(Result_2.f_dev_ppm, Result_2.f_dev_ppm_err);
+    fit_viewer.print_f_dev(Result_1.f_dev_ppm, Result_1.f_dev_ppm_err);
+    fit_viewer.print_f_dev(Result_2.f_dev_ppm, Result_2.f_dev_ppm_err);
 
-disp(' ')
+    disp(' ')
 
-fit_viewer.print_res(Res, Res_err_full)
-% Cap = 1/(6.28*freq*Res);
-% Cap_err = 1/(6.28*freq*Res^2)*Res_err;
-% print_cap(Cap, Cap_err)
-fit_viewer.print_phi(Phase_diff, Phase_diff_error_full)
+    fit_viewer.print_res(Res, Res_err_full)
+    % Cap = 1/(6.28*freq*Res);
+    % Cap_err = 1/(6.28*freq*Res^2)*Res_err;
+    % print_cap(Cap, Cap_err)
+    fit_viewer.print_phi(Phase_diff, Phase_diff_error_full)
 
-disp(' ')
+    disp(' ')
 
-disp('Parallel:')
-fit_viewer.print_cap(C_par)
-fit_viewer.print_res(R_par)
+    disp('Parallel:')
+    fit_viewer.print_cap(C_par)
+    fit_viewer.print_res(R_par)
 
-disp(' ')
+    disp(' ')
 
-disp('Series:')
-fit_viewer.print_cap(C_ser)
-fit_viewer.print_res(R_ser)
+    disp('Series:')
+    fit_viewer.print_cap(C_ser)
+    fit_viewer.print_res(R_ser)
 
-disp(' ')
+    disp(' ')
 
-warning('|R| may be calculated incorrectly!')
+    warning('|R| may be calculated incorrectly!')
 
 end
 
@@ -198,8 +201,8 @@ end
 
 
 function R_Scale = Aster_r_scale(Range_N)
-    Res_list = [200 10e3 1e6 100e6 10e9 1e12];
-    R_Scale = 1/Res_list(Range_N);
+Res_list = [200 10e3 1e6 100e6 10e9 1e12];
+R_Scale = 1/Res_list(Range_N);
 end
 
 
@@ -226,7 +229,18 @@ end
 
 
 function Harm_out_arr = Harm_calc_and_corr(Result, freq, Volt1, ...
-    Volt1_err, P1, P1e, R_Scale, Range_N)
+    Volt1_err, P1, P1e, R_Scale, Range_N, Calibration_set)
+arguments
+    Result
+    freq
+    Volt1
+    Volt1_err
+    P1
+    P1e
+    R_Scale
+    Range_N
+    Calibration_set = []
+end
 
 Harms_arr = Result.harm;
 Harms_err_arr = Result.harm_err;
@@ -251,7 +265,7 @@ for i = 1:numel(Harms_arr)
 
     % FIXME: add force flag to calibration to preserve harmonics
     [Harm_res, Harm_phase, Harm_amp_cal_err, Harm_phi_cal_err] = ...
-        Aster_FRA.apply_calibration(Range_N, H_freq, Harm_res, Harm_phase);
+        Aster_FRA.apply_calibration(Range_N, H_freq, Harm_res, Harm_phase, Calibration_set);
 
     Harm_res_abs_err = Harm_res*Amp_err_rel;
 
@@ -264,7 +278,7 @@ for i = 1:numel(Harms_arr)
     Harm_out.res_err = Harm_res_err;
     Harm_out.phi = Harm_phase;
     Harm_out.phi_err = Harm_res_phi_err;
-    
+
     Harm_out_arr = [Harm_out_arr Harm_out];
 end
 

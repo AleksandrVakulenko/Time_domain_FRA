@@ -9,7 +9,7 @@
 
 clc
 
-Save_flag = true;
+Save_flag = false;
 
 % NOTE: for internal cap 200 [pF]
 True_value.phi = -90;
@@ -78,28 +78,32 @@ Value_model_phi = feval(calibration_obj.phi, Freq_log_m);
 figure
 subplot(2, 1, 1)
 hold on
-plot(Freq_log, Value_data,  '.b', 'MarkerSize', 12);
-plot(Freq_log_m, Value_model_res, '--r');
+plot(10.^Freq_log, Value_data,  '.b', 'MarkerSize', 12);
+plot(10.^Freq_log_m, Value_model_res, '--r');
 title(['amp : ' num2str(Range_N)])
+set(gca, 'xscale', 'log')
 grid on
 
 subplot(2, 1, 2)
 hold on
-plot(Freq_log, Value_data - feval(calibration_obj.res, Freq_log)',  '.k', 'MarkerSize', 12);
+plot(10.^Freq_log, Value_data - feval(calibration_obj.res, Freq_log)',  '.k', 'MarkerSize', 12);
+set(gca, 'xscale', 'log')
 grid on
 
 
 figure
 subplot(2, 1, 1)
 hold on
-plot(Freq_log, Phi_data,  '.b', 'MarkerSize', 12);
-plot(Freq_log_m, Value_model_phi, '--r');
+plot(10.^Freq_log, Phi_data,  '.b', 'MarkerSize', 12);
+plot(10.^Freq_log_m, Value_model_phi, '--r');
 title(['phi : ' num2str(Range_N)])
+set(gca, 'xscale', 'log')
 grid on
 
 subplot(2, 1, 2)
 hold on
-plot(Freq_log, Phi_data - feval(calibration_obj.phi, Freq_log)',  '.k');
+plot(10.^Freq_log, Phi_data - feval(calibration_obj.phi, Freq_log)',  '.k');
+set(gca, 'xscale', 'log')
 grid on
 
 
