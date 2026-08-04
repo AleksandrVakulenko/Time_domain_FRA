@@ -4,9 +4,9 @@
 
 
 
-function Calibration_set = Cal_data_get_f(Folder)
+function Calibration_set = open_storage(Folder)
 arguments
-    Folder string = './Calibration_matfiles'
+    Folder string = './+Aster_calibration/Calibration_matfiles'; % FIXME: may be changed
 end
 
 Files = find_files(Folder);

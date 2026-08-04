@@ -1,4 +1,6 @@
 
+% NOTE: script to load and see calibration data
+
 clc
 
 Folder = 'Results_cal';
@@ -38,7 +40,7 @@ disp('FINISH')
 
 Result_arr_Aster_nc = [];
 
-Calibration_set = Cal_data_get_f();
+Calibration_set = Aster_calibration.open_storage();
 Timer = tic;
 for i = 1:numel(Result_ch1_arr)
     disp([num2str(i) '/' num2str(numel(Result_ch1_arr))])

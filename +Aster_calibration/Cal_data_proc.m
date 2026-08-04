@@ -1,11 +1,10 @@
 
-% 1) add file loader
-% 2) add calibration quality score
-% 3) finish mean_only mode
-% 4) remake apply_calibration
-% 5) sweep files
-% 6) run new tests
-% 7) make new calibration data
+
+% NOTE: script to create calibration objs
+
+% TODO:
+% 1) add calibration quality score
+
 
 clc
 
@@ -53,7 +52,7 @@ Range_N = RN;
 calibration_obj = calibration_fit(Freq, Res, Phi, True_value, Range_N);
 
 if Save_flag
-    Folder = 'Calibration_matfiles';
+    Folder = '+Aster_calibration/Calibration_matfiles';
     Filename = ['Aster_calibration_N' num2str(Range_N) '.mat'];
     File_addr = fullfile([Folder '/' Filename]);
     save(File_addr, "calibration_obj");

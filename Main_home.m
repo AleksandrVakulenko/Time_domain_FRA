@@ -5,18 +5,17 @@
 % FIXME: add LCR terminate before start
 
 LCR_type = {"LCR_E4980AL", []};
-Aster_addr = 3;
+Aster_addr = 6;
 
 Harm_num = [ ];
 Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 
 Gen_Voltage_level = 1.0; % [V]
 DC_bias = 0.0;
-F_min = 0.1;
-F_max = 300e3;
-F_num = 25;
+F_min = 0.01;
+F_max = 200;
+F_num = 20;
 Noisy_env = true;
-
 % Fixed_range = [5];
 
 Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
@@ -59,14 +58,7 @@ Resources.stop_button = Stop_button;
 Resources.underrange_ind = Fig.UserData.underrange_ind;
 
 % NOTE: terminate LCR
-LCR_dev = feval(LCR_type{1}, LCR_type{2});
-try
-    LCR_dev.terminate;
-catch err
-    delete(LCR_dev);
-    rethrow(err);
-end
-delete(LCR_dev);
+
 
 Results_arr_PRE = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr);
 % Zest = struct('type', 'cap', 'value', 10e-12);
@@ -113,18 +105,7 @@ if ~isempty(Fixed_range)
         "Freq_arr_Aster", "Full_time", "Sample")
 end
 
-Aster_FRA.switch_to_LCR(Aster_addr);
 
-Result_arr_LCR = [];
-N = numel(Freq_arr_LCR);
-for i = 1:N
-    disp([num2str(i) '/' num2str(N)])
-
-    Gen_freq = Freq_arr_LCR(i);
-    LCR_Result = Aster_FRA.LCR_measure(LCR_type, Gen_freq, Gen_Voltage_level, Time_profile);
-    LCR_Result.freq = Gen_freq;
-    Result_arr_LCR = [Result_arr_LCR LCR_Result];
-end
 
 disp('Finish')
 
@@ -132,11 +113,6 @@ disp('Finish')
 
 figure('position', [468 218 686 783])
 
-Freq_arr_plot_LCR = [Result_arr_LCR.freq];
-Res_LCR = [Result_arr_LCR.res_abs];
-Res_err_LCR = [Result_arr_LCR.res_abs_err];
-Phi_LCR = [Result_arr_LCR.phi];
-Phi_err_LCR = [Result_arr_LCR.phi_err];
 
 Freq_arr_plot_Aster = [Result_arr_Aster.freq];
 Res_Aster = [Result_arr_Aster.res_abs];
@@ -146,13 +122,9 @@ Phi_err_Aster = [Result_arr_Aster.phi_err];
 
 subplot(2, 1, 1)
 hold on
-% errorbar(Freq_arr_plot_LCR, Res_LCR, Res_err_LCR, '.b')
-% errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
-
-% errorbar(Freq_arr_plot_LCR, Res_LCR.*Freq_arr_plot_LCR, Res_err_LCR.*Freq_arr_plot_LCR, '.b')
+errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
 % errorbar(Freq_arr_plot_Aster, Res_Aster.*Freq_arr_plot_Aster, Res_err_Aster.*Freq_arr_plot_Aster, '.r')
-plot(Freq_arr_plot_LCR, 1./(2*pi*Res_LCR.*Freq_arr_plot_LCR)*1e12, '.b')
-plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.r')
+% plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.r')
 % plot(Res./Res*100, '-b')
 % plot((Res+Res_err)./Res*100, '--b')
 % plot((Res-Res_err)./Res*100, '--b')
@@ -167,7 +139,6 @@ box on
 
 subplot(2, 1, 2)
 hold on
-errorbar(Freq_arr_plot_LCR, Phi_LCR, Phi_err_LCR, '.b')
 errorbar(Freq_arr_plot_Aster, Phi_Aster, Phi_err_Aster, '.r')
 % plot(Freq_arr_plot_Aster, abs(tan((Phi_Aster+90)/180*pi)), '.b')
 % plot(Freq_arr, Phi_err)

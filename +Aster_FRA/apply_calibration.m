@@ -19,7 +19,7 @@ if N1 ~= N2 || N1 ~= N3 || N2 ~= N3
 end
 
 if isempty(Calibration_set)
-    Calibration_set = Cal_data_get_f(); % FIXME: get from outside
+    Calibration_set = Aster_calibration.open_storage(); % FIXME: get from outside
 end
 Range_list = [Calibration_set.range];
 ind = find(Range_list == Range_N);

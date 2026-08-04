@@ -1,15 +1,15 @@
 
 clc
 
-V_in = 5.00;
-Freq = 0.5;
+V_in = 5;
+Freq = 0.00002;
 
 Cap = 200e-12;
 
 
 R_FB_arr = [200 10e3 1e6 100e6 10e9 1e12];
 
-Range_N = 3;
+Range_N = 6;
 
 Res_FB = R_FB_arr(Range_N);
 
@@ -25,11 +25,14 @@ disp(['Freq = ' num2str(Freq, '%0.4f') ' Hz'])
 disp(['Vout = ' num2str(Vout, '%0.3f') ' V'])
 
 
-%% LONG
+%% LONG (~14 hours)
 
-Fixed_range_6 =     [6       6      6      6     6     6     6     6     6     6];
-Gen_voltage_arr_6 = [3.00    3.00   0.75   0.35  0.16  0.10  0.06  0.03  0.02  0.015];
-Freq_arr_6 =        [0.0005  0.001  0.005  0.01  0.02  0.03  0.05  0.1   0.15  0.2];
+Fixed_range_6 =     [6        6       6       6       6      6      6      6       6     6      6     6     6     6     6      6     6       6];
+Gen_voltage_arr_6 = [5.00     4.00    4.00    3.00    3.00   1.00   0.75   0.40    0.35  0.25   0.16  0.10  0.06  0.03  0.02   0.02  0.02    0.015];
+Freq_arr_6 =        [0.00006  0.00012  0.0002  0.0005  0.001  0.002  0.005  0.0075  0.01  0.013  0.02  0.03  0.05  0.10  0.125  0.15  0.175  0.2];
+% Fixed_range_6 =     [6      6      6      6       6     6      6     6     6     6     6      6     6       6];
+% Gen_voltage_arr_6 = [3.00   1.00   0.75   0.40    0.35  0.25   0.16  0.10  0.06  0.03  0.02   0.02  0.02    0.015];
+% Freq_arr_6 =        [0.001  0.002  0.005  0.0075  0.01  0.013  0.02  0.03  0.05  0.10  0.125  0.15  0.175  0.2];
 
 Fixed_range_5 =     [5      5     5     5     5     5     5    5     5     5];
 Gen_voltage_arr_5 = [5.00   5.00  5.00  5.00  3.50  1.50  0.5  0.25  0.20  0.15];
@@ -39,15 +42,22 @@ Fixed_range_4 =     [4     4     4     4     4     4     4     4     4     4    
 Gen_voltage_arr_4 = [5.00  5.00  5.00  5.00  5.00  5.00  5.00  3.00  1.60  1.20  0.90  0.60  0.50];
 Freq_arr_4 =        [0.02  0.1   0.2   0.5   1.0   2.0   5.0   10.0  20.0  30.0  40.0  60.0  70.0];
 
-Fixed_range_3 =     [3    3    3    3    3    3    3    3    3    3    3    3     3     3     3     3     3     3     3];
-Gen_voltage_arr_3 = [5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0   5.0   5.0   5.0   5.0   5.0   5.0   5.0];
-Freq_arr_3 =        [1    2    5    10   20   30   40   60   70   80   90   110   120   130   140   160   170   180   195];
+Fixed_range_3 =     [3    3    3    3    3    3    3    3    3    3    3     3     3     3     3     3     3     3];
+Gen_voltage_arr_3 = [5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0   5.0   5.0   5.0   5.0   5.0   5.0   5.0];
+Freq_arr_3 =        [2    5    10   20   30   40   60   70   80   90   110   120   130   140   160   170   180   195];
 
 Fixed_range_arr = [Fixed_range_6 Fixed_range_5 Fixed_range_4 Fixed_range_3]; 
 Gen_voltage_arr = [Gen_voltage_arr_6 Gen_voltage_arr_5 Gen_voltage_arr_4 Gen_voltage_arr_3];
 Freq_arr = [Freq_arr_6 Freq_arr_5 Freq_arr_4 Freq_arr_3];
 
+numel(Fixed_range_arr)
+numel(Gen_voltage_arr)
+numel(Freq_arr)
 
+Periods = 1./Freq_arr;
+Periods = Periods*1.5;
+Periods(Periods < 5) = 5;
+sum(Periods)/3600
 
 %% SHORT
 
@@ -70,6 +80,7 @@ Freq_arr_3 =        [1    2    5    10   20   30   40   60   70   80   90   110 
 Fixed_range_arr = [Fixed_range_6 Fixed_range_5 Fixed_range_4 Fixed_range_3]; 
 Gen_voltage_arr = [Gen_voltage_arr_6 Gen_voltage_arr_5 Gen_voltage_arr_4 Gen_voltage_arr_3];
 Freq_arr = [Freq_arr_6 Freq_arr_5 Freq_arr_4 Freq_arr_3];
+Freq_arr = Freq_arr*0.45;
 
 %% RANGE N 4
 
@@ -87,7 +98,7 @@ Fixed_range_arr = 4*ones(size(Freq_arr));
 
 F_min = 0.5;
 F_max = 200;
-F_num = 100;
+F_num = 200;
 Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
     "shuffle", "off", "repeat", 1);
 Gen_voltage_arr = 5*ones(size(Freq_arr));
@@ -143,6 +154,7 @@ Results_arr_PRE = [];
 disp('PRE MEASURMENTS FINISH')
 pause(1);
 
+Noisy_env = false;
 Timer = tic;
 Result_arr_Aster = [];
 Extra_data_arr = [];
@@ -161,7 +173,7 @@ for i = 1:N
 
     [Fit_Result, Extra_data] = single_freq_measurment(Resources, Aster_addr, ...
         Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Z_est, Time_profile, ...
-        Ax_arr, Fixed_range, Self_cal_mode);
+        Ax_arr, Fixed_range, Self_cal_mode, Noisy_env);
     Fit_Result.freq = Gen_freq;
     Result_arr_Aster = [Result_arr_Aster Fit_Result];
     Extra_data_arr = [Extra_data_arr Extra_data];
