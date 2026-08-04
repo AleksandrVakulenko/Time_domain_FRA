@@ -13,8 +13,8 @@ arguments
     options.calibration_set = []
     options.disp_flag {mustBeMember(options.disp_flag, ["on", "off"])} = "on"
     options.use_correction {mustBeMember(options.use_correction, ...
-        ["none", "1st", "both"])} = "both"
-    % FIXME: 1st and both is legacy, there is no 1st and 2nd anymore
+        ["on", "off", "none", "1st", "both"])} = "both"
+    % FIXME: "1st", "none", "both" is legacy, there is no 1st and 2nd anymore
 end
 
 use_correction = options.use_correction;
@@ -86,7 +86,7 @@ CH_2_Pe = sqrt(CH_2_Pe^2 + Err_new_2^2);
 
 
 % CALIBRATION SECTION
-if use_correction == "both" || use_correction == "1st"
+if use_correction == "both" || use_correction == "1st" || use_correction == "on"
     [Res, Phase_diff, Amp_cal_err, Phi_cal_err] = ...
         Aster_FRA.apply_calibration(Range_N, freq, Res, Phase_diff, Calibration_set);
 

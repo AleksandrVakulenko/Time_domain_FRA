@@ -474,17 +474,16 @@ end
 
 
 function Underrange_ind_set_f_wrapper(Underrange_ind_set_f, Underrange_1, Underrange_2)
-if Underrange_1 || Underrange_2
-    try
-        Underrange_ind_set_f(Underrange_1 || Underrange_2);
-    catch
-        if Underrange_1 && ~Underrange_2
-            disp('Underrange on CH1')
-        elseif ~Underrange_1 && Underrange_2
-            disp('Underrange on CH2')
-        elseif Underrange_1 && Underrange_2
-            disp('Underrange on CH1 and CH2')
-        end
+% FIXME: disp
+try
+    Underrange_ind_set_f(Underrange_1 || Underrange_2);
+catch
+    if Underrange_1 && ~Underrange_2
+        disp('Underrange on CH1')
+    elseif ~Underrange_1 && Underrange_2
+        disp('Underrange on CH2')
+    elseif Underrange_1 && Underrange_2
+        disp('Underrange on CH1 and CH2')
     end
 end
 end

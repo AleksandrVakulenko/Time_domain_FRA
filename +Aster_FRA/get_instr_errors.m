@@ -31,12 +31,12 @@ switch range_num
     case 2
         Basic_amp_error = 0.05; % [%]
         Temp_drift_error = 5; % [ppm]
-		Phi_err_mult = 1;
+		Phi_err_mult = 1.5;
 
     case 3
         Basic_amp_error = 0.1; % [%]
         Temp_drift_error = 10; % [ppm]
-		Phi_err_mult = 1;
+		Phi_err_mult = 1.5;
 
     case 4
         Basic_amp_error = 1; % [%]
