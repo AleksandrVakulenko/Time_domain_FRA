@@ -359,8 +359,9 @@ while ~stop
 
         drawnow
     else
+        % FIXME: debug disp
         disp(['numel(Axes_arr) = ' num2str(numel(Axes_arr)) ' | ' ...
-              'isvalid(Axes_arr) = ' num2str(isvalid(Axes_arr)) ' | ' ...
+              'isvalid(Axes_arr) = {' num2str(isvalid(Axes_arr)) '} | ' ...
               'all(isvalid(Axes_arr)) = ' num2str(all(isvalid(Axes_arr)))])
     end
 end
