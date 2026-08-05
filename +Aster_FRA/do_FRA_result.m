@@ -138,6 +138,12 @@ Zfull = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
 [C_par, R_par] = fit_viewer.RC_calc_parallel(Zfull, freq);
 [C_ser, R_ser] = fit_viewer.RC_calc_series(Zfull, freq);
 
+if numel(freq) > 1 || numel(Zfull) > 1
+    disp_flag = false;
+    disp(['More than one result!'])
+    disp(num2str(freq))
+end
+
 
 if disp_flag
     fit_viewer.print_f_dev(Result_1.f_dev_ppm, Result_1.f_dev_ppm_err);
@@ -145,6 +151,16 @@ if disp_flag
 
     disp(' ')
 
+    % FIXME: debug print
+%     disp('----------------')
+%     freq
+%     Res
+%     Res_err_full
+%     Phase_diff
+%     Phase_diff_error_full
+%     disp('----------------')
+    % ------------------
+    
     fit_viewer.print_res(Res, Res_err_full)
     % Cap = 1/(6.28*freq*Res);
     % Cap_err = 1/(6.28*freq*Res^2)*Res_err;
@@ -165,7 +181,7 @@ if disp_flag
 
     disp(' ')
 
-    warning('|R| may be calculated incorrectly!')
+%     warning('|R| may be calculated incorrectly!')
 
 end
 
@@ -287,14 +303,25 @@ end
 
 
 function Harm_2_out_arr = Nan_harm_clear(Harm_2_out_arr)
-Range = false(1, numel(Harm_2_out_arr));
+% FIXME: temp solution to delete empty harms
+
+Delete_range = false(1, numel(Harm_2_out_arr));
+
 for i = 1:numel(Harm_2_out_arr)
     Res = Harm_2_out_arr(i).res;
-    if isnan(Res)
-        Range(i) = true;
+    %     if numel(Res) > 1
+    %         disp(Res) % FIXME: disp
+    %         error('Problem in Harm list'); % FIXME: disp
+    %     else
+    if isempty(Res) || isnan(Res)
+        Delete_range(i) = true;
     end
+    %     end
+
 end
-Harm_2_out_arr(Range) = [];
+
+Harm_2_out_arr(Delete_range) = [];
+
 end
 
 

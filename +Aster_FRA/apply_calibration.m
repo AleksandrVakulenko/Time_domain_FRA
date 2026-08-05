@@ -17,6 +17,9 @@ N3 = numel(Phi_arr);
 if N1 ~= N2 || N1 ~= N3 || N2 ~= N3
     error('Freq, Res and Phi arrays must have same size')
 end
+if N1 > 1
+    disp(['Number of data to calibrate: ' num2str(N1)]); % FIXME: disp
+end
 
 if isempty(Calibration_set)
     Calibration_set = Aster_calibration.open_storage(); % FIXME: get from outside
@@ -41,12 +44,14 @@ if numel(Phi_err) == 1
 end
 
 % ----- FIXME: experimental part -----
+% FIXME: delete this
 % Alpha_min = 0.85*ones(size(Phi_arr));
 % Alpha = Alpha_min + abs(Phi_arr)/80*(1-Alpha_min);
 % Alpha(Phi_arr >= 0) = Alpha_min;
 % Alpha(Phi_arr <= -80) = 1;
 % Phi_cal = Phi_cal * Alpha;
 % ----- end of experimantal part -----
+
 
 Res_out = Res_arr.*Amp_cal; % "*" is res, "/" is cur amp
 Phi_out = Phi_arr - Phi_cal;
@@ -79,6 +84,8 @@ if Freq_arr > F_LIMIT*1.0001 % FIXME:
 else
     Amp = feval(Res_obj, freq_log);
     Phi = feval(Phi_obj, freq_log);
+    Amp = reshape(Amp, 1, numel(Amp));
+    Phi = reshape(Phi, 1, numel(Phi));
 end
 
 end

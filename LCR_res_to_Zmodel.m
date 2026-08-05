@@ -9,6 +9,11 @@ end
 
 function [Freq_out, Res_out] = unite_datasets(Result_arr_Aster, Results_arr_PRE)
 
+if ~isempty(Result_arr_Aster)
+    inds = Aster_FRA.FRA_results_check_valid(Result_arr_Aster);
+    Result_arr_Aster(~inds) = [];
+end
+
 N_result = numel(Result_arr_Aster);
 N_pre = numel(Results_arr_PRE);
 
@@ -68,7 +73,13 @@ Res_log = log10(Res);
 
 % plot(Freq_log, Res_log, '.')
 
-
+if numel(Freq_log) ~= numel(Res_log)
+    disp('--------------')
+    Freq_log
+    Res_log
+    disp('--------------')
+    error('Data sizes do not match.')
+end
 [xData, yData] = prepareCurveData( Freq_log, Res_log );
 ft = fittype( 'poly1' );
 fitresult = fit( xData, yData, ft );
@@ -76,3 +87,12 @@ fitresult = fit( xData, yData, ft );
 Zmodel = @(f) 10.^feval(fitresult, log10(f));
 
 end
+
+
+
+
+
+
+
+
+

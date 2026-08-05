@@ -60,7 +60,7 @@ Resources.underrange_ind = Fig.UserData.underrange_ind;
 % NOTE: terminate LCR
 
 
-Results_arr_PRE = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr);
+Results_arr_PRE = Aster_FRA.pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr);
 % Zest = struct('type', 'cap', 'value', 10e-12);
 % Zest = struct('type', 'res', 'value', 10e3);
 disp('PRE MEASURMENTS FINISH')
@@ -79,7 +79,7 @@ for i = 1:N
     Zmodel = LCR_res_to_Zmodel(Result_arr_Aster, Results_arr_PRE);
     Z_est = struct('type', 'res', 'value', Zmodel(Gen_freq));
 
-    [Fit_Result, Extra_data] = single_freq_measurment(Resources, Aster_addr, ...
+    [Fit_Result, Extra_data] = Aster_FRA.single_freq_measurment(Resources, Aster_addr, ...
         Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Z_est, Time_profile, ...
         Ax_arr, Fixed_range, false, Noisy_env);
     Fit_Result.freq = Gen_freq;
@@ -169,147 +169,6 @@ Score_2 = Extra_data.score.score_2;
 Used_ranges = Extra_data.used_ranges;
 
 
-
-
-
-
-
-
-
-
-
-%% TEST MEASUREMENT FUNCTNION
-
-function [Fit_Result, Extra_data] = single_freq_measurment(Resources, ...
-    Aster_addr, Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Zest, Time_profile, ...
-    Fig_or_ax, Fixed_range, Self_cal_mode, Noisy_env)
-
-%--------------------------------
-Freq = Gen_freq;
-Gen_Offset_level = DC_bias; % [V] % FIXME: unused
-Harm_profile = "common"; % "common", "most_accurate"
-Use_power_line_filter = Noisy_env;
-%--------------------------------
-
-Settings.amp = Gen_Voltage_level;
-Settings.freq = Gen_freq;
-Settings.dc = Gen_Offset_level;
-Settings.harm_num = Harm_num;
-Settings.time_profile = Time_profile;
-Settings.harm_profile = Harm_profile;
-Settings.use_power_line_filter = Use_power_line_filter;
-
-% Measurement part
-[Exit_flag, Ch_data_1, Ch_data_2, R_Scale, Accuracy_conf, ...
-    Used_ranges, Aster_range] = Aster_FRA.measure(Resources, Aster_addr, ...
-    Settings, Fig_or_ax, Zest, Fixed_range, Self_cal_mode);
-
-warning(['>>>>>> Exit_flag: ' num2str(Exit_flag) ' >>>>>>>>']); % FIXME: disp
-
-if Exit_flag == 40
-    % FIXME: debug way to finish by stop button
-    error('The program has been terminated by the user.')
-end
-
-% Fitting part
-Period_counter = Ch_data_1.period_counter;
-
-[Properties_1, Properties_2] = fit_core.get_fit_props(Period_counter);
-
-Max_points = 50e3; % FIXME: get from settings
-
-[Result_1, Residuals_1, DEBUG_1, Result_2, Residuals_2, DEBUG_2] = ...
-    fit_core.fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
-    Harm_num, Max_points);
-
-[Score_1, Score_2, Best_flag, Max_score] = ...
-    fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
-
-disp([newline 'Scores:' newline 'Ch1: ' num2str(Score_1) newline ...
-    'Ch2: ' num2str(Score_2)]) % FIXME: disp
-
-% Final plot part
-Axes_arr = fit_gui.init_gather_axes(Fig_or_ax);
-if numel(Axes_arr) == 2 && all(isvalid(Axes_arr))
-    style_num = 2;
-
-    Ax1 = Axes_arr(1);
-    Ax2 = Axes_arr(2);
-
-    fit_viewer.data_gather_plot(Ax1, Ch_data_1.time, Ch_data_1.voltage, ...
-        Ch_data_1.outliers_range, Result_1, style_num);
-    xlabel('t, s', 'Parent', Ax1)
-    ylabel('V1, V', 'Parent', Ax1)
-
-    fit_viewer.data_gather_plot(Ax2, Ch_data_2.time, Ch_data_2.voltage, ...
-        Ch_data_2.outliers_range, Result_2, style_num);
-    xlabel('t, s', 'Parent', Ax2);
-    ylabel('V2, V', 'Parent', Ax2);
-
-    drawnow
-end
-
-
-% FIXME: use debug function to show results
-if ~isempty(Result_1) && ~isempty(Result_2)
-    Fit_Result = Aster_FRA.do_FRA_result(Result_1, Result_2, Freq, Aster_range);
-else
-    Fit_Result = [];
-end
-
-Extra_data.ch_data_1 = Ch_data_1;
-Extra_data.ch_data_2 = Ch_data_2;
-Extra_data.result_1 = Result_1;
-Extra_data.result_2 = Result_2;
-Extra_data.residuals_1 = Residuals_1;
-Extra_data.residuals_2 = Residuals_2;
-Extra_data.score.score_1 = Score_1;
-Extra_data.score.score_2 = Score_2;
-Extra_data.score.best_flag = Best_flag;
-Extra_data.score.max_score = Max_score;
-Extra_data.DEBUG.DEBUG_1 = DEBUG_1;
-Extra_data.DEBUG.DEBUG_2 = DEBUG_2;
-Extra_data.used_ranges = Used_ranges;
-Extra_data.aster_range = Aster_range;
-
-end
-
-
-
-
-
-
-function Results_arr_PRE = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr)
-% NOTE: bad version
-% FIXME: it is bad to estimate on single point
-
-Noisy_env = true;
-Self_cal = false;
-
-    Harm_num = [1 2 3];
-    Gen_freq = [1 70];
-    DC_bias = 0;
-    Time_profile = 'ultra_fast';
-    Zest = struct('type', 'res', 'value', 50e3); % FIXME: magic constant
-    Fit_Result_1 = single_freq_measurment(Resources, Aster_addr, ...
-        Gen_freq(1), Gen_Voltage_level, DC_bias, Harm_num, Zest, ...
-        Time_profile, Ax_arr, [], Self_cal, Noisy_env);
-
-    Fit_Result_2 = single_freq_measurment(Resources, Aster_addr, ...
-        Gen_freq(2), Gen_Voltage_level, DC_bias, Harm_num, Zest, ...
-        Time_profile, Ax_arr, [], Self_cal, Noisy_env);
-    
-    Results_arr_PRE = [Fit_Result_1 Fit_Result_2];
-    
-    
-    % --- FXIME: debug section ---
-%     Res = Fit_Result.res_abs;
-%     Cap = 1/(2*pi*Res*Gen_freq);
-%     Zest = struct('type', 'cap', 'value', Cap);
-    % --- NOTE: end of debug section ---
-
-%     Zest = struct('type', 'res', 'value', Fit_Result.res_abs);
-end
 
 
 
