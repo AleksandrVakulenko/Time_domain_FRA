@@ -5,12 +5,12 @@
 % 3) Add set_freq and set_amp
 % 4) Refactor Aster class (Matlab)
 % 5) Exclude Astra from aDevice
-% 6) 
+% 6) Add ACK gen->main cpu command
 
 
 % UNSORTED
-% 1) add new scoring system based on max possible quality for current signal
-% 2) 
+% 1) Update freq gen, do not delete repeated freqs (200 Hz)
+% 2) add new scoring system based on max possible quality for current signal
 % 3) add more errors calculation (for colplex numbers)
 % 4) add data saver function
 % 5) 

@@ -17,51 +17,6 @@ Phi_err_abs = Phi_err_abs_basic*Phi_err_mult;
 end
 
 
-% NOTE: previous version (more errors)
-function [Basic_amp_error, Temp_drift_error, Phi_err_mult] = ...
-    get_instr_err_internal(range_num)
-
-switch range_num
-
-    case 1
-        Basic_amp_error = 0.1; % [%]
-        Temp_drift_error = 5; % [ppm]
-		Phi_err_mult = 1;
-		
-    case 2
-        Basic_amp_error = 0.05; % [%]
-        Temp_drift_error = 5; % [ppm]
-		Phi_err_mult = 1.5;
-
-    case 3
-        Basic_amp_error = 0.1; % [%]
-        Temp_drift_error = 10; % [ppm]
-		Phi_err_mult = 1.5;
-
-    case 4
-        Basic_amp_error = 1; % [%]
-        Temp_drift_error = 25; % [ppm]
-		Phi_err_mult = 2;
-
-    case 5
-        Basic_amp_error = 5; % [%]
-        Temp_drift_error = 250; % [ppm]
-		Phi_err_mult = 5;
-
-    case 6
-        Basic_amp_error = 5; % [%]
-        Temp_drift_error = 500; % [ppm]
-		Phi_err_mult = 10;
-
-    otherwise
-        error('Wrong range number')
-
-end
-
-end
-
-
-
 % NOTE: version for new calibration type
 function [Basic_amp_error, Temp_drift_error, Phi_err_mult] = ...
     get_instr_err_internal_new(range_num)
@@ -84,17 +39,17 @@ switch range_num
 		Phi_err_mult = 1;
 
     case 4
-        Basic_amp_error = 1; % [%]
+        Basic_amp_error = 0.25; % [%]
         Temp_drift_error = 25; % [ppm]
 		Phi_err_mult = 2;
 
     case 5
-        Basic_amp_error = 1; % [%]
+        Basic_amp_error = 0.25; % [%]
         Temp_drift_error = 250; % [ppm]
 		Phi_err_mult = 3;
 
     case 6
-        Basic_amp_error = 1; % [%]
+        Basic_amp_error = 0.25; % [%]
         Temp_drift_error = 500; % [ppm]
 		Phi_err_mult = 5;
 
