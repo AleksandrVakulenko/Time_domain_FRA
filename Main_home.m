@@ -7,19 +7,26 @@
 LCR_type = {"LCR_E4980AL", []};
 Aster_addr = 6;
 
-Harm_num = [ ];
-Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
+Harm_num = [3];
+Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
 
 Gen_Voltage_level = 1.0; % [V]
 DC_bias = 0.0;
-F_min = 0.01;
+F_min = 0.1;
 F_max = 200;
-F_num = 20;
+F_num = 100;
 Noisy_env = true;
 % Fixed_range = [5];
 
 Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
-    "shuffle", "on", "repeat", 1);
+    "shuffle", "on", "repeat", 3);
+
+Periods = 1./Freq_arr;
+Periods = Periods*1.5;
+Periods(Periods < 5) = 5;
+sum(Periods)/60
+
+%%
 % Freq_arr = 0.1;
 
 Sample.info = "test";
@@ -82,9 +89,11 @@ for i = 1:N
     [Fit_Result, Extra_data] = Aster_FRA.single_freq_measurment(Resources, Aster_addr, ...
         Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Z_est, Time_profile, ...
         Ax_arr, Fixed_range, false, Noisy_env);
-    Fit_Result.freq = Gen_freq;
-    Result_arr_Aster = [Result_arr_Aster Fit_Result];
-    Extra_data_arr = [Extra_data_arr Extra_data];
+    if ~isempty(Fit_Result) && Aster_FRA.FRA_results_check_valid(Fit_Result)
+        Fit_Result.freq = Gen_freq;
+        Result_arr_Aster = [Result_arr_Aster Fit_Result];
+        Extra_data_arr = [Extra_data_arr Extra_data];
+    end
 
     % FIXME: it is bad in shuffled freq array
 end
@@ -122,8 +131,8 @@ Phi_err_Aster = [Result_arr_Aster.phi_err];
 
 subplot(2, 1, 1)
 hold on
-errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
-% errorbar(Freq_arr_plot_Aster, Res_Aster.*Freq_arr_plot_Aster, Res_err_Aster.*Freq_arr_plot_Aster, '.r')
+% errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
+errorbar(Freq_arr_plot_Aster, Res_Aster.*Freq_arr_plot_Aster, Res_err_Aster.*Freq_arr_plot_Aster, '.r')
 % plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.r')
 % plot(Res./Res*100, '-b')
 % plot((Res+Res_err)./Res*100, '--b')
