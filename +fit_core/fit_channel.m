@@ -95,11 +95,11 @@ if ~isempty(Estimations)
             Result.harm = Result_harm.harm;
             Result.harm_err = Result_harm.harm_err;
         end
-%         disp(['        RMS_Ratio = ' num2str(RMS_Ratio, '%0.2f')]); % FIXME: disp
+        klog.disp(['        RMS_Ratio = ' num2str(RMS_Ratio, '%0.2f')], "debug_full");
     end
     
 else
-    disp('NO ESTIMATIONS FOR FIT'); % FIXME: disp; do something with it
+    klog.warning('NO ESTIMATIONS FOR FIT');
     Result = [];
     Residuals = [];
     DEBUG = [];

@@ -168,12 +168,6 @@ switch Phi_type
         error('unreachable')
 end
 
-% FIXME: delete this part
-% disp('------------------------')
-% Lower
-% StartPoint
-% Upper
-% disp('------------------------')
 
 Freq_dev_range = [-100 100]; % FIXME: debug
 if Freq_dev_flag

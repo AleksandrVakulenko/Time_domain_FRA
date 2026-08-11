@@ -90,9 +90,11 @@ for i = 1:N
     [Fit_Result, Extra_data] = Aster_FRA.single_freq_measurment(Resources, Aster_addr, ...
         Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Z_est, Time_profile, ...
         Ax_arr, Fixed_range, false, Noisy_env);
-    Fit_Result.freq = Gen_freq;
-    Result_arr_Aster = [Result_arr_Aster Fit_Result];
-    Extra_data_arr = [Extra_data_arr Extra_data];
+    if ~isempty(Fit_Result) && Aster_FRA.FRA_results_check_valid(Fit_Result)
+        Fit_Result.freq = Gen_freq;
+        Result_arr_Aster = [Result_arr_Aster Fit_Result];
+        Extra_data_arr = [Extra_data_arr Extra_data];
+    end
 
     % FIXME: it is bad in shuffled freq array
 end

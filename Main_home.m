@@ -14,12 +14,12 @@ Gen_Voltage_level = 1.0; % [V]
 DC_bias = 0.0;
 F_min = 0.1;
 F_max = 200;
-F_num = 100;
+F_num = 60;
 Noisy_env = true;
 % Fixed_range = [5];
 
 Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
-    "shuffle", "on", "repeat", 3);
+    "shuffle", "on", "repeat", 2);
 
 Periods = 1./Freq_arr;
 Periods = Periods*1.5;
@@ -131,8 +131,8 @@ Phi_err_Aster = [Result_arr_Aster.phi_err];
 
 subplot(2, 1, 1)
 hold on
-% errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
-errorbar(Freq_arr_plot_Aster, Res_Aster.*Freq_arr_plot_Aster, Res_err_Aster.*Freq_arr_plot_Aster, '.r')
+errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
+% errorbar(Freq_arr_plot_Aster, Res_Aster.*Freq_arr_plot_Aster, Res_err_Aster.*Freq_arr_plot_Aster, '.r')
 % plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.r')
 % plot(Res./Res*100, '-b')
 % plot((Res+Res_err)./Res*100, '--b')

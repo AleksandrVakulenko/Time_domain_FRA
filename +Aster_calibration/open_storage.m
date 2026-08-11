@@ -12,7 +12,7 @@ end
 Files = find_files(Folder);
 Calibration_set = [];
 for i = 1:numel(Files)
-%     disp([num2str(i) '/' num2str(numel(Files))])
+%     klog.disp([num2str(i) '/' num2str(numel(Files))])
     Data = load(Files(i).full_path, "calibration_obj");
 
     Calibration_set = [Calibration_set Data.calibration_obj];

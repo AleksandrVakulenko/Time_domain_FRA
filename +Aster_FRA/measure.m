@@ -65,7 +65,7 @@ try
 
     [Fs_new, Filter_wait] = Aster_FRA.ADC_init(Aster, Gen_freq, Harm_num, Times_conf);
 
-    disp(['>>>>>>  Fs = ' num2str(Fs_new, "%0.3f") ' Hz <<<<<<']) % FIXME: disp
+    klog.disp(['>>>>>>  Fs = ' num2str(Fs_new, "%0.3f") ' Hz <<<<<<'], "debug_light")
 
     Channel_settings_1.underrange_force = Underrange_force_1;
     Channel_settings_1.max_ch1_limit = MAX_CH1_LIMIT;
@@ -126,7 +126,7 @@ try
     stop = false;
     while ~stop
         Try_num = Try_num + 1;
-        disp(['Try num = ' num2str(Try_num)]) % FIXME: disp
+        klog.disp(['Try num = ' num2str(Try_num)], "debug_light")
 
         Aster.CMD_data_stream(1);
 
@@ -161,11 +161,11 @@ try
                 need_to_switch_range = true;
                 switch_range_force = true;
                 Channel_settings_2.underrange_force = true;
-                disp('Underrange force on CH2 is active') % FIXME: debug
+                klog.disp('Underrange force on CH2 is active', 'debug_light');
             elseif Exit_flag == 101 || Exit_flag == 201
                 stop = true;
             else
-                warning(['Unknown exit flag: ' num2str(Exit_flag)]) % FIXME: disp
+                klog.disp(['Unknown exit flag: ' num2str(Exit_flag)], "debug_light", "orange")
                 stop = true;
             end
 
@@ -194,7 +194,7 @@ try
     end
 catch ERR
     Aster_FRA.disconnest_devices(Aster, Gen)
-    disp('ERR finish // devices closed') % FIXME: disp
+    klog.disp('ERR finish // devices closed', 'common')
     rethrow(ERR)
 end
 
@@ -203,10 +203,10 @@ Aster_FRA.disconnest_devices(Aster, Gen)
 Accuracy_conf = Profile.accuracy_conf;
 
 Full_main_time = toc(Full_main_time_counter);
-disp([newline '-----------------------------------------' newline ...
+klog.disp([newline '-----------------------------------------' newline ...
     '             Main fit finish' newline ...
     '-----------------------------------------' newline ...
     'Time: ' num2str(Full_main_time) ' s' newline ...
-    '-----------------------------------------' newline]) % FIXME: disp
+    '-----------------------------------------' newline], 'debug_light');
 
 end

@@ -21,9 +21,9 @@ end
     end
 
     if ~isempty(Cap_err)
-    disp(['C = ' num2str(Cap*scale, '%0.3f') ' ± ' ...
-        num2str(Cap_err*scale, '%0.3f') ' ' unit])
+        klog.disp(['C = ' num2str(Cap*scale, '%0.3f') ' ± ' ...
+            num2str(Cap_err*scale, '%0.3f') ' ' unit])
     else
-    disp(['C = ' num2str(Cap*scale, '%0.3f') ' ' unit])
+        klog.disp(['C = ' num2str(Cap*scale, '%0.3f') ' ' unit])
     end
 end

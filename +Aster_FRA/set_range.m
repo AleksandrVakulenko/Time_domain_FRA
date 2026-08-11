@@ -24,17 +24,17 @@ else
 
         R_time = 0;
 
-        disp([newline 'Aster range switched to: ' num2str(Range) newline])
+        klog.disp([newline 'Aster range switched to: ' num2str(Range) newline], "debug_light")
     end
 
     if Range == 5
-        disp('Wait 1 sec ...')
+        klog.disp('Wait 1 sec ...')
         pause(1-R_time)
-        disp('Ready')
+        klog.disp('Ready')
     elseif Range == 6
-        disp('Wait 5 sec ...')
+        klog.disp('Wait 5 sec ...')
         pause(5-R_time)
-        disp('Ready')
+        klog.disp('Ready')
     else
         pause(0.2);
     end

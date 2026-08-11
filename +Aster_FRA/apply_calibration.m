@@ -18,7 +18,7 @@ if N1 ~= N2 || N1 ~= N3 || N2 ~= N3
     error('Freq, Res and Phi arrays must have same size')
 end
 if N1 > 1
-    disp(['Number of data to calibrate: ' num2str(N1)]); % FIXME: disp
+    klog.disp(['Number of data to calibrate: ' num2str(N1)], "debug_full");
 end
 
 if isempty(Calibration_set)

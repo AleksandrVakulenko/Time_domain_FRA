@@ -1,4 +1,7 @@
 
+
+
+
 function Harm_est = estimate_harmonics(T_arr, V_arr, Fs, freq, Harm_num, do_not_disp)
 arguments
 T_arr
@@ -6,7 +9,7 @@ V_arr
 Fs
 freq
 Harm_num
-do_not_disp = false
+do_not_disp = false % FIXME: delete
 end
 
 Harm_num(Harm_num == 1) = [];
@@ -15,12 +18,11 @@ if ~isempty(Harm_num)
 
     [V_arr, F_lim] = apply_nuttall(V_arr, Fs, freq);
 
-    % FIXME: disp
     if ~do_not_disp
         if ~isempty(F_lim)
-            disp(['Nuttall window is used' newline]); % FIXME: disp
+            klog.disp(['Nuttall window is used' newline], "debug_full");
         else
-            disp(['noise calc without window' newline]);  % FIXME: disp
+            klog.disp(['noise calc without window' newline], "debug_full");
         end
     end
 
@@ -46,19 +48,19 @@ if ~isempty(Harm_num)
             Harm_est(k).phi = Phi_DFT;
             Harm_est(k).status = 'est_1';
             if ~do_not_disp
-            disp('GOOD'); %FIXME: disp
-            disp(['noise  = ' num2str(nf_calc(hn*freq)) ' V']); %FIXME: disp
-            disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
+            klog.disp('GOOD', 'debug_light');
+            klog.disp(['noise  = ' num2str(nf_calc(hn*freq)) ' V'], 'debug_light');
+            klog.disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
                 '    ' newline ...
-                'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline]); %FIXME: disp
+                'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline], 'debug_light');
             end
         else
             if ~do_not_disp
-            disp('BAD'); %FIXME: disp
-            disp(['noise  = ' num2str(nf_calc(hn*freq)) ' V']); %FIXME: disp
-            disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
+            klog.disp('BAD', 'debug_light');
+            klog.disp(['noise  = ' num2str(nf_calc(hn*freq)) ' V'], 'debug_light');
+            klog.disp(['Amp_H' num2str(hn) ' = ' num2str(Amp_DFT) ' V' ...
                 '    ' newline ...
-                'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline]); %FIXME: disp
+                'Phi_H' num2str(hn) ' = ' num2str(Phi_DFT) ' deg' newline], 'debug_light');
             end
         end
     end

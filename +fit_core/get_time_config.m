@@ -133,13 +133,13 @@ Freq = 1/Period;
 
 Min_time = Times_conf.min_fop*Period;
 Max_time = Times_conf.max_fop*Period;
-% FIXME: disp
-disp('------ TIME CONFIG ------')
-disp(['Profile: "' char(Time_profile) '"'])
-disp(['Freq = ' num2str(Freq) ' Hz'])
-disp(['Min time = ' num2str(Min_time), ' s'])
-disp(['Max time = ' num2str(Max_time), ' s'])
-disp('-------------------------')
+
+klog.disp('------ TIME CONFIG ------')
+klog.disp(['Profile: "' char(Time_profile) '"'])
+klog.disp(['Freq = ' num2str(Freq) ' Hz'])
+klog.disp(['Min time = ' num2str(Min_time), ' s'])
+klog.disp(['Max time = ' num2str(Max_time), ' s'])
+klog.disp('-------------------------')
 end
 
 

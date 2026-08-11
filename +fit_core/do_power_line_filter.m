@@ -54,7 +54,6 @@ if Fs > Fs_minimum && Freq > Min_freq_to_filt && ...
 else
     Signal_f = Signal;
     Cut_FOP = 0;
-%     disp('NO FILTER')
 end
 
 if Cut_FOP/Period_counter > 0.3

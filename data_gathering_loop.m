@@ -211,10 +211,10 @@ while ~stop
 
     % FIXME: debug print
     if Overload_1.count > 0
-        disp(['Overload Ch 1: ' num2str(Overload_1.volume*100, '%0.2f') ' %']) % FIXME: disp
+        klog.disp(['Overload Ch 1: ' num2str(Overload_1.volume*100, '%0.2f') ' %'])
     end
     if Overload_2.count > 0
-        disp(['Overload Ch 2: ' num2str(Overload_2.volume*100, '%0.2f') ' %']) % FIXME: disp
+        klog.disp(['Overload Ch 2: ' num2str(Overload_2.volume*100, '%0.2f') ' %'])
     end
 
     if Underrange_1
@@ -285,7 +285,7 @@ while ~stop
 
         try
             if Prefit_need_1 && ~Prefit_ready_1
-                disp('PREFIT CHANNEL 1') % FIXME: disp
+                klog.disp('PREFIT CHANNEL 1', 'debug_light')
                 [Result_1] = fit_core.fit_one_channels(Ch_data_1, Properties_1, ...
                     Harm_num, Prefit_max_points);
                 if ~isempty(Result_1)
@@ -297,12 +297,12 @@ while ~stop
                         Prefit_ready_1 = true;
                         Estimations_1 = fit_core.result2estimation(Result_1);
                     end
-                    disp(['Score: ' num2str(Score_1)]); % FIXME: disp
+                    klog.disp(['Score: ' num2str(Score_1)]);
                 end
             end
 
             if Prefit_need_2 && ~Prefit_ready_2
-                disp('PREFIT CHANNEL 2') % FIXME: disp
+                klog.disp('PREFIT CHANNEL 2', 'debug_light')
                 [Result_2] = fit_core.fit_one_channels(Ch_data_2, Properties_2, ...
                     Harm_num, Prefit_max_points);
                 if ~isempty(Result_2)
@@ -314,12 +314,12 @@ while ~stop
                         Prefit_ready_2 = true;
                         Estimations_2 = fit_core.result2estimation(Result_2);
                     end
-                    disp(['Score: ' num2str(Score_2)]); % FIXME: disp
+                    klog.disp(['Score: ' num2str(Score_2)]);
                 end
             end
 
             if Prefit_need_1 && Prefit_need_2 && Prefit_ready_1 && Prefit_ready_2
-                disp('PREFIT CHANNEL 1 AND 2') % FIXME: disp
+                klog.disp('PREFIT CHANNEL 1 AND 2', 'debug_light')
                 [Result_1, ~, ~, Result_2, ~, ~] = ...
                     fit_core.fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, ...
                     Properties_2, Harm_num, Prefit_max_points);
@@ -334,8 +334,8 @@ while ~stop
                     [Score_1, Score2, ~, Max_score] = ...
                         fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
 
-                    disp(['--- Scores: ---' newline 'Ch1: ' num2str(Score_1) newline ...
-                        'Ch2: ' num2str(Score2) newline '---------------']) % FIXME: disp
+                    klog.disp(['--- Scores: ---' newline 'Ch1: ' num2str(Score_1) newline ...
+                        'Ch2: ' num2str(Score2) newline '---------------'])
 
                     if Score_1 > 0 && Score2 > 0
                         Ready_to_stop = true;
@@ -376,6 +376,7 @@ while ~stop
         drawnow
     else
         % FIXME: debug disp
+        % FIXME: what to do here?
         disp(['numel(Axes_arr) = ' num2str(numel(Axes_arr)) ' | ' ...
               'isvalid(Axes_arr) = {' num2str(isvalid(Axes_arr)) '} | ' ...
               'all(isvalid(Axes_arr)) = ' num2str(all(isvalid(Axes_arr)))])
@@ -479,11 +480,11 @@ try
     Underrange_ind_set_f(Underrange_1 || Underrange_2);
 catch
     if Underrange_1 && ~Underrange_2
-        disp('Underrange on CH1')
+        klog.disp('Underrange on CH1')
     elseif ~Underrange_1 && Underrange_2
-        disp('Underrange on CH2')
+        klog.disp('Underrange on CH2')
     elseif Underrange_1 && Underrange_2
-        disp('Underrange on CH1 and CH2')
+        klog.disp('Underrange on CH1 and CH2')
     end
 end
 end

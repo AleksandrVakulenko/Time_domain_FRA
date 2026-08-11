@@ -21,9 +21,9 @@ end
     end
     
     if ~isempty(Res_err)
-        disp(['|R| = ' num2str(Res*scale, '%0.4f') ' ± ' ...
+        klog.disp(['|R| = ' num2str(Res*scale, '%0.4f') ' ± ' ...
             num2str(Res_err*scale, '%0.4f') ' ' unit])
     else
-        disp(['|R| = ' num2str(Res*scale, '%0.4f') ' ' unit])
+        klog.disp(['|R| = ' num2str(Res*scale, '%0.4f') ' ' unit])
     end
 end
