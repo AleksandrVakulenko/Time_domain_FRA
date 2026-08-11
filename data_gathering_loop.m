@@ -11,10 +11,16 @@ arguments
     Fig_or_ax = []
 end
 
-Stop_button = Resources.stop_button;
+if ~isempty(Resources)
+    Stop_button = Resources.stop_button;
+    Underrange_ind = Resources.underrange_ind;
+    Underrange_ind_set_f = Underrange_ind.UserData;
+else
+    Stop_button = [];
+    Underrange_ind_set_f = [];
+end
 
-Underrange_ind = Resources.underrange_ind;
-Underrange_ind_set_f = Underrange_ind.UserData;
+
 
 
 
@@ -377,9 +383,9 @@ while ~stop
     else
         % FIXME: debug disp
         % FIXME: what to do here?
-        disp(['numel(Axes_arr) = ' num2str(numel(Axes_arr)) ' | ' ...
+        klog.disp(['numel(Axes_arr) = ' num2str(numel(Axes_arr)) ' | ' ...
               'isvalid(Axes_arr) = {' num2str(isvalid(Axes_arr)) '} | ' ...
-              'all(isvalid(Axes_arr)) = ' num2str(all(isvalid(Axes_arr)))])
+              'all(isvalid(Axes_arr)) = ' num2str(all(isvalid(Axes_arr)))], "debug_full")
     end
 end
 

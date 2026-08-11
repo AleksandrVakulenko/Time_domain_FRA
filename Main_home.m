@@ -45,6 +45,9 @@ Stop_button = Fig.UserData.stop_button;
 Resources.stop_button = Stop_button;
 Resources.underrange_ind = Fig.UserData.underrange_ind;
 
+% Resources = [];
+
+
 % NOTE: terminate LCR
 
 

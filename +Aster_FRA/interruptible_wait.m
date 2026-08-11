@@ -10,7 +10,11 @@ end
 disp_mode = "normal";
 Count_mode = "eco";
 
-stop_button = Resources.stop_button;
+if ~isempty(Resources)
+    stop_button = Resources.stop_button;
+else
+    stop_button = [];
+end
 
 msg = char(msg);
 if msg ~= ""
@@ -19,7 +23,7 @@ end
 
 if time_s < 0.3
     if disp_mode == "normal"
-        klog.disp(['Pause for ' num2str(round(time_s*100)/100) ' s' msg]);
+        klog.disp(['Pause for ' num2str(round(time_s*100)/100) ' s' msg], "debug_light");
     end
     pause(time_s)
 else
@@ -49,7 +53,7 @@ else
        
         if disp_mode == "normal"
             Time_disp = round(Time*100)/100;
-            klog.disp([num2str(Time_disp, FMT) ' / ' num2str(time_s, FMT) msg])
+            klog.disp([num2str(Time_disp, FMT) ' / ' num2str(time_s, FMT) msg], "debug_light")
         end
 
         Last = time_s - Time;

@@ -54,7 +54,7 @@ Max_points = 50e3; % FIXME: get from settings
     fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
 
 klog.disp([newline 'Scores:' newline 'Ch1: ' num2str(Score_1) newline ...
-    'Ch2: ' num2str(Score_2)], "debug_light")
+    'Ch2: ' num2str(Score_2) newline], "common")
 
 % Final plot part
 Axes_arr = fit_gui.init_gather_axes(Fig_or_ax);

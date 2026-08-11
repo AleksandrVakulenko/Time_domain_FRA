@@ -125,11 +125,13 @@ try
     Try_num = 0;
     stop = false;
     while ~stop
-        Stop_button = Resources.stop_button;
-        stop_btn_flag = fit_gui.stop_check(Stop_button);
-        if stop_btn_flag
-            Exit_flag = 40; % NOTE: external break
-            break;
+        if ~isempty(Resources)
+            Stop_button = Resources.stop_button;
+            stop_btn_flag = fit_gui.stop_check(Stop_button);
+            if stop_btn_flag
+                Exit_flag = 40; % NOTE: external break
+                break;
+            end
         end
         Try_num = Try_num + 1;
         klog.disp(['Try num = ' num2str(Try_num)], "debug_light")
@@ -144,7 +146,7 @@ try
 
         Aster.CMD_data_stream(0);
 
-        klog.warning(['Exit flag: ' num2str(Exit_flag)])
+        klog.disp(['Exit flag: ' num2str(Exit_flag) newline])
 
         if Exit_flag == 40
             break;
