@@ -114,10 +114,37 @@ Freq_arr_3 =        [1    2    5    10   20   30   40   60   70   80   90   110 
 Fixed_range_arr = [Fixed_range_6 Fixed_range_5 Fixed_range_4 Fixed_range_3]; 
 Gen_voltage_arr = [Gen_voltage_arr_6 Gen_voltage_arr_5 Gen_voltage_arr_4 Gen_voltage_arr_3];
 Freq_arr = [Freq_arr_6 Freq_arr_5 Freq_arr_4 Freq_arr_3];
-Scale = 1.19;
+Scale = 1.0;
 Freq_arr = Freq_arr*Scale;
 Gen_voltage_arr = Gen_voltage_arr / Scale;
 Gen_voltage_arr(Gen_voltage_arr > 5) = 5;
+
+%% Flash
+
+Fixed_range_6 =     [6     6     6];
+Gen_voltage_arr_6 = [0.03  0.02  0.015];
+Freq_arr_6 =        [0.1   0.15  0.2];
+
+Fixed_range_5 =     [5     5     5     5     5     5    5     5     5];
+Gen_voltage_arr_5 = [5.00  5.00  5.00  3.50  1.50  0.5  0.25  0.20  0.15];
+Freq_arr_5 =        [0.01  0.02  0.05  0.1   0.2   0.5  1.0   1.5   2.0];
+
+Fixed_range_4 =     [4     4     4     4     4     4     4     4     4     4     4     4];
+Gen_voltage_arr_4 = [5.00  5.00  5.00  5.00  5.00  5.00  3.00  1.60  1.20  0.90  0.60  0.50];
+Freq_arr_4 =        [0.1   0.2   0.5   1.0   2.0   5.0   10.0  20.0  30.0  40.0  60.0  70.0];
+
+Fixed_range_3 =     [3    3    3    3    3    3    3    3    3    3    3    3     3     3     3     3     3     3     3];
+Gen_voltage_arr_3 = [5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0  5.0   5.0   5.0   5.0   5.0   5.0   5.0   5.0];
+Freq_arr_3 =        [1    2    5    10   20   30   40   60   70   80   90   110   120   130   140   160   170   180   195];
+
+Fixed_range_arr = [Fixed_range_6 Fixed_range_5 Fixed_range_4 Fixed_range_3]; 
+Gen_voltage_arr = [Gen_voltage_arr_6 Gen_voltage_arr_5 Gen_voltage_arr_4 Gen_voltage_arr_3];
+Freq_arr = [Freq_arr_6 Freq_arr_5 Freq_arr_4 Freq_arr_3];
+Scale = 1.0;
+Freq_arr = Freq_arr*Scale;
+Gen_voltage_arr = Gen_voltage_arr / Scale;
+Gen_voltage_arr(Gen_voltage_arr > 5) = 5;
+
 %% RANGE N 4
 
 F_min = 0.05;
@@ -239,13 +266,15 @@ Res_Aster = [Result_arr_Aster.res_abs];
 Res_err_Aster = [Result_arr_Aster.res_abs_err];
 Phi_Aster = [Result_arr_Aster.phi];
 Phi_err_Aster = [Result_arr_Aster.phi_err];
-
+Cap_arr = 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster);
+Cap_arr_err = abs(-1./(2*pi*Res_Aster.^2.*Freq_arr_plot_Aster).*Res_err_Aster);
 
 subplot(2, 1, 1)
 hold on
 % errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
-errorbar(Freq_arr_plot_Aster, Res_Aster.*Freq_arr_plot_Aster, Res_err_Aster.*Freq_arr_plot_Aster, '.r')
-% plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.r')
+% errorbar(Freq_arr_plot_Aster, Res_Aster.*Freq_arr_plot_Aster, Res_err_Aster.*Freq_arr_plot_Aster, '.r')
+% errorbar(Freq_arr_plot_Aster, Cap_arr*1e12, Cap_arr_err*1e12, '.r')
+plot(Freq_arr_plot_Aster, Cap_arr_err./Cap_arr*100, '.r')
 % plot(Res./Res*100, '-b')
 % plot((Res+Res_err)./Res*100, '--b')
 % plot((Res-Res_err)./Res*100, '--b')
@@ -260,7 +289,7 @@ box on
 
 subplot(2, 1, 2)
 hold on
-errorbar(Freq_arr_plot_Aster, Phi_Aster, Phi_err_Aster, '.r')
+errorbar(Freq_arr_plot_Aster, Phi_Aster, Phi_err_Aster, '.r', 'MarkerSize', 12)
 % plot(Freq_arr_plot_Aster, abs(tan((Phi_Aster+90)/180*pi)), '.b')
 % plot(Freq_arr, Phi_err)
 % plot(Phi_err, '--b')

@@ -8,23 +8,32 @@ LCR_type = {"LCR_E4980AL", []};
 Aster_addr = 6;
 
 Harm_num = [3];
-Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 
-Gen_Voltage_level = 1.0; % [V]
+Gen_Voltage_level = 2.1; % [V]
 DC_bias = 0.0;
-F_min = 0.1;
+F_min = 0.02;
 F_max = 200;
-F_num = 60;
+F_num = 50;
 Noisy_env = true;
 % Fixed_range = [5];
 
 Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
-    "shuffle", "off", "repeat", 2);
+    "shuffle", "off", "repeat", 1, 'correction', 'max');
 
 Periods = 1./Freq_arr;
-Periods = Periods*1.5;
+if Time_profile == "common"
+    Periods = Periods*1.47;
+elseif Time_profile == "fine"
+    Periods = Periods*2.08;
+elseif Time_profile == "most_accurate"
+    Periods = Periods*2.0;
+elseif Time_profile == "ultra_fast"
+    Periods = Periods*1.16;
+end
 Periods(Periods < 5) = 5;
-sum(Periods)/60
+Time_prediction_m = sum(Periods)/60;
+disp(['Time prediction: ' num2str(Time_prediction_m, '%0.1f') ' min']);
 
 %%
 % Freq_arr = 0.1;
@@ -54,7 +63,7 @@ Resources.underrange_ind = Fig.UserData.underrange_ind;
 Results_arr_PRE = Aster_FRA.pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr);
 % Zest = struct('type', 'cap', 'value', 10e-12);
 % Zest = struct('type', 'res', 'value', 10e3);
-disp('PRE MEASURMENTS FINISH')
+disp(['PRE MEASURMENTS FINISH' newline])
 pause(1);
 
 Timer = tic;
@@ -90,12 +99,34 @@ Time_to_compare = sum(Time_to_compare);
 disp(['Full time: ' num2str(Full_time/60, '%0.1f') ' min | NC_time ~ ' ...
     num2str(Time_to_compare/60, '%0.1f') ' min | ratio = ' ...
     num2str(Full_time/Time_to_compare, '%0.1f') ])
-
+disp(['Time prediction: ' num2str(Time_prediction_m, '%0.1f') ' min']);
 
 
 
 
 disp('Finish')
+
+%% Fit result recalc
+
+Result_arr_Aster = [];
+for i = 1:numel(Extra_data_arr)
+    
+    Result_1 = Extra_data_arr(i).result_1;
+    Result_2 = Extra_data_arr(i).result_2;
+    Freq = Result_1.freq;
+    Aster_range = Extra_data_arr(i).aster_range;
+    if ~isempty(Result_1) && ~isempty(Result_2)
+        Fit_Result_new = Aster_FRA.do_FRA_result(Result_1, Result_2, Freq, Aster_range);
+        Fit_Result_new.freq = Freq;
+    else
+        Fit_Result_new = []; % FIXME: use FRA type
+    end
+
+    Result_arr_Aster = [Result_arr_Aster Fit_Result_new];
+
+end
+
+% Fit_Result.freq = Gen_freq;
 
 %%
 
@@ -107,12 +138,14 @@ Res_Aster = [Result_arr_Aster.res_abs];
 Res_err_Aster = [Result_arr_Aster.res_abs_err];
 Phi_Aster = [Result_arr_Aster.phi];
 Phi_err_Aster = [Result_arr_Aster.phi_err];
+Cap_arr = 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster);
+Cap_arr_err = -1./(2*pi*Res_Aster.^2.*Freq_arr_plot_Aster).*Res_err_Aster;
 
 subplot(2, 1, 1)
 hold on
-errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
+% errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
 % errorbar(Freq_arr_plot_Aster, Res_Aster.*Freq_arr_plot_Aster, Res_err_Aster.*Freq_arr_plot_Aster, '.r')
-% plot(Freq_arr_plot_Aster, 1./(2*pi*Res_Aster.*Freq_arr_plot_Aster)*1e12, '.r')
+errorbar(Freq_arr_plot_Aster, Cap_arr*1e12, Cap_arr_err*1e12, '.r')
 % plot(Res./Res*100, '-b')
 % plot((Res+Res_err)./Res*100, '--b')
 % plot((Res-Res_err)./Res*100, '--b')
@@ -124,6 +157,7 @@ set(gca, 'yscale', 'log')
 grid on
 grid minor
 box on
+% xline([45 55], 'LineWidth', 2)
 
 subplot(2, 1, 2)
 hold on

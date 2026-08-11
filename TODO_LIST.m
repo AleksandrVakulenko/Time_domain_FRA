@@ -9,7 +9,7 @@
 
 
 % UNSORTED
-% 1) Update freq gen, do not delete repeated freqs (200 Hz)
+% 1) Update Z_model and rangeforcaster
 % 2) add new scoring system based on max possible quality for current signal
 % 3) add more errors calculation (for colplex numbers)
 % 4) add data saver function

@@ -45,8 +45,8 @@ hold on
 for i = 1:numel(Un_ranges)
     Un_ranges(i)
     inds = Un_ranges(i) == Range_N_arr;
-    errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
-    % errorbar(Freq_arr_plot_Aster, Res_Aster.*Freq_arr_plot_Aster, Res_err_Aster.*Freq_arr_plot_Aster, '.r')
+%     errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
+    errorbar(Freq_arr_plot_Aster(inds), Res_Aster(inds).*Freq_arr_plot_Aster(inds), Res_err_Aster(inds).*Freq_arr_plot_Aster(inds), '.')
 %     plot(Freq_arr_plot_Aster(inds), 1./(2*pi*Res_Aster(inds).*Freq_arr_plot_Aster(inds))*1e12, '.')
 %     plot(Freq_arr_plot_Aster(inds), 1./(2*pi*Res_Aster(inds)*Scale_Res(i).*Freq_arr_plot_Aster(inds))*1e12, '.')
 end

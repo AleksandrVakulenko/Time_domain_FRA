@@ -9,6 +9,8 @@ Freq = Gen_freq;
 Gen_Offset_level = DC_bias; % [V] % FIXME: unused
 Harm_profile = "common"; % "common", "most_accurate"
 Use_power_line_filter = Noisy_env; % FIXME: must be an argument
+% FIXME: use Noisy_env to extend gathering time until power line filter is
+% applied
 %--------------------------------
 
 Settings.amp = Gen_Voltage_level;
@@ -27,8 +29,7 @@ try
 catch ERR
     Fit_Result = [];
     Extra_data = [];
-    warning(['Error in Aster_FRA.measure function:' newline ...
-        ERR.message]);
+    print_error_msg(ERR);
     return
 end
 

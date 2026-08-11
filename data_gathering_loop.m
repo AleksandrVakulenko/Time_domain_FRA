@@ -21,7 +21,7 @@ else
 end
 
 
-
+Overrange_request_not_possible = false; % FIXME: debug for Aster
 
 
 Axes_arr = fit_gui.init_gather_axes(Fig_or_ax);
@@ -38,14 +38,16 @@ Underrange_force_1 = Channel_settings_1.underrange_force;
 MAX_CH1_LIMIT = Channel_settings_1.max_ch1_limit;
 Time_to_underrange_1 = Channel_settings_1.time_to_underrange;
 Overrange_tolerance_1 = Channel_settings_1.overrange_tolerance;
-Time_to_overrange_1 = 0.1; % [s] FIXME: move to Channel_settings_1 or delete
+Overrange_FAST_tolerance_1 = 0.05; % FIXME: from settings
+Time_to_overrange_1 = 2; % [s] FIXME: move to Channel_settings_1 or delete
 Fs = Channel_settings_1.fs; % NOTE: ch2 fs same as ch1
 
 Underrange_force_2 = Channel_settings_2.underrange_force;
 MAX_CH2_LIMIT = Channel_settings_2.max_ch1_limit;
 Time_to_underrange_2 = Channel_settings_2.time_to_underrange;
 Overrange_tolerance_2 = Channel_settings_2.overrange_tolerance;
-Time_to_overrange_2 = 0.1; % [s] FIXME: move to Channel_settings_2 or delete
+Overrange_FAST_tolerance_2 = 0.05; % FIXME: from settings
+Time_to_overrange_2 = 2; % [s] FIXME: move to Channel_settings_2 or delete
 
 Times_conf = Profile.times_conf;
 Accuracy_conf = Profile.accuracy_conf;
@@ -107,6 +109,9 @@ Underrange_2 = true;
 Overload_1 = struct('range', [], 'count', 0, 'volume', 0);
 Overload_2 = struct('range', [], 'count', 0, 'volume', 0);
 
+Overload_FAST_1 = struct('count', 0, 'volume', 0);
+Overload_FAST_2 = struct('count', 0, 'volume', 0);
+
 Outliers_range_1 = [];
 Outliers_range_2 = [];
 
@@ -136,7 +141,30 @@ while ~stop
         break;
     end
 
-    [T_part, V1_part, V2_part] = FRA_dev.get_VV();
+    if Overrange_request_not_possible
+        [T_part, V1_part, V2_part] = FRA_dev.get_VV();
+    else
+        [T_part, V1_part, V2_part, ~, Overrange] = FRA_dev.get_VV();
+        if ~isempty(Overrange) && ~First_time
+            Overrange_ADC_1_part = Overrange.adc_1;
+            Overrange_ADC_2_part = Overrange.adc_2;
+%             Overrange_ADC_1 = [Overrange_ADC_1 Overrange_ADC_1_part];
+%             Overrange_ADC_2 = [Overrange_ADC_2 Overrange_ADC_2_part];
+            N1 = numel(find(Overrange_ADC_1_part));
+            N2 = numel(find(Overrange_ADC_2_part));
+%             if N1 > 0 || N2 > 0
+%             end
+            Overload_FAST_1.count = Overload_FAST_1.count + N1;
+            Overload_FAST_2.count = Overload_FAST_2.count + N2;
+%             disp(['--- | N1 = ' num2str(N1) ' | N2 = ' num2str(N2)  '| ---' ...
+%                 ' ' num2str(numel(T_arr)) ' ' num2str(numel(T_part)) ...
+%                 ' ' num2str(Data_size)])
+        end
+        Data_size = numel(T_arr) + numel(T_part);
+        Overload_FAST_1.volume = Overload_FAST_1.count/Data_size;
+        Overload_FAST_2.volume = Overload_FAST_2.count/Data_size;
+    end
+
     V2_part = -V2_part; % FIXME: add setting for inversion CH2 (Aster ch2 inv)
 
     % FIXME: add max time for empty input
@@ -206,6 +234,11 @@ while ~stop
     Exclude_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2, ...
         Outliers_force_range_2);
 
+%     Exclude_range_1 = fit_core.unite_outliers(Exclude_range_1, Overrange_ADC_1);
+%     Exclude_range_2 = fit_core.unite_outliers(Exclude_range_2, Overrange_ADC_2);
+%     Exclude_range_1 = Overrange_ADC_1;
+%     Exclude_range_2 = Overrange_ADC_2;
+
     %--------------------------------
     Overload_1.range = abs(V1_arr) > MAX_CH1_LIMIT;
     Overload_1.count = numel(find(Overload_1.range));
@@ -221,6 +254,13 @@ while ~stop
     end
     if Overload_2.count > 0
         klog.disp(['Overload Ch 2: ' num2str(Overload_2.volume*100, '%0.2f') ' %'])
+    end
+
+    if Overload_FAST_1.count > 0
+        klog.disp(['Overload FAST Ch 1: ' num2str(Overload_FAST_1.volume*100, '%0.2f') ' %'])
+    end
+    if Overload_FAST_2.count > 0
+        klog.disp(['Overload FAST Ch 2: ' num2str(Overload_FAST_2.volume*100, '%0.2f') ' %'])
     end
 
     if Underrange_1
@@ -249,6 +289,16 @@ while ~stop
 
     if Time_passed > Time_to_overrange_2 && Overload_2.volume > Overrange_tolerance_2
         Exit_flag = 202; % NOTE: EF 202: overrange ch2
+        break;
+    end
+
+    if Time_passed > Time_to_overrange_1 && Overload_FAST_1.volume > Overrange_FAST_tolerance_1
+        Exit_flag = 201; % FIXME: same as above
+        break;
+    end
+
+    if Time_passed > Time_to_overrange_2 && Overload_FAST_2.volume > Overrange_FAST_tolerance_2
+        Exit_flag = 202; % FIXME: same as above
         break;
     end
 

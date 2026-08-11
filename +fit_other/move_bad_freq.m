@@ -6,6 +6,7 @@ arguments
     Freq_arr;
     options.Power_line_freq = 50;
     options.action {mustBeMember(options.action, ["move", "delete"])} = "move";
+    options.level {mustBeMember(options.level, [1, 2, 3])} = 1;
 end
 
 Power_line_freq = options.Power_line_freq;
@@ -14,7 +15,14 @@ Action= options.action;
 % NOTE: settings
 Power_line_harm_N = 5;
 Harm_N = 7;
-Min_dev = 0.05;
+switch options.level
+    case 1
+        Min_dev = 0.02;
+    case 2
+        Min_dev = 0.03;
+    case 3
+        Min_dev = 0.05;
+end
 
 Freq_arr_init = Freq_arr;
 
