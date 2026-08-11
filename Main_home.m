@@ -19,7 +19,7 @@ Noisy_env = true;
 % Fixed_range = [5];
 
 Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
-    "shuffle", "on", "repeat", 2);
+    "shuffle", "off", "repeat", 2);
 
 Periods = 1./Freq_arr;
 Periods = Periods*1.5;
@@ -31,25 +31,6 @@ sum(Periods)/60
 
 Sample.info = "test";
 
-Fixed_range = [ ];
-Run_num = 2;
-
-% Fixed_range = 6;
-% Cal_cap_N = 1; % 10 pF
-% Voltage_amp_arr = [    10    10    10     5      3      1    0.5   0.25  ];
-% Freq_arr =        [0.001  0.002  0.005  0.01  0.02   0.05   0.1   0.2  ];
-
-% Fixed_range = 4;
-% Cal_cap_N = 3; % 1 nF
-% Freq_arr =        [0.05   0.1    0.2   0.5   1    2   4   8   22    55    95];
-% Voltage_amp_arr = ones(size(Freq_arr))*5;
-% Voltage_amp_arr = [2  2  2  2  2];
-% Freq_arr =        [95    125    140   180  195];
-
-% Fixed_range = 4;
-% Cal_cap_N = 3; % 1 nF
-% Voltage_amp_arr = [  10    10     10    10     10    10    5    5   5  5   2.5  1  0.5];
-% Freq_arr =        [0.01   0.02   0.05   0.1    0.2   0.5   1    2   4   8   22    55    69];
 
 
 F_range_Aster = Freq_arr <= 200;
@@ -86,6 +67,7 @@ for i = 1:N
     Zmodel = LCR_res_to_Zmodel(Result_arr_Aster, Results_arr_PRE);
     Z_est = struct('type', 'res', 'value', Zmodel(Gen_freq));
 
+    Fixed_range = [];
     [Fit_Result, Extra_data] = Aster_FRA.single_freq_measurment(Resources, Aster_addr, ...
         Gen_freq, Gen_Voltage_level, DC_bias, Harm_num, Z_est, Time_profile, ...
         Ax_arr, Fixed_range, false, Noisy_env);
@@ -107,12 +89,6 @@ disp(['Full time: ' num2str(Full_time/60, '%0.1f') ' min | NC_time ~ ' ...
     num2str(Full_time/Time_to_compare, '%0.1f') ])
 
 
-if ~isempty(Fixed_range)
-    Save_file = ['Calibration_data_2/' 'C' num2str(Fixed_range, '%02d') ...
-        '_' num2str(Run_num, '%02d') '.mat'];
-    save(Save_file, "Result_arr_Aster", "Extra_data_arr", "Voltage_amp_arr", ...
-        "Freq_arr_Aster", "Full_time", "Sample")
-end
 
 
 

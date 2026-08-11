@@ -118,13 +118,19 @@ try
     [~, ~, ~, Profile] = fit_core.get_time_config(Period, Time_profile_new, ...
         Harm_profile);
     
-    adev_utils.Wait(Filter_wait, 'Apply filter'); % FIXME: disp
+    Aster_FRA.interruptible_wait(Filter_wait, 'Apply filter', Resources);
     Used_ranges = Aster_Range;
     Last_used_range = Aster_Range;
 
     Try_num = 0;
     stop = false;
     while ~stop
+        Stop_button = Resources.stop_button;
+        stop_btn_flag = fit_gui.stop_check(Stop_button);
+        if stop_btn_flag
+            Exit_flag = 40; % NOTE: external break
+            break;
+        end
         Try_num = Try_num + 1;
         klog.disp(['Try num = ' num2str(Try_num)], "debug_light")
 
@@ -138,7 +144,7 @@ try
 
         Aster.CMD_data_stream(0);
 
-        warning(['Exit flag: ' num2str(Exit_flag)])
+        klog.warning(['Exit flag: ' num2str(Exit_flag)])
 
         if Exit_flag == 40
             break;
@@ -179,7 +185,7 @@ try
                     [~, ~, ~, Profile] = fit_core.get_time_config(Period, ...
                         Time_profile_new, Harm_profile);
 
-                    adev_utils.Wait(Filter_wait, 'Apply filter'); % FIXME: disp
+                    Aster_FRA.interruptible_wait(Filter_wait, 'Apply filter', Resources);
                     if ~flag
                         stop = true;
                     else
@@ -209,4 +215,16 @@ klog.disp([newline '-----------------------------------------' newline ...
     'Time: ' num2str(Full_main_time) ' s' newline ...
     '-----------------------------------------' newline], 'debug_light');
 
+if Exit_flag == 40
+    Ch_data_1 = fit_core.Ch_data_type.empty();
+    Ch_data_2 = fit_core.Ch_data_type.empty();
+    R_Scale = NaN;
+    Used_ranges = [];
+    Last_used_range = [];
 end
+
+end
+
+
+
+

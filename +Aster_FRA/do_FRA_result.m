@@ -139,6 +139,7 @@ Zfull = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
 [C_ser, R_ser] = fit_viewer.RC_calc_series(Zfull, freq);
 
 if numel(freq) > 1 || numel(Zfull) > 1
+    % FIXME: do something
     disp_flag = false;
     disp(['More than one result!'])
     disp(num2str(freq))
@@ -149,7 +150,7 @@ if disp_flag
     fit_viewer.print_f_dev(Result_1.f_dev_ppm, Result_1.f_dev_ppm_err);
     fit_viewer.print_f_dev(Result_2.f_dev_ppm, Result_2.f_dev_ppm_err);
 
-    disp(' ')
+    klog.disp(' ')
 
     % FIXME: debug print
 %     disp('----------------')
@@ -167,21 +168,19 @@ if disp_flag
     % print_cap(Cap, Cap_err)
     fit_viewer.print_phi(Phase_diff, Phase_diff_error_full)
 
-    disp(' ')
+    klog.disp(' ')
 
-    disp('Parallel:')
+    klog.disp('Parallel:')
     fit_viewer.print_cap(C_par)
     fit_viewer.print_res(R_par)
 
-    disp(' ')
+    klog.disp(' ')
 
-    disp('Series:')
+    klog.disp('Series:')
     fit_viewer.print_cap(C_ser)
     fit_viewer.print_res(R_ser)
 
-    disp(' ')
-
-%     warning('|R| may be calculated incorrectly!')
+    klog.disp(' ')
 
 end
 

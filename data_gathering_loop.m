@@ -297,7 +297,7 @@ while ~stop
                         Prefit_ready_1 = true;
                         Estimations_1 = fit_core.result2estimation(Result_1);
                     end
-                    klog.disp(['Score: ' num2str(Score_1)]);
+                    klog.disp(['Score: ' num2str(Score_1)], 'debug_light');
                 end
             end
 
@@ -314,7 +314,7 @@ while ~stop
                         Prefit_ready_2 = true;
                         Estimations_2 = fit_core.result2estimation(Result_2);
                     end
-                    klog.disp(['Score: ' num2str(Score_2)]);
+                    klog.disp(['Score: ' num2str(Score_2)], 'debug_light');
                 end
             end
 
@@ -335,7 +335,7 @@ while ~stop
                         fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
 
                     klog.disp(['--- Scores: ---' newline 'Ch1: ' num2str(Score_1) newline ...
-                        'Ch2: ' num2str(Score2) newline '---------------'])
+                        'Ch2: ' num2str(Score2) newline '---------------'], 'debug_light')
 
                     if Score_1 > 0 && Score2 > 0
                         Ready_to_stop = true;
