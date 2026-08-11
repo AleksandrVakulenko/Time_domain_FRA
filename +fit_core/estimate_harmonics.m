@@ -18,9 +18,9 @@ if ~isempty(Harm_num)
     % FIXME: disp
     if ~do_not_disp
         if ~isempty(F_lim)
-            disp(['Nuttall window is used' newline]);
+            disp(['Nuttall window is used' newline]); % FIXME: disp
         else
-            disp(['noise calc without window' newline])
+            disp(['noise calc without window' newline]);  % FIXME: disp
         end
     end
 

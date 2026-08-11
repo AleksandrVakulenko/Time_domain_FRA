@@ -192,7 +192,7 @@ Result.res_abs_err_fit = Res_err_fit;
 
 Result.phi = Phase_diff;
 Result.phi_err = Phase_diff_error_full;
-Result.phi_err_fit = Phase_diff_error_fit;
+Result.phi_err_fit = Phase_diff_error_fit; % FIXME: delete this
 
 Result.harm2 = Harm_2_out_arr;
 
