@@ -1,0 +1,42 @@
+
+Add more tries in Connector_COM_RS232
+
+-------------------------
+Error in Aster_FRA.measure function:
+> Unable to connect to the serialport device at port 'COM6'. Verify that a device is connected to the port, the port is not in use, and all serialport input arguments and parameter values are supported by the device.
+See <a href="matlab: helpview(fullfile(docroot,'matlab','helptargets.map'), 'serialport_connectError')">related documentation<//a> for troubleshooting steps. <
+ 
+File: C:\MATLAB\R2021b\toolbox\matlab\serialport\serialport.m
+Func: serialport
+Line: 116
+ 
+File: C:\Users\Sasha705\Documents\MATLAB\Fern\Modules\Connector\Connector_COM_RS232.m
+Func: Connector_COM_RS232.Connector_COM_RS232
+Line: 34
+ 
+File: C:\Users\Sasha705\Documents\MATLAB\Fern\Modules\Connector\Connector_COM_USB.m
+Func: Connector_COM_USB.Connector_COM_USB
+Line: 15
+ 
+File: C:\Users\Sasha705\Documents\MATLAB\Fern\Modules\aDevice\Aster_dev.m
+Func: Aster_dev.Aster_dev
+Line: 34
+ 
+File: E:\YandexDisk\_RF\_Проекты\Приборы ФТИ\Sin_signal_fit_dev_folder\+Aster_FRA\connect_to_devices.m
+Func: connect_to_devices
+Line: 14
+ 
+File: E:\YandexDisk\_RF\_Проекты\Приборы ФТИ\Sin_signal_fit_dev_folder\+Aster_FRA\measure.m
+Func: measure
+Line: 60
+ 
+File: E:\YandexDisk\_RF\_Проекты\Приборы ФТИ\Sin_signal_fit_dev_folder\+Aster_FRA\single_freq_measurment.m
+Func: single_freq_measurment
+Line: 27
+ 
+File: C:\Users\Sasha705\AppData\Local\Temp\Editor_deigc\LiveEditorEvaluationHelperE936834047.m
+Func: LiveEditorEvaluationHelperE936834047
+Line: 83
+
+
+
