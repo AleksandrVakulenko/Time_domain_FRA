@@ -29,7 +29,7 @@ try
 catch ERR
     Fit_Result = [];
     Extra_data = [];
-    print_error_msg(ERR);
+    Aster_FRA_helper.print_error_msg(ERR);
     return
 end
 

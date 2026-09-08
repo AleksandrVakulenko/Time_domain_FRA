@@ -12,14 +12,14 @@ Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 
 Gen_Voltage_level = 2.1; % [V]
 DC_bias = 0.0;
-F_min = 0.05;
+F_min = 0.01;
 F_max = 200;
 F_num = 50;
 Noisy_env = true;
 % Fixed_range = [5];
 
 Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
-    "shuffle", "off", "repeat", 1, 'correction', 'max');
+    "shuffle", "off", "repeat", 3, 'correction', 'max');
 
 Periods = 1./Freq_arr;
 if Time_profile == "common"
@@ -76,7 +76,7 @@ for i = 1:N
     Gen_freq = Freq_arr_Aster(i);
 %     Gen_Voltage_level = Voltage_amp_arr(i);
 
-    Zmodel = LCR_res_to_Zmodel(Result_arr_Aster, Results_arr_PRE);
+    Zmodel = Aster_FRA.LCR_res_to_Zmodel(Result_arr_Aster, Results_arr_PRE);
     Z_est = struct('type', 'res', 'value', Zmodel(Gen_freq));
 
     Fixed_range = [];

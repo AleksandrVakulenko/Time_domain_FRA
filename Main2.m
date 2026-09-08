@@ -84,7 +84,7 @@ for i = 1:N
     Gen_freq = Freq_arr_Aster(i);
 %     Gen_Voltage_level = Voltage_amp_arr(i);
 
-    Zmodel = LCR_res_to_Zmodel(Result_arr_Aster, Results_arr_PRE);
+    Zmodel = Aster_FRA.LCR_res_to_Zmodel(Result_arr_Aster, Results_arr_PRE);
     Z_est = struct('type', 'res', 'value', Zmodel(Gen_freq));
 
     [Fit_Result, Extra_data] = Aster_FRA.single_freq_measurment(Resources, Aster_addr, ...

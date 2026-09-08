@@ -1,3 +1,8 @@
+
+% NOTE: now it is a part of +Aster_FRA
+
+% FIXME: upgrade and put in some Fern module
+
 function print_error_msg(ERR)
     Stack = ERR.stack;
     klog.disp(['Error in Aster_FRA.measure function:' newline ...
@@ -10,3 +15,31 @@ function print_error_msg(ERR)
     end
     disp(' ')
 end
+
+
+%% TEST
+
+% clc
+% 
+% nyan
+% disp('safsdfad')
+% 
+% 
+% 
+% function nyan()
+% try
+%     nyan2()
+% catch ERR
+%     Aster_FRA_helper.print_error_msg(ERR)
+% end
+% 
+% 
+% end
+% 
+% 
+% 
+% function nyan2()
+% 
+%     A = [1 2 3];
+%     A(-2);
+% end
