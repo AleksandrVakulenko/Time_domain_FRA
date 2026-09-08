@@ -149,11 +149,11 @@ Gen_voltage_arr(Gen_voltage_arr > 5) = 5;
 
 F_min = 0.05;
 F_max = 70;
-F_num = 100;
+F_num = 200;
 Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
-    "shuffle", "off", "repeat", 1);
-Gen_voltage_arr_4 = 24.18./Freq_arr+0.3114;
-Gen_voltage_arr_4(Gen_voltage_arr_4 > 5) = 5;
+    "shuffle", "off", "repeat", 2);
+Gen_voltage_arr = 24.18./Freq_arr+0.3114;
+Gen_voltage_arr(Gen_voltage_arr > 5) = 5;
 Fixed_range_arr = 4*ones(size(Freq_arr));
 
 
@@ -163,7 +163,7 @@ F_min = 0.5;
 F_max = 200;
 F_num = 200;
 Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
-    "shuffle", "off", "repeat", 1);
+    "shuffle", "off", "repeat", 3);
 Gen_voltage_arr = 5*ones(size(Freq_arr));
 Fixed_range_arr = 3*ones(size(Freq_arr));
 
@@ -178,7 +178,7 @@ LCR_type = {"LCR_E4980AL", []};
 Aster_addr = 6;
 
 Harm_num = [ ];
-Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
 
 Sample.info = "test";
 
@@ -273,8 +273,8 @@ subplot(2, 1, 1)
 hold on
 % errorbar(Freq_arr_plot_Aster, Res_Aster, Res_err_Aster, '.r')
 % errorbar(Freq_arr_plot_Aster, Res_Aster.*Freq_arr_plot_Aster, Res_err_Aster.*Freq_arr_plot_Aster, '.r')
-% errorbar(Freq_arr_plot_Aster, Cap_arr*1e12, Cap_arr_err*1e12, '.r')
-plot(Freq_arr_plot_Aster, Cap_arr_err./Cap_arr*100, '.r')
+errorbar(Freq_arr_plot_Aster, Cap_arr*1e12, Cap_arr_err*1e12, '.r')
+% plot(Freq_arr_plot_Aster, Cap_arr_err./Cap_arr*100, '.r')
 % plot(Res./Res*100, '-b')
 % plot((Res+Res_err)./Res*100, '--b')
 % plot((Res-Res_err)./Res*100, '--b')
