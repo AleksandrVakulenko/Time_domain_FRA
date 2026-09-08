@@ -134,7 +134,6 @@ Harm_2_out_arr = Nan_harm_clear(Harm_2_out_arr);
 
 Zfull = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
 
-
 [C_par, R_par] = fit_viewer.RC_calc_parallel(Zfull, freq);
 [C_ser, R_ser] = fit_viewer.RC_calc_series(Zfull, freq);
 
@@ -184,16 +183,19 @@ if disp_flag
 
 end
 
-% FIXME: use Aster_FRA.LCR_result_type here
+Result = Aster_FRA.LCR_result_type;
+
+Result.freq = freq;
+Result.gen_amp = NaN; % FIXME % Measurment voltage level
+Result.gen_dc = NaN; % FIXME % Measurment DC bias level
+
 Result.res_abs = Res;
 Result.res_abs_err = Res_err_full;
-Result.res_abs_err_fit = Res_err_fit;
 
 Result.phi = Phase_diff;
 Result.phi_err = Phase_diff_error_full;
-Result.phi_err_fit = Phase_diff_error_fit; % FIXME: delete this
 
-Result.harm2 = Harm_2_out_arr;
+Result.harm = Harm_2_out_arr;
 
 Result.cap_par = C_par;
 Result.r_scale = R_Scale;
@@ -203,7 +205,6 @@ Result.voltage = []; % FIXME: debug; previously: Volt1;
 Result.voltage_error = [];% FIXME: debug; previously: Volt1_err;
 
 Result.range_n = Range_N;
-Result.freq = freq;
 
 end
 
@@ -262,7 +263,7 @@ Harms_err_arr = Result.harm_err;
 
 [Amp_err_rel, Phi_err_abs] = Aster_FRA.get_instr_errors(Range_N);
 
-Harm_out_arr = [];
+Harm_out_arr = Aster_FRA.LCR_harm_result_type.empty;
 for i = 1:numel(Harms_arr)
     Harm = Harms_arr(i);
     Harm_err = Harms_err_arr(i);
@@ -287,7 +288,7 @@ for i = 1:numel(Harms_arr)
     Harm_res_err = sqrt(Harm_res_err^2 + Harm_amp_cal_err^2 + Harm_res_abs_err^2);
     Harm_res_phi_err = sqrt(Harm_res_phi_err^2 + Harm_phi_cal_err^2 + Phi_err_abs^2);
 
-    % FIXME: must be a type
+    Harm_out = Aster_FRA.LCR_harm_result_type;
     Harm_out.n = Hn;
     Harm_out.res = Harm_res;
     Harm_out.res_err = Harm_res_err;

@@ -2,15 +2,14 @@
 
 function [Result] = LCR_measure(LCR_type, Gen_freq, Gen_Voltage_level, Time_profile)
 arguments
-    LCR_type
+    LCR_type % FIXME: add type
     Gen_freq
     Gen_Voltage_level
     Time_profile string {mustBeMember(Time_profile, ...
         ["ultra_fast", "common", "fine", "most_accurate"])} = "common"
 end
 
-% FIXME: replace by Aster_FRA.LCR_result_type.empty()
-Result = [];
+Result = Aster_FRA.LCR_result_type.empty();
 
 LCR_dev = feval(LCR_type{1}, LCR_type{2});
 
@@ -47,20 +46,32 @@ try
         [R_abs, Phi_deg, R_abs_err, Phi_deg_err] = ...
             LCR_dev.get_R_Phi_with_errors(Time_profile);
 
-        % FIXME: replace by Aster_FRA.LCR_result_type class
-        % FIXME: use in output: 1) Gen_Voltage_level 2) Gen_freq
+        Zfull = R_abs*cos(Phi_deg/180*pi) + R_abs*1i*sin(Phi_deg/180*pi);
+        [C_par, R_par] = fit_viewer.RC_calc_parallel(Zfull, Gen_freq);
+        
+
+        Result = Aster_FRA.LCR_result_type;
+
+        Result.freq = Gen_freq;
+        Result.gen_amp = Gen_Voltage_level;
+        Result.gen_dc = 0; % FIXME
+
         Result.res_abs = R_abs;
         Result.res_abs_err = R_abs_err;
 
         Result.phi = Phi_deg;
         Result.phi_err = Phi_deg_err;
 
-        Result.cap_par = [];
-        Result.r_scale = [];
-        Result.current = [];
-        Result.current_error = [];
-        Result.voltage = [];
-        Result.voltage_error = [];
+        Result.harm = Aster_FRA.LCR_harm_result_type.empty;
+
+        Result.cap_par = C_par;
+
+        Result.r_scale = NaN;
+        Result.range_n = NaN;
+        Result.current = NaN;
+        Result.current_error = NaN;
+        Result.voltage = NaN;
+        Result.voltage_error = NaN;
 
     end
 

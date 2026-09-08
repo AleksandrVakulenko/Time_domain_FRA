@@ -1,5 +1,6 @@
 
 % NOTE: script to load and see calibration data
+%   and somehow create a calibration files
 
 clc
 
@@ -62,7 +63,7 @@ Time = toc(Timer);
 Time_per_cal = Time/numel(Result_ch1_arr);
 disp(['Time per single calibration: ' num2str(Time_per_cal*1e3, '%0.1f') ' ms'])
 
-%%
+
 %%
 
 try

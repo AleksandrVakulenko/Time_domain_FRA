@@ -5,7 +5,7 @@
 % 3) Add set_freq and set_amp
 % 4) Refactor Aster class (Matlab)
 % 5) Exclude Astra from aDevice
-% 6) Add ACK gen->main cpu command
+% 6) Add ACK gen->main cpu command (already done?)
 
 
 % UNSORTED

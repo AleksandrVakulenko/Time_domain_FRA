@@ -219,7 +219,7 @@ pause(1);
 
 Noisy_env = false;
 Timer = tic;
-Result_arr_Aster = [];
+Result_arr_Aster = Aster_FRA.LCR_result_type.empty;
 Extra_data_arr = [];
 N = numel(Gen_voltage_arr);
 for i = 1:N

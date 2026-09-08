@@ -2,12 +2,22 @@
 
 
 function Zmodel = LCR_res_to_Zmodel(Result_arr_Aster, Results_arr_PRE)
+arguments
+    Result_arr_Aster Aster_FRA.LCR_result_type = Aster_FRA.LCR_result_type.empty
+    Results_arr_PRE Aster_FRA.LCR_result_type = Aster_FRA.LCR_result_type.empty
+end
+
 [Freq, Res] = unite_datasets(Result_arr_Aster, Results_arr_PRE);
 Zmodel = do_res_fit(Freq, Res);
+
 end
 
 
 function [Freq_out, Res_out] = unite_datasets(Result_arr_Aster, Results_arr_PRE)
+arguments
+    Result_arr_Aster Aster_FRA.LCR_result_type = Aster_FRA.LCR_result_type.empty
+    Results_arr_PRE Aster_FRA.LCR_result_type = Aster_FRA.LCR_result_type.empty
+end
 
 if ~isempty(Result_arr_Aster)
     inds = Aster_FRA.FRA_results_check_valid(Result_arr_Aster);

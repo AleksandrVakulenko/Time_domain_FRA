@@ -12,7 +12,7 @@ Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 
 Gen_Voltage_level = 2.1; % [V]
 DC_bias = 0.0;
-F_min = 0.02;
+F_min = 0.05;
 F_max = 200;
 F_num = 50;
 Noisy_env = true;
@@ -67,7 +67,7 @@ disp(['PRE MEASURMENTS FINISH' newline])
 pause(1);
 
 Timer = tic;
-Result_arr_Aster = [];
+Result_arr_Aster = Aster_FRA.LCR_result_type.empty;
 Extra_data_arr = [];
 N = numel(Freq_arr_Aster);
 for i = 1:N

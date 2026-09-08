@@ -1,6 +1,9 @@
 
 
 % NOTE: script to create calibration objs
+% 1) get data from calibration measurments
+% 2) run this script with uncommented section for used calibration DUT
+% 3) Set Save_flag = true for autosave calibration file
 
 % TODO:
 % 1) add calibration quality score

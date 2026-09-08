@@ -75,7 +75,7 @@ disp('PRE MEASURMENTS FINISH')
 pause(1);
 
 Timer = tic;
-Result_arr_Aster = [];
+Result_arr_Aster = Aster_FRA.LCR_result_type.empty;
 Extra_data_arr = [];
 N = numel(Freq_arr_Aster);
 for i = 1:N
@@ -117,7 +117,7 @@ end
 
 Aster_FRA.switch_to_LCR(Aster_addr);
 
-Result_arr_LCR = [];
+Result_arr_LCR = Aster_FRA.LCR_result_type.empty;
 N = numel(Freq_arr_LCR);
 for i = 1:N
     disp([num2str(i) '/' num2str(N)])
