@@ -5,14 +5,18 @@
 % FIXME: add LCR terminate before start
 
 LCR_type = {"LCR_E4980AL", []};
-Aster_addr = 6;
+if ispc
+    Aster_addr = 6;
+elseif isunix
+    Aster_addr = "/dev/ttyACM0"; % FIXME: debug
+end
 
 Harm_num = [3];
 Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 
 Gen_Voltage_level = 2.1; % [V]
 DC_bias = 0.0;
-F_min = 0.01;
+F_min = 0.05;
 F_max = 200;
 F_num = 50;
 Noisy_env = true;
@@ -20,6 +24,8 @@ Noisy_env = true;
 
 Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
     "shuffle", "off", "repeat", 3, 'correction', 'max');
+
+% Freq_arr = 0.005;
 
 Periods = 1./Freq_arr;
 if Time_profile == "common"

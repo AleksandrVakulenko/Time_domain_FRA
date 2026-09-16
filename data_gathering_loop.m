@@ -490,7 +490,7 @@ if Underrange_force
     return;
 end
 
-[Mean, Span, ~, ~] = fit_core.singal_stats(V_arr);
+[Mean, Span, ~, ~] = fit_core.signal_stats(V_arr);
 
 Underrange_level = 0.01; % FIXME: magic constant
 

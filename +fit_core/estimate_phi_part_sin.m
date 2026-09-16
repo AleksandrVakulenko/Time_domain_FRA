@@ -35,7 +35,7 @@ if Fraction > 1.4 && Fraction <= 2.0
     Phase1 = fit_core.short_sig_phase_calc(Time(1:N1), Signal(1:N1), Period);
     Phase2 = fit_core.short_sig_phase_calc(Time(N1+1:N2), Signal(N1+1:N2), Period);
     Phase3 = fit_core.short_sig_phase_calc(Time(N2+1:end), Signal(N2+1:end), Period);
-    Phase = mean(medfilt1([Phase1 Phase2 Phase3]));
+    Phase = mean(median([Phase1 Phase2 Phase3]));
     Status = "OK";
     return
 end

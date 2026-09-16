@@ -27,8 +27,8 @@ try
     Used_ranges, Aster_range] = Aster_FRA.measure(Resources, Aster_addr, ...
     Settings, Fig_or_ax, Zest, Fixed_range, Self_cal_mode);
 catch ERR
-    Fit_Result = [];
-    Extra_data = [];
+    Fit_Result = Aster_FRA.LCR_result_type.empty;
+    Extra_data = []; % FIXME: add type
     Aster_FRA_helper.print_error_msg(ERR);
     return
 end
@@ -83,7 +83,7 @@ end
 if ~isempty(Result_1) && ~isempty(Result_2)
     Fit_Result = Aster_FRA.do_FRA_result(Result_1, Result_2, Freq, Aster_range);
 else
-    Fit_Result = []; % FIXME: use FRA type
+    Fit_Result = Aster_FRA.LCR_result_type.empty; % FIXME: use FRA type
 end
 
 Extra_data.ch_data_1 = Ch_data_1;

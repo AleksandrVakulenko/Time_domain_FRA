@@ -1,5 +1,5 @@
 function Result = do_initial_estimation(T_arr, V_arr, Period)
-    [Mean, Span, ~, ~] = fit_core.singal_stats(V_arr);
+    [Mean, Span, ~, ~] = fit_core.signal_stats(V_arr);
     
     Start_Phi = fit_core.estimate_phi_part_sin(T_arr, V_arr, Period);
     if isempty(Start_Phi)

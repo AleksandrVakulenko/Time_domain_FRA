@@ -5,9 +5,14 @@ Fig_name = 'FRA GUI';
 
 Screen_size = get(0, 'ScreenSize');
 Screen_size(1:2) = [];
-Screen_hor = Screen_size(1);
-Screen_vert = Screen_size(2);
-
+if isunix
+    % FIXME: use 'xrandr --query'
+    Screen_hor = Screen_size(1)/2; % FIXME: debug
+    Screen_vert = Screen_size(2);
+else
+    Screen_hor = Screen_size(1);
+    Screen_vert = Screen_size(2);
+end
 
 Aspect_ratio = 4/3;
 Horizontal_part = 0.53;
