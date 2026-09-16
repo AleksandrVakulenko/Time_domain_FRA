@@ -36,18 +36,18 @@ Filename = "Settings.json";
 
 JSON_text = jsonencode(Settings_struct, "PrettyPrint", true);
 
-fit_settings.write_json_file(Filename, JSON_text);
+TDFRA_fit_settings.write_json_file(Filename, JSON_text);
 
 disp(JSON_text)
 
-Data = fit_settings.read_json_file(Filename);
+Data = TDFRA_fit_settings.read_json_file(Filename);
 
 disp(Data)
 
 %% READ
 
 
-Value = fit_settings.get_value("max_haromic_to_find")
+Value = TDFRA_fit_settings.get_value("max_haromic_to_find")
 
 
 
