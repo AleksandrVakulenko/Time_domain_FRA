@@ -14,7 +14,7 @@
 %
 %   INPUTS
 %       Result_1, Result_2 - Fitting result structures from
-%                            fit_core.fit_channel. Result_1 is assumed to be
+%                            TDFRA_fit_core.fit_channel. Result_1 is assumed to be
 %                            the voltage channel, Result_2 the current
 %                            channel (converted via R_Scale).
 %       freq              - Measurement frequency (Hz).

@@ -11,7 +11,7 @@ if ~isempty(Outliers_range)
     end
 end
 
-Outliers_range_out = fit_core.unite_outliers(Outliers_range, Outliers_range_force);
+Outliers_range_out = TDFRA_fit_core.unite_outliers(Outliers_range, Outliers_range_force);
 
 end
 

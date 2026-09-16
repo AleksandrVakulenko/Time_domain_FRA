@@ -1,25 +1,25 @@
 
 clc
 
-% fit_core : Harm_refit : Harm_to_find
+% TDFRA_fit_core : Harm_refit : Harm_to_find
 Settings_struct.max_haromic_to_find = 9; 
 
-% fit_core : estimate_harmonics : HNR_min_dB
+% TDFRA_fit_core : estimate_harmonics : HNR_min_dB
 Settings_struct.harm_to_noise_value_dB = 10; 
 
-% fit_core : fft_filter_dbl_ch : Min_Ratio
+% TDFRA_fit_core : fft_filter_dbl_ch : Min_Ratio
 Settings_struct.min_period_number_ref_to_old_in_filter = 0.8; 
 
-% fit_core : find_outliers : Sigma_scale
+% TDFRA_fit_core : find_outliers : Sigma_scale
 Settings_struct.sigma_scale_to_find_outlier = 3;
 
-% fit_core : get_time_config : Absolute_max_FOP
+% TDFRA_fit_core : get_time_config : Absolute_max_FOP
 Settings_struct.absolute_max_number_of_gatherd_periods = 30;
 
-% fit_core : noise_amp_calc : exclude_bad_freq : Freq_max_dev
+% TDFRA_fit_core : noise_amp_calc : exclude_bad_freq : Freq_max_dev
 Settings_struct.max_freq_deviation_in_fft = 0.03;
 
-% fit_core : fit_channel : Minimum_number_of_points
+% TDFRA_fit_core : fit_channel : Minimum_number_of_points
 Settings_struct.min_number_of_points_to_fit = 100;
 
 % Main2 : Max_points

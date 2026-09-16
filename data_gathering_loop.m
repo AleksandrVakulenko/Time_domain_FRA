@@ -98,10 +98,10 @@ V1_arr_raw = [];
 V2_arr_raw = [];
 
 % FIXME: need refactor
-Estimations_1 = fit_core.Estimation_type.empty;
-Estimations_2 = fit_core.Estimation_type.empty;
-Result_1 = fit_core.Result_type.empty;
-Result_2 = fit_core.Result_type.empty;
+Estimations_1 = TDFRA_fit_core.Estimation_type.empty;
+Estimations_2 = TDFRA_fit_core.Estimation_type.empty;
+Result_1 = TDFRA_fit_core.Result_type.empty;
+Result_2 = TDFRA_fit_core.Result_type.empty;
 
 Underrange_1 = true;
 Underrange_2 = true;
@@ -214,9 +214,9 @@ while ~stop
     [Cut_FOP_first_1, Cut_FOP_first_2] = left_cut_volume(Periods_counter);
 
     if Use_power_line_filter
-        [V1_arr, Cut_FOP_filter_1] = fit_core.do_power_line_filter(T_arr, ...
+        [V1_arr, Cut_FOP_filter_1] = TDFRA_fit_core.do_power_line_filter(T_arr, ...
             V1_arr_raw, Fs, Freq);
-        [V2_arr, Cut_FOP_filter_2] = fit_core.do_power_line_filter(T_arr, ...
+        [V2_arr, Cut_FOP_filter_2] = TDFRA_fit_core.do_power_line_filter(T_arr, ...
             V2_arr_raw, Fs, Freq);
     else
         V1_arr = V1_arr_raw;
@@ -224,18 +224,18 @@ while ~stop
         Cut_FOP_filter_1 = 0;
         Cut_FOP_filter_2 = 0;
     end
-    Outliers_force_range_1 = fit_core.get_force_outliers(T_arr, Freq, ...
+    Outliers_force_range_1 = TDFRA_fit_core.get_force_outliers(T_arr, Freq, ...
         Cut_FOP_filter_1, Cut_FOP_first_1);
-    Outliers_force_range_2 = fit_core.get_force_outliers(T_arr, Freq, ...
+    Outliers_force_range_2 = TDFRA_fit_core.get_force_outliers(T_arr, Freq, ...
         Cut_FOP_filter_2, Cut_FOP_first_2);
 
-    Exclude_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1, ...
+    Exclude_range_1 = TDFRA_fit_core.uppend_outliers(T_arr, Outliers_range_1, ...
         Outliers_force_range_1);
-    Exclude_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2, ...
+    Exclude_range_2 = TDFRA_fit_core.uppend_outliers(T_arr, Outliers_range_2, ...
         Outliers_force_range_2);
 
-%     Exclude_range_1 = fit_core.unite_outliers(Exclude_range_1, Overrange_ADC_1);
-%     Exclude_range_2 = fit_core.unite_outliers(Exclude_range_2, Overrange_ADC_2);
+%     Exclude_range_1 = TDFRA_fit_core.unite_outliers(Exclude_range_1, Overrange_ADC_1);
+%     Exclude_range_2 = TDFRA_fit_core.unite_outliers(Exclude_range_2, Overrange_ADC_2);
 %     Exclude_range_1 = Overrange_ADC_1;
 %     Exclude_range_2 = Overrange_ADC_2;
 
@@ -308,10 +308,10 @@ while ~stop
     end
 
     if Strategy.do_estimations
-        Estimations_1 = fit_core.do_estimations(Estimations_1, T_arr, V1_arr, ...
+        Estimations_1 = TDFRA_fit_core.do_estimations(Estimations_1, T_arr, V1_arr, ...
             Freq, Periods_counter);
 
-        Estimations_2 = fit_core.do_estimations(Estimations_2, T_arr, V2_arr, ...
+        Estimations_2 = TDFRA_fit_core.do_estimations(Estimations_2, T_arr, V2_arr, ...
             Freq, Periods_counter);
     end
     %--------------------------------
@@ -331,27 +331,27 @@ while ~stop
         
         Fit_local_timer = tic;
 
-        Ch_data_1 = fit_core.Ch_data_type(T_arr, V1_arr, Exclude_range_1, Overload_1, ...
+        Ch_data_1 = TDFRA_fit_core.Ch_data_type(T_arr, V1_arr, Exclude_range_1, Overload_1, ...
             Estimations_1, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
 
-        Ch_data_2 = fit_core.Ch_data_type(T_arr, V2_arr, Exclude_range_2, Overload_2, ...
+        Ch_data_2 = TDFRA_fit_core.Ch_data_type(T_arr, V2_arr, Exclude_range_2, Overload_2, ...
             Estimations_2, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
 
-        [Properties_1, Properties_2] = fit_core.get_fit_props(Periods_counter);
+        [Properties_1, Properties_2] = TDFRA_fit_core.get_fit_props(Periods_counter);
 
         try
             if Prefit_need_1 && ~Prefit_ready_1
                 klog.disp('PREFIT CHANNEL 1', 'debug_light')
-                [Result_1] = fit_core.fit_one_channels(Ch_data_1, Properties_1, ...
+                [Result_1] = TDFRA_fit_core.fit_one_channels(Ch_data_1, Properties_1, ...
                     Harm_num, Prefit_max_points);
                 if ~isempty(Result_1)
-                    Outliers_range_1 = fit_core.find_outliers(Ch_data_1, Result_1);
-                    Exclude_range_1 = fit_core.unite_outliers(Outliers_range_1, ...
+                    Outliers_range_1 = TDFRA_fit_core.find_outliers(Ch_data_1, Result_1);
+                    Exclude_range_1 = TDFRA_fit_core.unite_outliers(Outliers_range_1, ...
                         Outliers_force_range_1);
                     [Score_1, ~] = fit_viewer.score_calc_ch(Result_1, Accuracy_conf);
                     if Score_1 > 0
                         Prefit_ready_1 = true;
-                        Estimations_1 = fit_core.result2estimation(Result_1);
+                        Estimations_1 = TDFRA_fit_core.result2estimation(Result_1);
                     end
                     klog.disp(['Score: ' num2str(Score_1)], 'debug_light');
                 end
@@ -359,16 +359,16 @@ while ~stop
 
             if Prefit_need_2 && ~Prefit_ready_2
                 klog.disp('PREFIT CHANNEL 2', 'debug_light')
-                [Result_2] = fit_core.fit_one_channels(Ch_data_2, Properties_2, ...
+                [Result_2] = TDFRA_fit_core.fit_one_channels(Ch_data_2, Properties_2, ...
                     Harm_num, Prefit_max_points);
                 if ~isempty(Result_2)
-                    Outliers_range_2 = fit_core.find_outliers(Ch_data_2, Result_2);
-                    Exclude_range_2 = fit_core.unite_outliers(Outliers_range_2, ...
+                    Outliers_range_2 = TDFRA_fit_core.find_outliers(Ch_data_2, Result_2);
+                    Exclude_range_2 = TDFRA_fit_core.unite_outliers(Outliers_range_2, ...
                         Outliers_force_range_2);
                     [Score_2, ~] = fit_viewer.score_calc_ch(Result_2, Accuracy_conf);
                     if Score_2 > 0
                         Prefit_ready_2 = true;
-                        Estimations_2 = fit_core.result2estimation(Result_2);
+                        Estimations_2 = TDFRA_fit_core.result2estimation(Result_2);
                     end
                     klog.disp(['Score: ' num2str(Score_2)], 'debug_light');
                 end
@@ -377,14 +377,14 @@ while ~stop
             if Prefit_need_1 && Prefit_need_2 && Prefit_ready_1 && Prefit_ready_2
                 klog.disp('PREFIT CHANNEL 1 AND 2', 'debug_light')
                 [Result_1, ~, ~, Result_2, ~, ~] = ...
-                    fit_core.fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, ...
+                    TDFRA_fit_core.fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, ...
                     Properties_2, Harm_num, Prefit_max_points);
                 if ~isempty(Result_1) && ~isempty(Result_2)
-                    Outliers_range_1 = fit_core.find_outliers(Ch_data_1, Result_1);
-                    Exclude_range_1 = fit_core.unite_outliers(Outliers_range_1, ...
+                    Outliers_range_1 = TDFRA_fit_core.find_outliers(Ch_data_1, Result_1);
+                    Exclude_range_1 = TDFRA_fit_core.unite_outliers(Outliers_range_1, ...
                         Outliers_force_range_1);
-                    Outliers_range_2 = fit_core.find_outliers(Ch_data_2, Result_2);
-                    Exclude_range_2 = fit_core.unite_outliers(Outliers_range_2, ...
+                    Outliers_range_2 = TDFRA_fit_core.find_outliers(Ch_data_2, Result_2);
+                    Exclude_range_2 = TDFRA_fit_core.unite_outliers(Outliers_range_2, ...
                         Outliers_force_range_2);
 
                     [Score_1, Score2, ~, Max_score] = ...
@@ -395,8 +395,8 @@ while ~stop
 
                     if Score_1 > 0 && Score2 > 0
                         Ready_to_stop = true;
-                        Estimations_1 = fit_core.result2estimation(Result_1);
-                        Estimations_2 = fit_core.result2estimation(Result_2);
+                        Estimations_1 = TDFRA_fit_core.result2estimation(Result_1);
+                        Estimations_2 = TDFRA_fit_core.result2estimation(Result_2);
                     end
                     if Score_1 > Max_score/2 && Score_2 > Max_score/2
                         Early_finish_possible = true;
@@ -440,28 +440,28 @@ while ~stop
 end
 
 if Exit_flag == 40
-    Ch_data_1 = fit_core.Ch_data_type.empty();
-    Ch_data_2 = fit_core.Ch_data_type.empty();
+    Ch_data_1 = TDFRA_fit_core.Ch_data_type.empty();
+    Ch_data_2 = TDFRA_fit_core.Ch_data_type.empty();
 else
     % NOTE: where are breaks in while loop (so do uppend_outliers one more time)
-    Exclude_range_1 = fit_core.uppend_outliers(T_arr, Outliers_range_1, ...
+    Exclude_range_1 = TDFRA_fit_core.uppend_outliers(T_arr, Outliers_range_1, ...
         Outliers_force_range_1);
-    Exclude_range_2 = fit_core.uppend_outliers(T_arr, Outliers_range_2, ...
+    Exclude_range_2 = TDFRA_fit_core.uppend_outliers(T_arr, Outliers_range_2, ...
         Outliers_force_range_2);
 
     if isempty(Estimations_1)
-        Estimations_1 = fit_core.do_estimations(fit_core.Estimation_type.empty, ...
+        Estimations_1 = TDFRA_fit_core.do_estimations(TDFRA_fit_core.Estimation_type.empty, ...
             T_arr, V1_arr, Freq, Periods_counter);
     end
     if isempty(Estimations_2)
-        Estimations_2 = fit_core.do_estimations(fit_core.Estimation_type.empty, ...
+        Estimations_2 = TDFRA_fit_core.do_estimations(TDFRA_fit_core.Estimation_type.empty, ...
             T_arr, V2_arr, Freq, Periods_counter);
     end
 
-    Ch_data_1 = fit_core.Ch_data_type(T_arr, V1_arr, Exclude_range_1, Overload_1, ...
+    Ch_data_1 = TDFRA_fit_core.Ch_data_type(T_arr, V1_arr, Exclude_range_1, Overload_1, ...
         Estimations_1, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
 
-    Ch_data_2 = fit_core.Ch_data_type(T_arr, V2_arr, Exclude_range_2, Overload_2, ...
+    Ch_data_2 = TDFRA_fit_core.Ch_data_type(T_arr, V2_arr, Exclude_range_2, Overload_2, ...
         Estimations_2, Times_conf, Accuracy_conf, Fs, Freq, Periods_counter);
 end
 
@@ -490,7 +490,7 @@ if Underrange_force
     return;
 end
 
-[Mean, Span, ~, ~] = fit_core.signal_stats(V_arr);
+[Mean, Span, ~, ~] = TDFRA_fit_core.signal_stats(V_arr);
 
 Underrange_level = 0.01; % FIXME: magic constant
 

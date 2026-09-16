@@ -28,7 +28,7 @@ if ~isempty(Harm_num)
 
     % NOTE: do not use for noise amp calc
     
-    [~, nf_calc] = fit_core.noise_amp_calc(freq, T_arr, V_arr, Fs, F_lim);
+    [~, nf_calc] = TDFRA_fit_core.noise_amp_calc(freq, T_arr, V_arr, Fs, F_lim);
     if isempty(nf_calc)
         Harm_est = [];
         return;
@@ -39,8 +39,8 @@ if ~isempty(Harm_num)
     k = 0;
     Harm_est = struct('n', [], 'amp', [], 'phi', []);
     for hn = Harm_num
-        % FIXME: fit_core.DFT_single_freq could return empty
-        [Amp_DFT, Phi_DFT] = fit_core.DFT_single_freq(T_arr, V_arr, hn*freq);
+        % FIXME: TDFRA_fit_core.DFT_single_freq could return empty
+        [Amp_DFT, Phi_DFT] = TDFRA_fit_core.DFT_single_freq(T_arr, V_arr, hn*freq);
         if Amp_DFT > 10^(HNR_min_dB/20)*nf_calc(hn*freq)
             k = k + 1;
             Harm_est(k).n = hn;

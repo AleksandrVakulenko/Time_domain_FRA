@@ -44,7 +44,7 @@
 %                                      if auto‑ranging).
 %       Ch_data_1       - Structure with data for channel 1 (time, voltage,
 %                         outliers, overload, etc.). If user stops, it is an
-%                         empty object of type fit_core.Ch_data_type.
+%                         empty object of type TDFRA_fit_core.Ch_data_type.
 %       Ch_data_2       - Structure with data for channel 2 (same fields).
 %       R_Scale         - Scale resistor value (Ohm) corresponding to the
 %                         current range (used to convert voltage to current).
@@ -65,11 +65,11 @@
 %         producing Exit_flag = 40.
 %       * If Self_cal_mode is true, the instrument is set to calibration
 %         mode (external generator, GND current) and then restored.
-%       * The function calls fit_core.get_time_config to compute timing
+%       * The function calls TDFRA_fit_core.get_time_config to compute timing
 %         parameters and updates them if the range changes.
 %
 %   See also Aster_FRA.connect_to_devices, Aster_FRA.Gen_initiate,
 %            Aster_FRA.ADC_init, Aster_FRA.set_range,
-%            data_gathering_loop, fit_core.get_time_config.
+%            data_gathering_loop, TDFRA_fit_core.get_time_config.
 
 

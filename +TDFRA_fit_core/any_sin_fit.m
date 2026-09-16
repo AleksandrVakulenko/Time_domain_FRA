@@ -83,13 +83,13 @@ X_arr = [Time(1) mean([Time(1) Time(end)]) Time(end)];
 
 switch Amp_type
     case "const"
-        Amp_str = fit_core.func_constructor([], 'a');
+        Amp_str = TDFRA_fit_core.func_constructor([], 'a');
         a3 = mean(Est_amp);
         Lower = [Lower a3/10];
         StartPoint = [StartPoint a3];
         Upper = [Upper a3*10];
     case "linear"
-        Amp_str = fit_core.func_constructor([X_arr(1) X_arr(3)], 'a');
+        Amp_str = TDFRA_fit_core.func_constructor([X_arr(1) X_arr(3)], 'a');
         amp_poly = fit(Est_time_norm', Est_amp', 'poly1');
         a2 = feval(amp_poly, X_arr(1)/Period);
         a3 = feval(amp_poly, X_arr(3)/Period);
@@ -97,7 +97,7 @@ switch Amp_type
         StartPoint = [StartPoint a2 a3];
         Upper = [Upper a2*10 a3*10];
     case "poly2"
-        Amp_str = fit_core.func_constructor(X_arr, 'a');
+        Amp_str = TDFRA_fit_core.func_constructor(X_arr, 'a');
         amp_poly = fit(Est_time_norm', Est_amp', 'poly2');
         a1 = feval(amp_poly, X_arr(1)/Period); % FIXME: use feval once for all
         a2 = feval(amp_poly, X_arr(2)/Period);
@@ -112,13 +112,13 @@ end
 
 switch BG_type
     case "const"
-        BG_str = fit_core.func_constructor([], 'c');
+        BG_str = TDFRA_fit_core.func_constructor([], 'c');
         c3 = mean(Est_bg);
         Lower = [Lower -inf];
         StartPoint = [StartPoint c3];
         Upper = [Upper inf];
     case "linear"
-        BG_str = fit_core.func_constructor([X_arr(1) X_arr(3)], 'c');
+        BG_str = TDFRA_fit_core.func_constructor([X_arr(1) X_arr(3)], 'c');
         bg_poly = fit(Est_time_norm', Est_bg', 'poly1');
         c2 = feval(bg_poly, X_arr(1)/Period);
         c3 = feval(bg_poly, X_arr(3)/Period);
@@ -126,7 +126,7 @@ switch BG_type
         StartPoint = [StartPoint c2 c3];
         Upper = [Upper +inf +inf];
     case "poly2"
-        BG_str = fit_core.func_constructor(X_arr, 'c');
+        BG_str = TDFRA_fit_core.func_constructor(X_arr, 'c');
         bg_poly = fit(Est_time_norm', Est_bg', 'poly2');
         c1 = feval(bg_poly, X_arr(1)/Period); % FIXME: use feval once for all
         c2 = feval(bg_poly, X_arr(2)/Period);
@@ -141,13 +141,13 @@ end
 Phi_dev = 120; % FIXME: magic constant
 switch Phi_type
     case "const"
-        Phi_str = fit_core.func_constructor([], 'p');
+        Phi_str = TDFRA_fit_core.func_constructor([], 'p');
         p3 = mean(Est_phi);
         Lower = [Lower p3-Phi_dev];
         StartPoint = [StartPoint p3];
         Upper = [Upper p3+Phi_dev];
     case "linear"
-        Phi_str = fit_core.func_constructor([X_arr(1) X_arr(3)], 'p');
+        Phi_str = TDFRA_fit_core.func_constructor([X_arr(1) X_arr(3)], 'p');
         phi_poly = fit(Est_time_norm', Est_phi', 'poly1');
         p2 = feval(phi_poly, X_arr(1)/Period);
         p3 = feval(phi_poly, X_arr(3)/Period);
@@ -156,7 +156,7 @@ switch Phi_type
         Upper = [Upper p2+Phi_dev p3+Phi_dev];
 
     case "poly2"
-        Phi_str = fit_core.func_constructor(X_arr, 'p');
+        Phi_str = TDFRA_fit_core.func_constructor(X_arr, 'p');
         phi_poly = fit(Est_time_norm', Est_phi', 'poly2');
         p1 = feval(phi_poly, X_arr(1)/Period); % FIXME: use feval once for all
         p2 = feval(phi_poly, X_arr(2)/Period);
@@ -289,7 +289,7 @@ else
     harm_err = [];
 end
 
-Result = fit_core.Result_type;
+Result = TDFRA_fit_core.Result_type;
 Result.amp_poly = amp_poly_out;
 Result.phi_poly = phi_poly_out;
 Result.bg_poly = bg_poly_out;
@@ -303,7 +303,7 @@ Result.fit_function = "any_sin_fit";
 Result.freq = Freq;
 Result.harm = harm_out;
 Result.harm_err = harm_err;
-Result.estimations = fit_core.Estimation_type.empty();
+Result.estimations = TDFRA_fit_core.Estimation_type.empty();
 
 
 % FIXME: debug
@@ -367,13 +367,13 @@ function [Str, Lower, StartPoint, Upper] = ...
     
     switch Phi_type
         case "const"
-            Str = fit_core.func_constructor([], Pref);
+            Str = TDFRA_fit_core.func_constructor([], Pref);
             p3 = mean(Est_v);
             Lower = [Lower -inf];
             StartPoint = [StartPoint p3];
             Upper = [Upper +inf];
         case "linear"
-            Str = fit_core.func_constructor([X_arr(1) X_arr(3)], Pref);
+            Str = TDFRA_fit_core.func_constructor([X_arr(1) X_arr(3)], Pref);
             phi_poly = fit(Est_time_norm', Est_v', 'poly2');
             p2 = feval(phi_poly, X_arr(1)/Period);
             p3 = feval(phi_poly, X_arr(3)/Period);
@@ -381,7 +381,7 @@ function [Str, Lower, StartPoint, Upper] = ...
             StartPoint = [StartPoint p2 p3];
             Upper = [Upper +inf +inf];
         case "poly2"
-            Str = fit_core.func_constructor(X_arr, Pref);
+            Str = TDFRA_fit_core.func_constructor(X_arr, Pref);
             phi_poly = fit(Est_time_norm', Est_v', 'poly2');
             p1 = feval(phi_poly, X_arr(1)/Period); % FIXME: use feval once for all
             p2 = feval(phi_poly, X_arr(2)/Period);

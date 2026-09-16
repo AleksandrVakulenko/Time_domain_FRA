@@ -30,7 +30,7 @@ V2_arr = Ch_data.voltage;
 Fs = Ch_data.fs;
 
 [~, RMS_Ratio, Residuals, Residuals_harm] = ...
-    fit_core.Harm_refit(Result, T_arr, V2_arr, Fs);
+    TDFRA_fit_core.Harm_refit(Result, T_arr, V2_arr, Fs);
 
 
 disp(['RMS_Ratio = ' num2str(RMS_Ratio, '%0.2f')])

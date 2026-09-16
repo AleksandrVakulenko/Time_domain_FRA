@@ -15,7 +15,7 @@
 %
 %   INPUTS
 %       Result_1, Result_2 - Fitting result structures (as produced by
-%                            fit_core.fit_channel). Each must contain
+%                            TDFRA_fit_core.fit_channel). Each must contain
 %                            fields such as amplitude, phase, harmonics,
 %                            etc. If empty, the score is -Inf.
 %       Target            - Structure with target accuracy limits:

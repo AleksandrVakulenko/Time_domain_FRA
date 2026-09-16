@@ -40,7 +40,7 @@ else
     end
 end
 
-[Times_conf, Time_printer, ~, Profile] = fit_core.get_time_config(Period, ...
+[Times_conf, Time_printer, ~, Profile] = TDFRA_fit_core.get_time_config(Period, ...
     Time_profile, Harm_profile);
 Time_printer(); % FIXME: disp
 
@@ -115,7 +115,7 @@ try
     [~, R_Scale, Aster_Range] = Aster_FRA.set_range(Aster, Range_init_num);
     % NOTE: update time and accuracy profiles
     Time_profile_new = Aster_FRA.max_time_profile(Time_profile, Aster_Range);
-    [~, ~, ~, Profile] = fit_core.get_time_config(Period, Time_profile_new, ...
+    [~, ~, ~, Profile] = TDFRA_fit_core.get_time_config(Period, Time_profile_new, ...
         Harm_profile);
     
     Aster_FRA.interruptible_wait(Filter_wait, 'Apply filter', Resources);
@@ -184,7 +184,7 @@ try
                     [flag, R_Scale, Aster_Range] = Aster_FRA.set_range(Aster, Aster_Range);
                     % NOTE: update time and accuracy profiles
                     Time_profile_new = Aster_FRA.max_time_profile(Time_profile, Aster_Range);
-                    [~, ~, ~, Profile] = fit_core.get_time_config(Period, ...
+                    [~, ~, ~, Profile] = TDFRA_fit_core.get_time_config(Period, ...
                         Time_profile_new, Harm_profile);
 
                     Aster_FRA.interruptible_wait(Filter_wait, 'Apply filter', Resources);
@@ -218,8 +218,8 @@ klog.disp([newline '-----------------------------------------' newline ...
     '-----------------------------------------' newline], 'debug_light');
 
 if Exit_flag == 40
-    Ch_data_1 = fit_core.Ch_data_type.empty();
-    Ch_data_2 = fit_core.Ch_data_type.empty();
+    Ch_data_1 = TDFRA_fit_core.Ch_data_type.empty();
+    Ch_data_2 = TDFRA_fit_core.Ch_data_type.empty();
     R_Scale = NaN;
     Used_ranges = [];
     Last_used_range = [];

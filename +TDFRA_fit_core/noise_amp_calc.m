@@ -13,7 +13,7 @@ arguments
 end
 
 
-[Time, Signal] = fit_core.signal_cut_by_n_periods(Time, Signal, freq);
+[Time, Signal] = TDFRA_fit_core.signal_cut_by_n_periods(Time, Signal, freq);
 
 if isempty(Signal)
     Noise_amp = [];

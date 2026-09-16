@@ -21,7 +21,7 @@
 %           .time_conf      - Time configuration with field 'period'.
 %       Properties  - Structure of fit properties (e.g. frequency deviation
 %                     settings, initial guesses) produced by
-%                     fit_core.get_fit_props.
+%                     TDFRA_fit_core.get_fit_props.
 %       Harm_num    - Number of harmonics to include in the model (if no
 %                     overload). If overloaded, this is overridden to 0.
 %       Max_points  - Maximum number of data points to use in the fit.
@@ -34,15 +34,15 @@
 %       DEBUG_1     - Debug information from the fitting process.
 %
 %   NOTES
-%       * The function calls fit_core.estimation_processing to obtain
+%       * The function calls TDFRA_fit_core.estimation_processing to obtain
 %         starting values for the solver.
 %       * The frequency deviation flag is set to false in this function
 %         (no frequency drift estimated). For two‑channel fitting, a
 %         shared frequency deviation is used.
 %       * Overload events cause the harmonic number to be set to empty,
-%         which is interpreted by fit_core.fit_channel as fitting only the
+%         which is interpreted by TDFRA_fit_core.fit_channel as fitting only the
 %         fundamental.
 %
-%   See also fit_core.estimation_processing, fit_core.fit_channel,
-%            fit_core.fit_two_channels, fit_core.get_fit_props.
+%   See also TDFRA_fit_core.estimation_processing, TDFRA_fit_core.fit_channel,
+%            TDFRA_fit_core.fit_two_channels, TDFRA_fit_core.get_fit_props.
 

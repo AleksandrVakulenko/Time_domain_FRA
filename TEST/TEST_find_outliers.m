@@ -17,7 +17,7 @@ T_arr = Ch_data.time;
 V_arr = Ch_data.voltage;
 
 [range, Outliers_volume, Limits, Residuals] = ...
-    fit_core.find_outliers(Ch_data, Result);
+    TDFRA_fit_core.find_outliers(Ch_data, Result);
 
 disp(['Outliers volume = ' num2str(Outliers_volume*100, '%0.2f') ' %'])
 

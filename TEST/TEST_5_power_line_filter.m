@@ -18,7 +18,7 @@ Noise = 0.2*sin(2*pi*50*Time + Pnoise);
 
 Signal = Signal + Noise;
 
-[Signal_f, Cut_FOP] = fit_core.do_power_line_filter(Time, Signal, Fs, Freq, 50);
+[Signal_f, Cut_FOP] = TDFRA_fit_core.do_power_line_filter(Time, Signal, Fs, Freq, 50);
 
 % Signal_f = filter(Hd, Signal);
 
@@ -119,7 +119,7 @@ end
 %     0.2*sin(2*pi*50*Time) + normrnd(0, 0.1, size(Time));
 Signal = 1*sin(2*pi*Freq*Time) + 0.2*sin(2*pi*50*Time);
 
-[Signal_f, Cut_FOP_filter] = fit_core.do_power_line_filter(Time, Signal, Fs, Freq);
+[Signal_f, Cut_FOP_filter] = TDFRA_fit_core.do_power_line_filter(Time, Signal, Fs, Freq);
 
 Outliers_force_range = get_force_outliers(Time, Freq, ...
     Cut_FOP_filter, Cut_FOP_first);

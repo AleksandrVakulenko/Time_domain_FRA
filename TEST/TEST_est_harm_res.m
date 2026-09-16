@@ -1,9 +1,9 @@
 
-% NOTE: TEST script for fit_core::estimate_harms_from_res()
+% NOTE: TEST script for TDFRA_fit_core::estimate_harms_from_res()
 
 clc
 
-Noise_rms = fit_core.noise_rms_calc(Data_signal, Fs, freq, Harm_num)
+Noise_rms = TDFRA_fit_core.noise_rms_calc(Data_signal, Fs, freq, Harm_num)
 
 
 %%
@@ -29,7 +29,7 @@ clc
 % Harm_est
 % 
 
-Harm_est = fit_core.estimate_harms_from_res(T_arr_new, Residuals_new, freq, ...
+Harm_est = TDFRA_fit_core.estimate_harms_from_res(T_arr_new, Residuals_new, freq, ...
     Noise_rms, Harm_num)
 
 

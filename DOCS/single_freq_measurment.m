@@ -88,7 +88,7 @@
 %       * Plotting is performed only when Fig_or_ax is a valid 2‑element
 %         array of axes handles.
 %
-%   See also Aster_FRA.measure, fit_core.fit_two_channels, 
+%   See also Aster_FRA.measure, TDFRA_fit_core.fit_two_channels, 
 %            fit_viewer.score_calc, fit_gui.init_gather_axes,
 %            Aster_FRA.do_FRA_result.
 

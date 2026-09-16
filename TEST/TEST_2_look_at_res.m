@@ -33,7 +33,7 @@ T_arr_min = linspace(T_arr_print(1), T_arr_print(end), 1000);
 
 Residuals_in = Data_signal - ym;
 
-Noise_rms = fit_core.noise_rms_calc(Data_signal, Fs, freq, Harm_num);
+Noise_rms = TDFRA_fit_core.noise_rms_calc(Data_signal, Fs, freq, Harm_num);
 
 [~, Amp, Phi, BG, Amp_err, Phi_err, BG_err] = ...
     fit_viewer.calc_fitted_signal(Result_in, T_arr_min);

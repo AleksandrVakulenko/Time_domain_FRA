@@ -41,10 +41,10 @@ Periods_counter = Time_passed/Period;
 Estimations = Estimations_all;
 
 if Periods_counter >= 1
-    [out_time1, out_sig1] = fit_core.get_one_period(T_arr, V_arr, Period, "first");
-    [out_time2, out_sig2] = fit_core.get_one_period(T_arr, V_arr, Period, "last", 1.1);
+    [out_time1, out_sig1] = TDFRA_fit_core.get_one_period(T_arr, V_arr, Period, "first");
+    [out_time2, out_sig2] = TDFRA_fit_core.get_one_period(T_arr, V_arr, Period, "last", 1.1);
 
-    Result1 = fit_core.DFT_estimation(out_time1, out_sig1, Period);
+    Result1 = TDFRA_fit_core.DFT_estimation(out_time1, out_sig1, Period);
     if ~isempty(Result1)
         Result1.t_min = 0;
         Result1.t_max = 0;
@@ -57,7 +57,7 @@ if Periods_counter >= 1
         end
     end
 
-    Result2 = fit_core.DFT_estimation(out_time2, out_sig2, Period);
+    Result2 = TDFRA_fit_core.DFT_estimation(out_time2, out_sig2, Period);
     if ~isempty(Result2)
         Result2.t_min = T_arr(end);
         Result2.t_max = T_arr(end);
@@ -72,8 +72,8 @@ if Periods_counter >= 1
 
 else
 %     Freq = 1/Period;
-%     Init_values = fit_core.do_initial_estimation(T_arr, V_arr, Period);
-%     Result = fit_core.simple_sin_fit_f(T_arr, V_arr, Freq, Init_values);
+%     Init_values = TDFRA_fit_core.do_initial_estimation(T_arr, V_arr, Period);
+%     Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, Freq, Init_values);
 
     % FIXME: maybe there are some problems here
 

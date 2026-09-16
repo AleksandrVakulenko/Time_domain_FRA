@@ -25,7 +25,7 @@ if Num > Max_points
 
     Fs_new = Max_points/Time_length;
     if ~isempty(Filter_freq)
-        [T_arr, V1_arr, V2_arr] = fit_core.fft_filter_dbl_ch(T_arr, V1_arr, ...
+        [T_arr, V1_arr, V2_arr] = TDFRA_fit_core.fft_filter_dbl_ch(T_arr, V1_arr, ...
             V2_arr, freq, Fs, Filter_freq);
     end
 

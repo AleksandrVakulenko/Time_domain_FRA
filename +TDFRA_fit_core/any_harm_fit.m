@@ -79,7 +79,7 @@ else
     harm_err = [];
 end
 
-Result = fit_core.Result_type;
+Result = TDFRA_fit_core.Result_type;
 Result.amp_poly = [];
 Result.phi_poly = [];
 Result.bg_poly = [];
@@ -93,7 +93,7 @@ Result.fit_function = "any_harm_fit";
 Result.freq = Freq;
 Result.harm = harm_out;
 Result.harm_err = harm_err;
-Result.estimations = fit_core.Estimation_type.empty();
+Result.estimations = TDFRA_fit_core.Estimation_type.empty();
 
 end
 

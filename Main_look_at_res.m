@@ -21,7 +21,7 @@ end
 T_arr = Ch_data.time;
 Data_signal = Ch_data.voltage;
 Outliers_range = Ch_data.outliers_range;
-% Outliers_range = fit_core.uppend_outliers(T_arr, Outliers_range);
+% Outliers_range = TDFRA_fit_core.uppend_outliers(T_arr, Outliers_range);
 
 Data_time = T_arr;
 Fs = Ch_data.fs;
@@ -33,7 +33,7 @@ T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
 Residuals_in = Data_signal - ym;
 
-Noise_rms = fit_core.noise_rms_calc(Data_signal, Fs, Freq, Harm_num);
+Noise_rms = TDFRA_fit_core.noise_rms_calc(Data_signal, Fs, Freq, Harm_num);
 
 [~, Amp, Phi, BG, Amp_err, Phi_err, BG_err] = ...
     fit_viewer.calc_fitted_signal(Result_in, T_arr_min);

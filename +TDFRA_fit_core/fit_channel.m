@@ -20,7 +20,7 @@ if ~isempty(Estimations)
 
     if ~isempty(Harm_num)
         try % FIXME: why try-catch?
-            Harm_est = fit_core.estimate_harmonics(T_arr, V_arr, Fs, freq, Harm_num);
+            Harm_est = TDFRA_fit_core.estimate_harmonics(T_arr, V_arr, Fs, freq, Harm_num);
         catch
             Harm_est = [];
         end
@@ -28,7 +28,7 @@ if ~isempty(Estimations)
         Harm_est = [];
     end
 
-    Noise_rms = fit_core.noise_rms_calc(V_arr, Fs, freq, Harm_num);
+    Noise_rms = TDFRA_fit_core.noise_rms_calc(V_arr, Fs, freq, Harm_num);
 
     % NOTE: use range oly if it contains more than 100 points
     Minimum_number_of_points = 100;% FIXME: get from settings
@@ -39,7 +39,7 @@ if ~isempty(Estimations)
 
     Max_points = Fit_settings.max_points;
     % FIXME: make it single channel
-    [T_arr, V_arr, ~, Fs2] = fit_core.make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
+    [T_arr, V_arr, ~, Fs2] = TDFRA_fit_core.make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
         freq, Harm_num, Max_points);
 
 %     if Fs2 ~= Fs
@@ -47,7 +47,7 @@ if ~isempty(Estimations)
 %     end
 
     % NOTE: fit with harmonics estimations
-    [Result, Residuals, DEBUG] = fit_core.any_sin_fit(T_arr, V_arr, freq, ...
+    [Result, Residuals, DEBUG] = TDFRA_fit_core.any_sin_fit(T_arr, V_arr, freq, ...
         Estimations, Properties, Harm_est, Fit_settings);
     
     DEBUG.Fs_new = Fs2;
@@ -58,7 +58,7 @@ if ~isempty(Estimations)
     % NOTE: analize residuals here (it is already done below)
     if ~isempty(Harm_num)
         % FIXME: is it better to use full Fs?
-        Harm_est_2 = fit_core.estimate_harms_from_res(T_arr, Residuals, freq, ...
+        Harm_est_2 = TDFRA_fit_core.estimate_harms_from_res(T_arr, Residuals, freq, ...
             Noise_rms, Harm_num);
     else
         Harm_est_2 = [];
@@ -79,18 +79,18 @@ if ~isempty(Estimations)
     end
     
     if Refit_flag
-        [Result, Residuals, DEBUG] = fit_core.any_sin_fit(T_arr, V_arr, freq, ...
+        [Result, Residuals, DEBUG] = TDFRA_fit_core.any_sin_fit(T_arr, V_arr, freq, ...
             Estimations, Properties, Fitted_harm, Fit_settings);
     end
 
     % NOTE: harm redefine
     if Period_counter > 1
-        [Result_harm, RMS_Ratio] = fit_core.Harm_refit(Result, T_arr, V_arr, Fs2);
+        [Result_harm, RMS_Ratio] = TDFRA_fit_core.Harm_refit(Result, T_arr, V_arr, Fs2);
         Harm_y = fit_viewer.Harm_calc(Result_harm, T_arr);
         if ~isempty(Harm_y)
             V_arr_pure = V_arr - Harm_y;
-            Estimations_pure = fit_core.result2estimation(Result_harm);
-            [Result, Residuals, DEBUG] = fit_core.any_sin_fit(T_arr, V_arr_pure, freq, ...
+            Estimations_pure = TDFRA_fit_core.result2estimation(Result_harm);
+            [Result, Residuals, DEBUG] = TDFRA_fit_core.any_sin_fit(T_arr, V_arr_pure, freq, ...
                 Estimations_pure, Properties, [], Fit_settings);
             Result.harm = Result_harm.harm;
             Result.harm_err = Result_harm.harm_err;

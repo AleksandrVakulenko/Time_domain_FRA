@@ -5,8 +5,8 @@ Period = 1/Freq;
 
 % FIXME: do we need this?
 if isempty(Estimations) && Periods_counter >= 1.0
-    Init_values = fit_core.do_initial_estimation(T_arr, V_arr, Period);
-    Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
+    Init_values = TDFRA_fit_core.do_initial_estimation(T_arr, V_arr, Period);
+    Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, ...
         Freq, Init_values);
     Estimations = Result;
 end
@@ -19,13 +19,13 @@ switch signal_per_duration(Periods_counter)
 
     case "get_lucky" % 0.45 : 0.5
         if isempty(Estimations)
-            Init_values = fit_core.do_initial_estimation(T_arr, V_arr, Period);
-            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
+            Init_values = TDFRA_fit_core.do_initial_estimation(T_arr, V_arr, Period);
+            Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Init_values);
             Result.legacy_status = "extra";
             Estimations = Result;
         else
-            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
+            Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Estimations);
             Result.legacy_status = "extra";
             Estimations = [Estimations Result];
@@ -33,46 +33,46 @@ switch signal_per_duration(Periods_counter)
 
     case "min" % 0.5 : 1.0
         if isempty(Estimations)
-            Init_values = fit_core.do_initial_estimation(T_arr, V_arr, Period);
-            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
+            Init_values = TDFRA_fit_core.do_initial_estimation(T_arr, V_arr, Period);
+            Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Init_values);
             Result.legacy_status = "low";
             Estimations = Result;
         else
-            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
+            Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Estimations);
             Result.legacy_status = "low";
             Estimations = [Estimations Result];
         end
 
     case "single" % 1.0 : 2
-        Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
+        Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, ...
             Freq, Estimations);
         Estimations = [Estimations Result];
-        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
+        [out_time, out_sig] = TDFRA_fit_core.get_one_period(T_arr, V_arr, Period, ...
             "last", 1.05);
-        Result2 = fit_core.DFT_estimation(out_time, out_sig, Period);
+        Result2 = TDFRA_fit_core.DFT_estimation(out_time, out_sig, Period);
         if ~isempty(Result2)
             Estimations = [Estimations Result2];
         end
 
 
     case "long" % 2 : 10 FIXME: same as above?
-        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
+        [out_time, out_sig] = TDFRA_fit_core.get_one_period(T_arr, V_arr, Period, ...
             "last", 1.05);
-        Result1 = fit_core.simple_sin_fit_f(out_time, out_sig, ...
+        Result1 = TDFRA_fit_core.simple_sin_fit_f(out_time, out_sig, ...
             Freq, Estimations);
         Estimations = [Estimations Result1];
-        Result2 = fit_core.DFT_estimation(out_time, out_sig, Period);
+        Result2 = TDFRA_fit_core.DFT_estimation(out_time, out_sig, Period);
         if ~isempty(Result2)
             Estimations = [Estimations Result2];
         end
 
 
     case "max" % 10 : inf
-        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, ...
+        [out_time, out_sig] = TDFRA_fit_core.get_one_period(T_arr, V_arr, Period, ...
             "last", 1.05);
-        Result = fit_core.DFT_estimation(out_time, out_sig, Period);
+        Result = TDFRA_fit_core.DFT_estimation(out_time, out_sig, Period);
         if ~isempty(Result)
             Estimations = [Estimations Result];
         end

@@ -16,11 +16,11 @@ Residuals = V_arr - ym;
 
 Harm_to_find = [2 3 4 5 6 7 8 9]; % FIXME: get from settings
 
-Harm_est = fit_core.estimate_harmonics(T_arr, Residuals, Fs, Freq, Harm_to_find, true);
+Harm_est = TDFRA_fit_core.estimate_harmonics(T_arr, Residuals, Fs, Freq, Harm_to_find, true);
 
 if ~isempty(Harm_est)
     [Result_harm, Residuals_harm, ~] = ...
-        fit_core.any_harm_fit(T_arr, Residuals, Freq, Harm_est, f_dev_ppm);
+        TDFRA_fit_core.any_harm_fit(T_arr, Residuals, Freq, Harm_est, f_dev_ppm);
 
     RMS_old = std(Residuals);
     RMS_new = std(Residuals_harm);

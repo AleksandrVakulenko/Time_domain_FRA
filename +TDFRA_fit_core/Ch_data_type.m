@@ -10,7 +10,7 @@ classdef Ch_data_type
         voltage double
         outliers_range logical
         overload
-        estimations fit_core.Estimation_type
+        estimations TDFRA_fit_core.Estimation_type
         time_conf
         accuracy_conf
         fs (1, 1) double

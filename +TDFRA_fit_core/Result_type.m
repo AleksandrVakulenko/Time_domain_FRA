@@ -24,7 +24,7 @@ properties (Access = public)
     harm
     harm_err
 
-    estimations fit_core.Estimation_type
+    estimations TDFRA_fit_core.Estimation_type
 
 end
 

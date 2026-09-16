@@ -65,7 +65,7 @@ Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 Harm_profile = "common"; % "common", "most_accurate"
 %--------------------------------
 
-[Times_conf, Time_printer] = fit_core.get_time_config(Period, ...
+[Times_conf, Time_printer] = TDFRA_fit_core.get_time_config(Period, ...
     Time_profile, Harm_profile);
 Time_printer(); % FIXME: debug
 
@@ -280,7 +280,7 @@ if ~no_estimations(Estimations)
     Max_points = 1000e3; % FIXME: magic constant
     % FIXME: upgrade function make_fs_lower
     % FIXME: make it single channel
-    [T_arr, V_arr, ~, Fs2] = fit_core.make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
+    [T_arr, V_arr, ~, Fs2] = TDFRA_fit_core.make_fs_lower(T_arr, V_arr, V_arr, Fs, ...
         freq, Harm_num, Max_points);
 
     if Fs2 ~= Fs % FIXME: debug print
@@ -290,7 +290,7 @@ if ~no_estimations(Estimations)
     end
 
     % NOTE: fit with harmonics estimations
-    [Result, Residuals, DEBUG] = fit_core.any_sin_fit(T_arr, V_arr, freq, ...
+    [Result, Residuals, DEBUG] = TDFRA_fit_core.any_sin_fit(T_arr, V_arr, freq, ...
         Estimations, Properties, Harm_est, Fit_settings);
     
     DEBUG.Fs_new = Fs2;
@@ -300,7 +300,7 @@ if ~no_estimations(Estimations)
 
     % NOTE: analize residuals here
     if ~isempty(Harm_num)
-        Harm_est_2 = fit_core.estimate_harms_from_res(T_arr, Residuals, freq, ...
+        Harm_est_2 = TDFRA_fit_core.estimate_harms_from_res(T_arr, Residuals, freq, ...
             Noise_rms, Harm_num);
     else
         Harm_est_2 = [];
@@ -322,7 +322,7 @@ if ~no_estimations(Estimations)
     
     % NOTE: fit residuals here to find lost harms
     if Refit_flag
-        [Result, Residuals, DEBUG] = fit_core.any_sin_fit(T_arr, V_arr, freq, ...
+        [Result, Residuals, DEBUG] = TDFRA_fit_core.any_sin_fit(T_arr, V_arr, freq, ...
             Estimations, Properties, Fitted_harm, Fit_settings);
     end
     
@@ -338,9 +338,9 @@ end
 function Result = ... % do_initial_estimation
     do_initial_estimation(T_arr, V_arr, Period)
 
-    [Mean, Span, ~, ~] = fit_core.signal_stats(V_arr);
+    [Mean, Span, ~, ~] = TDFRA_fit_core.signal_stats(V_arr);
     
-    Start_Phi = fit_core.estimate_phi_part_sin(T_arr, V_arr, Period);
+    Start_Phi = TDFRA_fit_core.estimate_phi_part_sin(T_arr, V_arr, Period);
     if isempty(Start_Phi)
         Start_Phi = 0;
     end
@@ -398,7 +398,7 @@ function Result = DFT_estimation(Time, Signal, Period)
     End_time = Time(end);
     Freq = 1/Period;
 
-    [Amp_DFT, Phi_DFT, Mean] = fit_core.DFT_single_freq(Time, Signal, Freq);
+    [Amp_DFT, Phi_DFT, Mean] = TDFRA_fit_core.DFT_single_freq(Time, Signal, Freq);
 
     Result = struct(...
         'amp', Amp_DFT, 'phi', Phi_DFT, 'bg', Mean, 'f_dev', NaN, ...
@@ -513,7 +513,7 @@ Period = 1/Freq;
 % FIXME: do we need this?
 if no_estimations(Estimations) && Periods_counter > 1.0
     Init_values = do_initial_estimation(T_arr, V_arr, Period);
-    Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
+    Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, ...
         Freq, Init_values);
     Estimations = Result;
 end
@@ -527,11 +527,11 @@ switch signal_per_duration(Periods_counter)
     case "get_lucky" % 0.45 : 0.5
         if no_estimations(Estimations_extra)
             Init_values = do_initial_estimation(T_arr, V_arr, Period);
-            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
+            Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Init_values);
             Estimations_extra = Result;
         else
-            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
+            Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Estimations_extra);
             Estimations_extra = [Estimations_extra Result];
         end
@@ -539,25 +539,25 @@ switch signal_per_duration(Periods_counter)
     case "min" % 0.5 : 1.0
         if no_estimations(Estimations_low)
             Init_values = do_initial_estimation(T_arr, V_arr, Period);
-            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
+            Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Init_values);
             Estimations_low = Result;
         else
-            Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
+            Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, ...
                 Freq, Estimations_low);
             Estimations_low = [Estimations_low Result];
         end
 
     case "single" % 1.0 : 2
-        Result = fit_core.simple_sin_fit_f(T_arr, V_arr, ...
+        Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, ...
             Freq, Estimations);
         Estimations = [Estimations Result];
 
 
     case "long" % 2 : 10
         Scale = Periods_counter/2; % FXIME: magic constant
-        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, "last", Scale);
-        Result = fit_core.simple_sin_fit_f(out_time, out_sig, ...
+        [out_time, out_sig] = TDFRA_fit_core.get_one_period(T_arr, V_arr, Period, "last", Scale);
+        Result = TDFRA_fit_core.simple_sin_fit_f(out_time, out_sig, ...
             Freq, Estimations);
         % Result = DFT_estimation(T_arr, V_arr, Period);
         Estimations = [Estimations Result];
@@ -566,7 +566,7 @@ switch signal_per_duration(Periods_counter)
 
     case "max" % 10 : inf
         Scale = 5; % FIXME: magic constant
-        [out_time, out_sig] = fit_core.get_one_period(T_arr, V_arr, Period, "last", Scale);
+        [out_time, out_sig] = TDFRA_fit_core.get_one_period(T_arr, V_arr, Period, "last", Scale);
         Result = DFT_estimation(out_time, out_sig, Period);
         Estimations = [Estimations Result];
 
@@ -579,7 +579,7 @@ end
 
 function Underrange = check_underrange(V_arr, Underrange, Underrange_force)
 if Underrange
-    [Mean, Span, ~, ~] = fit_core.signal_stats(V_arr);
+    [Mean, Span, ~, ~] = TDFRA_fit_core.signal_stats(V_arr);
     if Underrange_force
         Underrange_level = 0.001*5; % FIXME: magic constant
     else
@@ -605,8 +605,8 @@ Periods_counter = Time_passed/Period;
 Estimations = est_cell_arr{1};
 
 if Periods_counter >= 1
-    [out_time1, out_sig1] = fit_core.get_one_period(T_arr, V_arr, Period, "first");
-    [out_time2, out_sig2] = fit_core.get_one_period(T_arr, V_arr, Period, "last", 1.1);
+    [out_time1, out_sig1] = TDFRA_fit_core.get_one_period(T_arr, V_arr, Period, "first");
+    [out_time2, out_sig2] = TDFRA_fit_core.get_one_period(T_arr, V_arr, Period, "last", 1.1);
 
     Result1 = DFT_estimation(out_time1, out_sig1, Period);
     Result1.t_min = 0;

@@ -4,7 +4,7 @@
 
 function Estimations = result2estimation(Result)
 arguments
-    Result fit_core.Result_type;
+    Result TDFRA_fit_core.Result_type;
 end
 
 % -----------------------------------------
@@ -14,7 +14,7 @@ Estimations = Result.estimations;
 Time = Result.amp_poly.x;
 Period = 1/Result.freq;
 
-Estimation_1 = fit_core.Estimation_type;
+Estimation_1 = TDFRA_fit_core.Estimation_type;
 
 Estimation_1.amp = Result.amp_poly.p3;
 Estimation_1.phi = Result.phi_poly.p3;

@@ -38,10 +38,10 @@
 %         when the acquisition length is at least two periods.
 %       * For channel 2, frequency deviation is fixed to the value obtained
 %         from channel 1 (Fit_settings_2.freq_dev_const = Result_1.f_dev_ppm).
-%       * The estimation structures (from fit_core.estimation_processing)
+%       * The estimation structures (from TDFRA_fit_core.estimation_processing)
 %         are attached to the results for later use.
 %
-%   See also fit_core.fit_one_channels, fit_core.fit_channel,
-%            fit_core.estimation_processing, fit_core.get_fit_props.
+%   See also TDFRA_fit_core.fit_one_channels, TDFRA_fit_core.fit_channel,
+%            TDFRA_fit_core.estimation_processing, TDFRA_fit_core.get_fit_props.
 
 

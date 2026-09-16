@@ -1,6 +1,6 @@
 
 % NOTE:
-% TEST for Noise_amp = fit_core.noise_amp_calc(freq, Time, Signal, Fss)
+% TEST for Noise_amp = TDFRA_fit_core.noise_amp_calc(freq, Time, Signal, Fss)
 
 % FIXME: bad for noise amp calc !
 
@@ -48,9 +48,9 @@ else
 end
 
 
-[Time, Signal] = fit_core.signal_cut_by_n_periods(Time, Signal, freq);
+[Time, Signal] = TDFRA_fit_core.signal_cut_by_n_periods(Time, Signal, freq);
 
-[Noise_amp, noise_floor] = fit_core.noise_amp_calc(freq, Time, Signal, Fss, F_lim);
+[Noise_amp, noise_floor] = TDFRA_fit_core.noise_amp_calc(freq, Time, Signal, Fss, F_lim);
 disp(['Noise amp = ' num2str(Noise_amp*1e3, '%0.2f') ' mV'])
 
 
@@ -89,7 +89,7 @@ clc
 % Amp = zeros(size(Freq_list));
 % for i = 1:numel(Freq_list)
 %     Freq = Freq_list(i);
-%     Amp(i) = fit_core.DFT_single_freq(Synth_time, Synth_signal, Freq);
+%     Amp(i) = TDFRA_fit_core.DFT_single_freq(Synth_time, Synth_signal, Freq);
 % end
 
 figure
@@ -239,14 +239,14 @@ function Amp = find_spectrum_amps(Time, Signal, Freq_list)
         Amp_part = zeros(size(Freq_list_part));
         for k = 1:numel(Freq_list_part)
             Freq = Freq_list_part(k);
-            Amp_part(k) = fit_core.DFT_single_freq(Time, Signal, Freq);
+            Amp_part(k) = TDFRA_fit_core.DFT_single_freq(Time, Signal, Freq);
         end
         Amp(i) = max(Amp_part);
     end
 end
 
 
-% NOTE: SHARED with same in fit_core.noise_amp_calc.m
+% NOTE: SHARED with same in TDFRA_fit_core.noise_amp_calc.m
 function [Bad_num, new_freq_list] = exclude_bad_freq(freq_list, exclude_list)
 
 % % freq_list = [328.3291  350.9986 373.3524];

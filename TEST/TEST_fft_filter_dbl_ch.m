@@ -1,5 +1,5 @@
 
-% NOTE: test for fit_core::fft_filter_dbl_ch
+% NOTE: test for TDFRA_fit_core::fft_filter_dbl_ch
 
 % FIXME: NEED TO GENERATE DATA
 
@@ -21,7 +21,7 @@ Signal_filt_2 = V2_arr;
 Filter_freq = 40;
 
 
-[T_arr_filt, Signal_filt_1, Signal_filt_2] = fit_core.fft_filter_dbl_ch(...
+[T_arr_filt, Signal_filt_1, Signal_filt_2] = TDFRA_fit_core.fft_filter_dbl_ch(...
     T_arr_filt, Signal_filt_1, Signal_filt_2, freq, Fs, Filter_freq);
 
 

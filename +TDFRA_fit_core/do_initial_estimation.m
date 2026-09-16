@@ -1,12 +1,12 @@
 function Result = do_initial_estimation(T_arr, V_arr, Period)
-    [Mean, Span, ~, ~] = fit_core.signal_stats(V_arr);
+    [Mean, Span, ~, ~] = TDFRA_fit_core.signal_stats(V_arr);
     
-    Start_Phi = fit_core.estimate_phi_part_sin(T_arr, V_arr, Period);
+    Start_Phi = TDFRA_fit_core.estimate_phi_part_sin(T_arr, V_arr, Period);
     if isempty(Start_Phi)
         Start_Phi = 0;
     end
 
-    Result = fit_core.Estimation_type;
+    Result = TDFRA_fit_core.Estimation_type;
     Result.amp = Span;
     Result.phi = Start_Phi;
     Result.bg = Mean;

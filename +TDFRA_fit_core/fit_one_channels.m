@@ -17,13 +17,13 @@ if Overload_1.count > 0
     Harm_num_1 = [];
 end
 
-Estimations_1 = fit_core.estimation_processing(Ch_data);
+Estimations_1 = TDFRA_fit_core.estimation_processing(Ch_data);
 
 Fit_settings_1.freq_dev_flag = false; % FIXME: maybe put in input args
 Fit_settings_1.freq_dev_const = 0;
 Fit_settings_1.max_points = Max_points;
 
-[Result_1, Residuals_1, DEBUG_1] = fit_core.fit_channel(T_arr_1, V1_arr, ...
+[Result_1, Residuals_1, DEBUG_1] = TDFRA_fit_core.fit_channel(T_arr_1, V1_arr, ...
     Fit_range, Fs, freq, Estimations_1, Properties, Harm_num_1, Fit_settings_1);
 
 end
