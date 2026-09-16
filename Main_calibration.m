@@ -183,7 +183,7 @@ Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
 Sample.info = "test";
 
 
-Fig = fit_gui.init_Aster_FRA_gui();
+Fig = TDFRA_fit_gui.init_Aster_FRA_gui();
 Ax_arr = [Fig.UserData.axes_top Fig.UserData.axes_bot];
 Stop_button = Fig.UserData.stop_button;
 Resources.stop_button = Stop_button;

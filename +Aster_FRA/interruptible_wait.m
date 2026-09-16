@@ -42,7 +42,7 @@ else
     while ~stop
         Time = toc(Timer);
 
-        stop_btn_flag = fit_gui.stop_check(stop_button);
+        stop_btn_flag = TDFRA_fit_gui.stop_check(stop_button);
         if stop_btn_flag
             return;
         end

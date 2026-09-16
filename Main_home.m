@@ -54,7 +54,7 @@ F_range_LCR = Freq_arr >= 20;
 Freq_arr_Aster = Freq_arr(F_range_Aster);
 Freq_arr_LCR = Freq_arr(F_range_LCR);
 
-Fig = fit_gui.init_Aster_FRA_gui();
+Fig = TDFRA_fit_gui.init_Aster_FRA_gui();
 Ax_arr = [Fig.UserData.axes_top Fig.UserData.axes_bot];
 Stop_button = Fig.UserData.stop_button;
 Resources.stop_button = Stop_button;

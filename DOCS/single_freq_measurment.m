@@ -89,6 +89,6 @@
 %         array of axes handles.
 %
 %   See also Aster_FRA.measure, TDFRA_fit_core.fit_two_channels, 
-%            TDFRA_fit_viewer.score_calc, fit_gui.init_gather_axes,
+%            TDFRA_fit_viewer.score_calc, TDFRA_fit_gui.init_gather_axes,
 %            Aster_FRA.do_FRA_result.
 

@@ -24,7 +24,7 @@ end
 Overrange_request_not_possible = false; % FIXME: debug for Aster
 
 
-Axes_arr = fit_gui.init_gather_axes(Fig_or_ax);
+Axes_arr = TDFRA_fit_gui.init_gather_axes(Fig_or_ax);
 
 Period = 1/Freq;
 Harm_num(Harm_num == 1) = [];
@@ -135,7 +135,7 @@ while ~stop
     %FIXME: debug for fast signal
     pause(0.001);
     
-    external_stop = fit_gui.stop_check(Stop_button);
+    external_stop = TDFRA_fit_gui.stop_check(Stop_button);
     if external_stop
         Exit_flag = 40; % NOTE: external break
         break;

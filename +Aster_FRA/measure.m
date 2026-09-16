@@ -127,7 +127,7 @@ try
     while ~stop
         if ~isempty(Resources)
             Stop_button = Resources.stop_button;
-            stop_btn_flag = fit_gui.stop_check(Stop_button);
+            stop_btn_flag = TDFRA_fit_gui.stop_check(Stop_button);
             if stop_btn_flag
                 Exit_flag = 40; % NOTE: external break
                 break;

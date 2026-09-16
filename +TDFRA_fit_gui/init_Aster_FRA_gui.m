@@ -70,7 +70,7 @@ Underrange_ind_12.UserData = @(x) set_underrange(x, Underrange_ind_12);
 
 
 Stop_button.UserData = struct('stop', false);
-Stop_button.Callback = @fit_gui.stop_callback;
+Stop_button.Callback = @TDFRA_fit_gui.stop_callback;
 
 Data = struct('axes_top', Ax1, 'axes_bot', Ax2, ...
               'stop_button', Stop_button, ...
