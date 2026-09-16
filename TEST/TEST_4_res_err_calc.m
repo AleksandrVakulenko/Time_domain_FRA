@@ -1,7 +1,7 @@
 
 clc
 
-[A_err_prc, P_err_deg, C_err_prc] = fit_viewer.carrier_error_calc(Result_1);
+[A_err_prc, P_err_deg, C_err_prc] = TDFRA_fit_viewer.carrier_error_calc(Result_1);
 
 disp(['A_err = ' num2str(A_err_prc, '%0.4f') ' %'])
 disp(['P_err = ' num2str(P_err_deg, '%0.4f') ' deg'])
@@ -9,7 +9,7 @@ disp(['C_err = ' num2str(C_err_prc, '%0.4f') ' %'])
 
 disp(' ')
 
-[A_err_prc, P_err_deg, C_err_prc] = fit_viewer.carrier_error_calc(Result_2);
+[A_err_prc, P_err_deg, C_err_prc] = TDFRA_fit_viewer.carrier_error_calc(Result_2);
 
 disp(['A_err = ' num2str(A_err_prc, '%0.4f') ' %'])
 disp(['P_err = ' num2str(P_err_deg, '%0.4f') ' deg'])
@@ -23,7 +23,7 @@ Target.amp_err_prc = 0.05; % [%]
 Target.phi_err_deg = 0.1; % [deg]
 
 [Score1, Score2, Best_flag, Max_score] = ...
-    fit_viewer.score_calc(Result_1, Result_2, Target);
+    TDFRA_fit_viewer.score_calc(Result_1, Result_2, Target);
 
 
 %%

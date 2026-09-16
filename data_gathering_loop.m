@@ -348,7 +348,7 @@ while ~stop
                     Outliers_range_1 = TDFRA_fit_core.find_outliers(Ch_data_1, Result_1);
                     Exclude_range_1 = TDFRA_fit_core.unite_outliers(Outliers_range_1, ...
                         Outliers_force_range_1);
-                    [Score_1, ~] = fit_viewer.score_calc_ch(Result_1, Accuracy_conf);
+                    [Score_1, ~] = TDFRA_fit_viewer.score_calc_ch(Result_1, Accuracy_conf);
                     if Score_1 > 0
                         Prefit_ready_1 = true;
                         Estimations_1 = TDFRA_fit_core.result2estimation(Result_1);
@@ -365,7 +365,7 @@ while ~stop
                     Outliers_range_2 = TDFRA_fit_core.find_outliers(Ch_data_2, Result_2);
                     Exclude_range_2 = TDFRA_fit_core.unite_outliers(Outliers_range_2, ...
                         Outliers_force_range_2);
-                    [Score_2, ~] = fit_viewer.score_calc_ch(Result_2, Accuracy_conf);
+                    [Score_2, ~] = TDFRA_fit_viewer.score_calc_ch(Result_2, Accuracy_conf);
                     if Score_2 > 0
                         Prefit_ready_2 = true;
                         Estimations_2 = TDFRA_fit_core.result2estimation(Result_2);
@@ -388,7 +388,7 @@ while ~stop
                         Outliers_force_range_2);
 
                     [Score_1, Score2, ~, Max_score] = ...
-                        fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
+                        TDFRA_fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
 
                     klog.disp(['--- Scores: ---' newline 'Ch1: ' num2str(Score_1) newline ...
                         'Ch2: ' num2str(Score2) newline '---------------'], 'debug_light')
@@ -415,14 +415,14 @@ while ~stop
         Ax1 = Axes_arr(1);
         Ax2 = Axes_arr(2);
 
-        fit_viewer.data_gather_plot(Ax1, T_arr, V1_arr, ...
+        TDFRA_fit_viewer.data_gather_plot(Ax1, T_arr, V1_arr, ...
             Exclude_range_1, Result_1, style_num);
         % FIXME: do not toush axes labels and titles
         title(['Ch 1 (PC: ' num2str(Periods_counter, '%0.3f') ')'], 'Parent', Ax1);
         xlabel('t, s', 'Parent', Ax1)
         ylabel('V1, V', 'Parent', Ax1)
 
-        fit_viewer.data_gather_plot(Ax2, T_arr, V2_arr, ...
+        TDFRA_fit_viewer.data_gather_plot(Ax2, T_arr, V2_arr, ...
             Exclude_range_2, Result_2, style_num);
         % FIXME: do not toush axes labels and titles
         title('Ch 2', 'Parent', Ax2);

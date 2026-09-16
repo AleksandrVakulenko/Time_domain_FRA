@@ -8,7 +8,7 @@
 %
 %   This function evaluates the quality of two fitted sine‑wave results
 %   (e.g. from two channels) relative to a target accuracy specification.
-%   It delegates to fit_viewer.score_calc_ch for each result, then
+%   It delegates to TDFRA_fit_viewer.score_calc_ch for each result, then
 %   determines which channel achieved the maximum score. The maximum
 %   possible score is a fixed constant (currently 23) defined in
 %   score_calc_ch.
@@ -32,12 +32,12 @@
 %
 %   NOTES
 %       * The scoring is heuristic and based on error thresholds and the
-%         signal‑to‑range ratio. See fit_viewer.score_calc_ch for details.
+%         signal‑to‑range ratio. See TDFRA_fit_viewer.score_calc_ch for details.
 %       * A result of empty yields a score of -Inf, effectively marking it
 %         as unacceptable.
 %
-%   See also fit_viewer.score_calc_ch, fit_viewer.carrier_error_calc,
-%            fit_viewer.get_amp_to_range_ratio.
+%   See also TDFRA_fit_viewer.score_calc_ch, TDFRA_fit_viewer.carrier_error_calc,
+%            TDFRA_fit_viewer.get_amp_to_range_ratio.
 
 
 

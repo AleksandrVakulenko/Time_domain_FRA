@@ -34,7 +34,7 @@
 %       * The function is intended for internal use by the measurement and
 %         fitting routines to ensure consistent plotting.
 %
-%   See also fit_viewer.data_gather_plot, subplot.
+%   See also TDFRA_fit_viewer.data_gather_plot, subplot.
 
 
 

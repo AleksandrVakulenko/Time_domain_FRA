@@ -46,7 +46,7 @@
 %           .range_n                 - Range number used.
 %
 %   NOTES
-%       * The function uses fit_viewer.calc_output to extract amplitude,
+%       * The function uses TDFRA_fit_viewer.calc_output to extract amplitude,
 %         phase, and their errors from each fit result.
 %       * It adds extra errors based on signal‑to‑range ratio using
 %         experimentally derived functions (Section A00 in code).
@@ -57,7 +57,7 @@
 %         then cleaned of NaN/empty entries.
 %
 %   See also Aster_FRA.apply_calibration, Aster_FRA.get_instr_errors,
-%            fit_viewer.calc_output, fit_viewer.RC_calc_parallel,
-%            fit_viewer.RC_calc_series.
+%            TDFRA_fit_viewer.calc_output, TDFRA_fit_viewer.RC_calc_parallel,
+%            TDFRA_fit_viewer.RC_calc_series.
 
 

@@ -25,13 +25,13 @@ if isempty(R_Scale)
     R_Scale = Aster_r_scale(Range_N);
 end
 
-Output = fit_viewer.calc_output(Result_1, []);
+Output = TDFRA_fit_viewer.calc_output(Result_1, []);
 Volt1 = Output.amp;
 Volt1_err = Output.amp_err;
 CH_1_P = Output.phi;
 CH_1_Pe = Output.phi_err;
 
-Output = fit_viewer.calc_output(Result_2, []);
+Output = TDFRA_fit_viewer.calc_output(Result_2, []);
 Volt2 = Output.amp;
 Volt2_err = Output.amp_err;
 CH_2_P = Output.phi;
@@ -134,8 +134,8 @@ Harm_2_out_arr = Nan_harm_clear(Harm_2_out_arr);
 
 Zfull = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
 
-[C_par, R_par] = fit_viewer.RC_calc_parallel(Zfull, freq);
-[C_ser, R_ser] = fit_viewer.RC_calc_series(Zfull, freq);
+[C_par, R_par] = TDFRA_fit_viewer.RC_calc_parallel(Zfull, freq);
+[C_ser, R_ser] = TDFRA_fit_viewer.RC_calc_series(Zfull, freq);
 
 if numel(freq) > 1 || numel(Zfull) > 1
     % FIXME: do something
@@ -146,8 +146,8 @@ end
 
 
 if disp_flag
-    fit_viewer.print_f_dev(Result_1.f_dev_ppm, Result_1.f_dev_ppm_err);
-    fit_viewer.print_f_dev(Result_2.f_dev_ppm, Result_2.f_dev_ppm_err);
+    TDFRA_fit_viewer.print_f_dev(Result_1.f_dev_ppm, Result_1.f_dev_ppm_err);
+    TDFRA_fit_viewer.print_f_dev(Result_2.f_dev_ppm, Result_2.f_dev_ppm_err);
 
     klog.disp(' ')
 
@@ -161,23 +161,23 @@ if disp_flag
 %     disp('----------------')
     % ------------------
     
-    fit_viewer.print_res(Res, Res_err_full)
+    TDFRA_fit_viewer.print_res(Res, Res_err_full)
     % Cap = 1/(6.28*freq*Res);
     % Cap_err = 1/(6.28*freq*Res^2)*Res_err;
     % print_cap(Cap, Cap_err)
-    fit_viewer.print_phi(Phase_diff, Phase_diff_error_full)
+    TDFRA_fit_viewer.print_phi(Phase_diff, Phase_diff_error_full)
 
     klog.disp(' ')
 
     klog.disp('Parallel:')
-    fit_viewer.print_cap(C_par)
-    fit_viewer.print_res(R_par)
+    TDFRA_fit_viewer.print_cap(C_par)
+    TDFRA_fit_viewer.print_res(R_par)
 
     klog.disp(' ')
 
     klog.disp('Series:')
-    fit_viewer.print_cap(C_ser)
-    fit_viewer.print_res(R_ser)
+    TDFRA_fit_viewer.print_cap(C_ser)
+    TDFRA_fit_viewer.print_res(R_ser)
 
     klog.disp(' ')
 

@@ -47,7 +47,7 @@ try
             LCR_dev.get_R_Phi_with_errors(Time_profile);
 
         Zfull = R_abs*cos(Phi_deg/180*pi) + R_abs*1i*sin(Phi_deg/180*pi);
-        [C_par, R_par] = fit_viewer.RC_calc_parallel(Zfull, Gen_freq);
+        [C_par, R_par] = TDFRA_fit_viewer.RC_calc_parallel(Zfull, Gen_freq);
         
 
         Result = Aster_FRA.LCR_result_type;

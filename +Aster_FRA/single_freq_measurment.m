@@ -52,7 +52,7 @@ Max_points = 50e3; % FIXME: get from settings
     Harm_num, Max_points);
 
 [Score_1, Score_2, Best_flag, Max_score] = ...
-    fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
+    TDFRA_fit_viewer.score_calc(Result_1, Result_2, Accuracy_conf);
 
 klog.disp([newline 'Scores:' newline 'Ch1: ' num2str(Score_1) newline ...
     'Ch2: ' num2str(Score_2) newline], "common")
@@ -65,12 +65,12 @@ if numel(Axes_arr) == 2 && all(isvalid(Axes_arr))
     Ax1 = Axes_arr(1);
     Ax2 = Axes_arr(2);
 
-    fit_viewer.data_gather_plot(Ax1, Ch_data_1.time, Ch_data_1.voltage, ...
+    TDFRA_fit_viewer.data_gather_plot(Ax1, Ch_data_1.time, Ch_data_1.voltage, ...
         Ch_data_1.outliers_range, Result_1, style_num);
     xlabel('t, s', 'Parent', Ax1)
     ylabel('V1, V', 'Parent', Ax1)
 
-    fit_viewer.data_gather_plot(Ax2, Ch_data_2.time, Ch_data_2.voltage, ...
+    TDFRA_fit_viewer.data_gather_plot(Ax2, Ch_data_2.time, Ch_data_2.voltage, ...
         Ch_data_2.outliers_range, Result_2, style_num);
     xlabel('t, s', 'Parent', Ax2);
     ylabel('V2, V', 'Parent', Ax2);

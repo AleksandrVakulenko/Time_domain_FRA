@@ -22,12 +22,12 @@ end
     end
     T_arr = linspace(T_start, T_end, N);
     
-    Amp = fit_viewer.poly3calc(Result_in.amp_poly, T_arr);
-    Phi = fit_viewer.poly3calc(Result_in.phi_poly, T_arr);
-    BG = fit_viewer.poly3calc(Result_in.bg_poly, T_arr);
-    Amp_err = fit_viewer.poly3calc(Result_in.amp_poly_err, T_arr);
-    Phi_err = fit_viewer.poly3calc(Result_in.phi_poly_err, T_arr);
-    BG_err = fit_viewer.poly3calc(Result_in.bg_poly_err, T_arr);
+    Amp = TDFRA_fit_viewer.poly3calc(Result_in.amp_poly, T_arr);
+    Phi = TDFRA_fit_viewer.poly3calc(Result_in.phi_poly, T_arr);
+    BG = TDFRA_fit_viewer.poly3calc(Result_in.bg_poly, T_arr);
+    Amp_err = TDFRA_fit_viewer.poly3calc(Result_in.amp_poly_err, T_arr);
+    Phi_err = TDFRA_fit_viewer.poly3calc(Result_in.phi_poly_err, T_arr);
+    BG_err = TDFRA_fit_viewer.poly3calc(Result_in.bg_poly_err, T_arr);
 
     if flag
         Amp_err = sqrt(std(Amp)^2 + mean(Amp_err).^2);

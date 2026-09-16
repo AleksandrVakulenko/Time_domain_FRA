@@ -29,19 +29,19 @@ Freq = Result_in.freq;
 
 T_arr_min = linspace(T_arr(1), T_arr(end), 1000);
 
-[ym, Amp_full, Phi_full, BG_full] = fit_viewer.calc_fitted_signal(Result_in, T_arr);
+[ym, Amp_full, Phi_full, BG_full] = TDFRA_fit_viewer.calc_fitted_signal(Result_in, T_arr);
 
 Residuals_in = Data_signal - ym;
 
 Noise_rms = TDFRA_fit_core.noise_rms_calc(Data_signal, Fs, Freq, Harm_num);
 
 [~, Amp, Phi, BG, Amp_err, Phi_err, BG_err] = ...
-    fit_viewer.calc_fitted_signal(Result_in, T_arr_min);
+    TDFRA_fit_viewer.calc_fitted_signal(Result_in, T_arr_min);
 
 
 % Calc output values and errors ------------------------------------
 pps = [0];
-Output = fit_viewer.calc_output(Result_in, pps);
+Output = TDFRA_fit_viewer.calc_output(Result_in, pps);
 Amp_out = Output.amp;
 Phi_out = Output.phi;
 BG_out = Output.bg;
@@ -141,7 +141,7 @@ title('Residuals histogram')
 
 
 %%
-HHH = fit_viewer.Harm_calc(Result, T_arr);
+HHH = TDFRA_fit_viewer.Harm_calc(Result, T_arr);
 plot(T_arr, HHH);
 %%
 
@@ -228,7 +228,7 @@ end
 
 
 function Harm_disp(Result_in)
-Output = fit_viewer.calc_output(Result_in, [0]);
+Output = TDFRA_fit_viewer.calc_output(Result_in, [0]);
 Amp_out = Output.amp;
 
 Harm = Result_in.harm;

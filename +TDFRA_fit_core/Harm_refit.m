@@ -10,7 +10,7 @@ Freq = Result.freq;
 % T_arr = Ch_data.time;
 % V_arr = Ch_data.voltage;
 
-ym = fit_viewer.calc_fitted_signal(Result, T_arr, true);
+ym = TDFRA_fit_viewer.calc_fitted_signal(Result, T_arr, true);
 
 Residuals = V_arr - ym;
 

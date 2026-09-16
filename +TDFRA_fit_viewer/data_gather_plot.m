@@ -20,7 +20,7 @@ function data_gather_plot(Ax, T_arr, V_arr, Outliers_range, Result, style_num)
     end
 
     if ~isempty(Result)
-        Fit_y_1 = fit_viewer.calc_fitted_signal(Result, T_arr); % FIXME: UNCOMMENT
+        Fit_y_1 = TDFRA_fit_viewer.calc_fitted_signal(Result, T_arr); % FIXME: UNCOMMENT
         plot(T_arr, Fit_y_1, ...
             Fit.style, 'Color', Fit.color, 'LineWidth', Fit.linewidth, ...
             'MarkerSize', Fit.marker_size, 'Parent', Ax)

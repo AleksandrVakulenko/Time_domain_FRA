@@ -10,7 +10,7 @@ if isempty(Result)
     return;
 end
 
-[A_err_prc, P_err_deg, C_err_prc] = fit_viewer.carrier_error_calc(Result);
+[A_err_prc, P_err_deg, C_err_prc] = TDFRA_fit_viewer.carrier_error_calc(Result);
 
 Amp_err_target = Target.amp_err_prc;
 Phi_err_target = Target.phi_err_deg;
@@ -87,7 +87,7 @@ function Ratio = get_amp_to_range_ratio(Result)
 
     N = 10;
     T_arr = linspace(T_start, T_end, N);
-    Amp = fit_viewer.poly3calc(Result.amp_poly, T_arr);
+    Amp = TDFRA_fit_viewer.poly3calc(Result.amp_poly, T_arr);
     Amp = mean(Amp);
 
     Ratio = Amp / MAX_VOLTAGE;

@@ -86,7 +86,7 @@ if ~isempty(Estimations)
     % NOTE: harm redefine
     if Period_counter > 1
         [Result_harm, RMS_Ratio] = TDFRA_fit_core.Harm_refit(Result, T_arr, V_arr, Fs2);
-        Harm_y = fit_viewer.Harm_calc(Result_harm, T_arr);
+        Harm_y = TDFRA_fit_viewer.Harm_calc(Result_harm, T_arr);
         if ~isempty(Harm_y)
             V_arr_pure = V_arr - Harm_y;
             Estimations_pure = TDFRA_fit_core.result2estimation(Result_harm);

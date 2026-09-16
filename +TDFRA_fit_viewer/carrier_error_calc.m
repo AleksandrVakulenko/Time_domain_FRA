@@ -6,7 +6,7 @@ Period = 1/Freq;
 Num_op_points = 10;
 
 pps = Num_op_points/Period;
-Output = fit_viewer.calc_output(Result_in, pps);
+Output = TDFRA_fit_viewer.calc_output(Result_in, pps);
 Amp_out = Output.amp;
 % Phi_out = Output.phi;
 BG_out = Output.bg;

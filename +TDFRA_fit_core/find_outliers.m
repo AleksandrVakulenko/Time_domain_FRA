@@ -28,7 +28,7 @@ function Residuals = calc_residuals(Ch_data, Result_in)
 T_arr = Ch_data.time;
 Data_signal = Ch_data.voltage;
 
-ym = fit_viewer.calc_fitted_signal(Result_in, T_arr);
+ym = TDFRA_fit_viewer.calc_fitted_signal(Result_in, T_arr);
 
 Residuals = Data_signal - ym;
 

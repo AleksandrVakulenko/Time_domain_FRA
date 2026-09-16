@@ -16,7 +16,7 @@
 %           .amp_poly   - Polynomial coefficients for amplitude vs time.
 %           .phi        - Carrier phase (degrees).
 %           .amp_err_prc, .phi_err_deg, .const_err_prc (or similar fields
-%                         obtained via fit_viewer.carrier_error_calc).
+%                         obtained via TDFRA_fit_viewer.carrier_error_calc).
 %                 (The function internally calls carrier_error_calc.)
 %       Target  - Structure with target accuracy limits:
 %           .amp_err_prc - Target amplitude error in percent.
@@ -34,8 +34,8 @@
 %         of the input range.
 %       * The function assumes a maximum input voltage of 10 V.
 %
-%   See also fit_viewer.carrier_error_calc, fit_viewer.score_calc,
-%            fit_viewer.poly3calc.
+%   See also TDFRA_fit_viewer.carrier_error_calc, TDFRA_fit_viewer.score_calc,
+%            TDFRA_fit_viewer.poly3calc.
 
 
 
