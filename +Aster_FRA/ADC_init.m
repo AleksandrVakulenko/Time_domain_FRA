@@ -65,4 +65,8 @@ Fs_new = Aster.ADC_send_freq(Sampling_freq);
 Aster.ADC_filter(ADC_filter_Fc);
 % Aster.set_ADC_2_range(12); % FIXME: check it
 
+% FIXME: 
+klog.disp(['Fs = ' num2str(Fs_new) '; Fc = ' ...
+    num2str(ADC_filter_Fc, '%0.3f') ' Hz'], "debug_light");
+
 end
