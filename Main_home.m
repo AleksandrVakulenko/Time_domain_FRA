@@ -4,7 +4,9 @@
 
 % FIXME: add LCR terminate before start
 
-LCR_type = {"LCR_E4980AL", []};
+LCR_type = Aster_FRA_helper.LCR_device_name_type("LCR_E4980AL", []);
+% LCR_type = Aster_FRA_helper.LCR_device_name_type.empty;
+
 if ispc
     Aster_addr = 6;
 elseif isunix
@@ -12,72 +14,93 @@ elseif isunix
 end
 
 Harm_num = [3];
-Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
 
-Gen_Voltage_level = 2.1; % [V]
+Gen_Voltage_level = 1.0; % [V]
 DC_bias = 0.0;
-F_min = 0.05;
+F_min = 0.1;
 F_max = 200;
-F_num = 50;
+F_num = 45;
 Noisy_env = true;
-% Fixed_range = [5];
 
 Freq_arr = TDFRA_fit_other.gen_freq_arr(F_min, F_max, F_num, ...
-    "shuffle", "off", "repeat", 3, 'correction', 'max');
+    "shuffle", "off", "repeat", 1, 'correction', 'max');
 
 % Freq_arr = 0.005;
 
-Periods = 1./Freq_arr;
-if Time_profile == "common"
-    Periods = Periods*1.47;
-elseif Time_profile == "fine"
-    Periods = Periods*2.08;
-elseif Time_profile == "most_accurate"
-    Periods = Periods*2.0;
-elseif Time_profile == "ultra_fast"
-    Periods = Periods*1.16;
-end
-Periods(Periods < 5) = 5;
-Time_prediction_m = sum(Periods)/60;
+Time_prediction_m = Aster_FRA_helper.time_prediction(Freq_arr, Time_profile);
 disp(['Time prediction: ' num2str(Time_prediction_m, '%0.1f') ' min']);
 
 %%
-% Freq_arr = 0.1;
 
-Sample.info = "test";
-
-
-
-F_range_Aster = Freq_arr <= 200;
-F_range_LCR = Freq_arr >= 20;
-
-Freq_arr_Aster = Freq_arr(F_range_Aster);
-Freq_arr_LCR = Freq_arr(F_range_LCR);
-
+% NOTE: run GUI
 Fig = TDFRA_fit_gui.init_Aster_FRA_gui();
 Ax_arr = [Fig.UserData.axes_top Fig.UserData.axes_bot];
 Stop_button = Fig.UserData.stop_button;
 Resources.stop_button = Stop_button;
 Resources.underrange_ind = Fig.UserData.underrange_ind;
-
 % Resources = [];
 
+Aster_highest_freq = 200; % FIXME: get from instrument
+LCR_lowest_freq = 20; % FIXME: get from instrument
+
+F_range_Aster = Freq_arr <= Aster_highest_freq; 
+F_range_LCR = Freq_arr >= LCR_lowest_freq; 
+
+Freq_arr_Aster = Freq_arr(F_range_Aster);
+Freq_arr_LCR = Freq_arr(F_range_LCR);
+
+if ~isempty(Freq_arr_LCR)
+    LCR_avilable = Aster_FRA_helper.check_LCR_avilable(LCR_type);
+    if ~LCR_avilable
+        warning('LCR dev anavilable'); % FIXME: disp
+    end
+else
+    % USED is flag what we dont need an LCR measurments
+    LCR_avilable = false; 
+end
+
+
+% NOTE: run LCR first if possible
+Result_arr_LCR = Aster_FRA.LCR_result_type.empty;
+if LCR_avilable
+    Aster_FRA.switch_to_LCR(Aster_addr);
+   
+    N = numel(Freq_arr_LCR);
+    for i = 1:N
+        disp(['LCR freq list: ' num2str(i) '/' num2str(N)]); % FIXME: disp
+
+        Gen_freq = Freq_arr_LCR(i);
+        LCR_Result = Aster_FRA.LCR_measure(LCR_type, Gen_freq, Gen_Voltage_level, Time_profile);
+        LCR_Result.freq = Gen_freq;
+        Result_arr_LCR = [Result_arr_LCR LCR_Result];
+    end
+end
 
 % NOTE: terminate LCR
+if LCR_avilable
+    Aster_FRA_helper.LCR_terminate(LCR_type);
+end
 
 
-Results_arr_PRE = Aster_FRA.pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr);
-% Zest = struct('type', 'cap', 'value', 10e-12);
-% Zest = struct('type', 'res', 'value', 10e3);
-disp(['PRE MEASURMENTS FINISH' newline])
-pause(1);
+% NOTE: do not do pre measurments if LCR results avilable in freq range
+%   in range from 20 Hz to 200 Hz
+flag = Aster_FRA_helper.is_LCR_results_valid_as_pre(Result_arr_LCR);
+if ~flag
+    disp(['RUN MEASURMENTS FINISH' newline]) % FIXME: disp
+    Results_arr_PRE = Aster_FRA.pre_measurment(Resources, Aster_addr, ...
+        Gen_Voltage_level, Ax_arr);
+    disp(['PRE MEASURMENTS FINISH' newline]) % FIXME: disp
+else
+    Results_arr_PRE = Result_arr_LCR;
+end
 
 Timer = tic;
 Result_arr_Aster = Aster_FRA.LCR_result_type.empty;
-Extra_data_arr = [];
+Extra_data_arr = Aster_FRA.LCR_extra_data_type.empty;
 N = numel(Freq_arr_Aster);
 for i = 1:N
-    disp([num2str(i) '/' num2str(N)])
+    disp(['Aster freq list: ' num2str(i) '/' num2str(N)]); % FIXME: disp
 
     Gen_freq = Freq_arr_Aster(i);
 %     Gen_Voltage_level = Voltage_amp_arr(i);
@@ -98,6 +121,7 @@ for i = 1:N
     % FIXME: it is bad in shuffled freq array
 end
 
+% FIXME: debug section
 Full_time = toc(Timer);
 Time_to_compare = 2./Freq_arr_Aster;
 Time_to_compare(Time_to_compare < 1) = 1;
@@ -106,7 +130,6 @@ disp(['Full time: ' num2str(Full_time/60, '%0.1f') ' min | NC_time ~ ' ...
     num2str(Time_to_compare/60, '%0.1f') ' min | ratio = ' ...
     num2str(Full_time/Time_to_compare, '%0.1f') ])
 disp(['Time prediction: ' num2str(Time_prediction_m, '%0.1f') ' min']);
-
 
 
 

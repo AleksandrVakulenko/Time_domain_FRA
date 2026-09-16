@@ -1,5 +1,4 @@
 
-% FIXME: this function is also a part of FRA toolbox
 
 function switch_to_LCR(Aster_addr)
 

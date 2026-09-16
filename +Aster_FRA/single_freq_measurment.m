@@ -28,7 +28,7 @@ try
     Settings, Fig_or_ax, Zest, Fixed_range, Self_cal_mode);
 catch ERR
     Fit_Result = Aster_FRA.LCR_result_type.empty;
-    Extra_data = []; % FIXME: add type
+    Extra_data = Aster_FRA.LCR_extra_data_type.empty; % FIXME: add type
     Aster_FRA_helper.print_error_msg(ERR);
     return
 end
@@ -82,10 +82,13 @@ end
 % FIXME: use debug function to show results
 if ~isempty(Result_1) && ~isempty(Result_2)
     Fit_Result = Aster_FRA.do_FRA_result(Result_1, Result_2, Freq, Aster_range);
+    Fit_Result.gen_amp = Gen_Voltage_level; % FIXME % Measurment voltage level
+    Fit_Result.gen_dc = DC_bias; % FIXME % Measurment DC bias level
 else
     Fit_Result = Aster_FRA.LCR_result_type.empty; % FIXME: use FRA type
 end
 
+Extra_data = Aster_FRA.LCR_extra_data_type;
 Extra_data.ch_data_1 = Ch_data_1;
 Extra_data.ch_data_2 = Ch_data_2;
 Extra_data.result_1 = Result_1;
@@ -96,8 +99,8 @@ Extra_data.score.score_1 = Score_1;
 Extra_data.score.score_2 = Score_2;
 Extra_data.score.best_flag = Best_flag;
 Extra_data.score.max_score = Max_score;
-Extra_data.DEBUG.DEBUG_1 = DEBUG_1;
-Extra_data.DEBUG.DEBUG_2 = DEBUG_2;
+Extra_data.DEBUG.DEBUG_1 = DEBUG_1; % FIXME: delete
+Extra_data.DEBUG.DEBUG_2 = DEBUG_2; % FIXME: delete
 Extra_data.used_ranges = Used_ranges;
 Extra_data.aster_range = Aster_range;
 

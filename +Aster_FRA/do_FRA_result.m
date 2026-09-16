@@ -1,9 +1,9 @@
 
 
-% FIXME: R_Scale could be calculated from Range_N
-% FIXME: freq is inside Result struct
 
-function Result = do_FRA_result(Result_1, Result_2, freq, Range_N, R_Scale, options)
+function Result = do_FRA_result(Result_1, Result_2, freq, Range_N, ...
+    R_Scale, options)
+
 arguments
     Result_1
     Result_2
@@ -183,6 +183,9 @@ if disp_flag
 
 end
 
+Cur = Volt2*R_Scale;
+Cur_err = Volt2_err*R_Scale;
+
 Result = Aster_FRA.LCR_result_type;
 
 Result.freq = freq;
@@ -199,10 +202,10 @@ Result.harm = Harm_2_out_arr;
 
 Result.cap_par = C_par;
 Result.r_scale = R_Scale;
-Result.current = []; % FIXME: debug; previously: Cur;
-Result.current_error = []; % FIXME: debug; previously: Cur_err;
-Result.voltage = []; % FIXME: debug; previously: Volt1;
-Result.voltage_error = [];% FIXME: debug; previously: Volt1_err;
+Result.current = Cur;
+Result.current_error = Cur_err;
+Result.voltage = Volt1;
+Result.voltage_error = Volt1_err;
 
 Result.range_n = Range_N;
 

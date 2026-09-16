@@ -76,7 +76,7 @@ pause(1);
 
 Timer = tic;
 Result_arr_Aster = Aster_FRA.LCR_result_type.empty;
-Extra_data_arr = [];
+Extra_data_arr = Aster_FRA.LCR_extra_data_type.empty;
 N = numel(Freq_arr_Aster);
 for i = 1:N
     disp([num2str(i) '/' num2str(N)])

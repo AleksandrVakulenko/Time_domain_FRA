@@ -1,4 +1,13 @@
 
+% 1) Save old files in current state
+% 2) make TDFRA module
+% 3) make Flowery module for Dahlia and Aster
+% 4) make Aster_FRA a part of Flowery
+% 5) create Dielectric project
+% 6) add Flowery and TDFRA to auto include in Dielectric
+% 7) 
+
+
 % Aster hardware/software:
 % 1) Add ADC_1 and ADC_2 ranges
 % 2) Add I input protection

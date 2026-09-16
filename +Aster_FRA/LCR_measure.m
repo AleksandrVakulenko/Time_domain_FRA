@@ -2,16 +2,16 @@
 
 function [Result] = LCR_measure(LCR_type, Gen_freq, Gen_Voltage_level, Time_profile)
 arguments
-    LCR_type % FIXME: add type
-    Gen_freq
-    Gen_Voltage_level
+    LCR_type Aster_FRA_helper.LCR_device_name_type
+    Gen_freq double
+    Gen_Voltage_level double
     Time_profile string {mustBeMember(Time_profile, ...
         ["ultra_fast", "common", "fine", "most_accurate"])} = "common"
 end
 
 Result = Aster_FRA.LCR_result_type.empty();
 
-LCR_dev = feval(LCR_type{1}, LCR_type{2});
+LCR_dev = LCR_type.init_connection();
 
 if ~isa(LCR_dev, "adev_traits.LCR_meter_traits")
     delete(LCR_dev);

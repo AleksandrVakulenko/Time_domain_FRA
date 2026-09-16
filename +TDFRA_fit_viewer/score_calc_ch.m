@@ -3,6 +3,7 @@
 
 function [Score, max_score] = score_calc_ch(Result, Target)
 
+% FIXME: could be 29
 max_score = 23; % FIXME: magic constant
 
 if isempty(Result)
