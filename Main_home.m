@@ -22,7 +22,7 @@ F_num = 50;
 Noisy_env = true;
 % Fixed_range = [5];
 
-Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
+Freq_arr = TDFRA_fit_other.gen_freq_arr(F_min, F_max, F_num, ...
     "shuffle", "off", "repeat", 3, 'correction', 'max');
 
 % Freq_arr = 0.005;

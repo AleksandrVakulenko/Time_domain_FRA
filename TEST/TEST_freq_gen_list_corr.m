@@ -6,7 +6,7 @@ F_max = 200;
 F_num = 200;
 
 
-Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
+Freq_arr = TDFRA_fit_other.gen_freq_arr(F_min, F_max, F_num, ...
     "shuffle", "off", "repeat", 1, 'correction', 'off')
 
 figure

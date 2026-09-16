@@ -150,7 +150,7 @@ Gen_voltage_arr(Gen_voltage_arr > 5) = 5;
 F_min = 0.05;
 F_max = 70;
 F_num = 200;
-Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
+Freq_arr = TDFRA_fit_other.gen_freq_arr(F_min, F_max, F_num, ...
     "shuffle", "off", "repeat", 2);
 Gen_voltage_arr = 24.18./Freq_arr+0.3114;
 Gen_voltage_arr(Gen_voltage_arr > 5) = 5;
@@ -162,7 +162,7 @@ Fixed_range_arr = 4*ones(size(Freq_arr));
 F_min = 0.5;
 F_max = 200;
 F_num = 200;
-Freq_arr = fit_other.gen_freq_arr(F_min, F_max, F_num, ...
+Freq_arr = TDFRA_fit_other.gen_freq_arr(F_min, F_max, F_num, ...
     "shuffle", "off", "repeat", 3);
 Gen_voltage_arr = 5*ones(size(Freq_arr));
 Fixed_range_arr = 3*ones(size(Freq_arr));

@@ -20,9 +20,9 @@ end
 Freq_arr = 10.^linspace(log10(F_min), log10(F_max), F_num);
 
 if options.correction == "on"
-    Freq_arr = fit_other.correct_freq_list(Freq_arr, 2);
+    Freq_arr = TDFRA_fit_other.correct_freq_list(Freq_arr, 2);
 elseif options.correction == "max"
-    Freq_arr = fit_other.correct_freq_list(Freq_arr, 3);
+    Freq_arr = TDFRA_fit_other.correct_freq_list(Freq_arr, 3);
     inds = Freq_arr > 46 & Freq_arr < 58; % FIMXE: use line freq const
     Freq_arr(inds) = [];
 end
