@@ -1,6 +1,7 @@
 
-% FIXME: implicit passing of an argument (Estimations) to a function:
+% FIXME: (2) implicit passing of an argument (Estimations) to a function:
 % use the second argument instead of Result.estimations
+% !OR concat outside in caller
 
 function Estimations = result2estimation(Result)
 arguments

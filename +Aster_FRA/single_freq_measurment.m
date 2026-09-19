@@ -45,7 +45,8 @@ Period_counter = Ch_data_1.period_counter;
 
 [Properties_1, Properties_2] = TDFRA_fit_core.get_fit_props(Period_counter);
 
-Max_points = 50e3; % FIXME: (3) get from settings
+% FIXME: (3) get from settings (but settings do not belong to Aster_FRA)
+Max_points = 50e3;
 
 [Result_1, Residuals_1, DEBUG_1, Result_2, Residuals_2, DEBUG_2] = ...
     TDFRA_fit_core.fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...

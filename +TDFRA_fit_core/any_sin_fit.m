@@ -9,13 +9,15 @@ function [Result, Residuals, DEBUG] = ...
 
 Period = 1/Freq;
 
-% FIXME: undone structure
+% FIXME: (3) undone structure
 Freq_dev_flag = Settings.freq_dev_flag;
 Freq_dev_const = Settings.freq_dev_const;
 
 
 if ~isempty(Properties)
-    [Amp_type, BG_type, Phi_type] = prop_parser(Properties);
+    Amp_type = Properties.Amp_type;
+    BG_type = Properties.BG_type;
+    Phi_type = Properties.Phi_type;
 else
     Amp_type = "const";
     Phi_type = "const";
@@ -99,7 +101,7 @@ switch Amp_type
     case "poly2"
         Amp_str = TDFRA_fit_core.func_constructor(X_arr, 'a');
         amp_poly = fit(Est_time_norm', Est_amp', 'poly2');
-        a1 = feval(amp_poly, X_arr(1)/Period); % FIXME: use feval once for all
+        a1 = feval(amp_poly, X_arr(1)/Period); % FIXME: (3) use feval once for all
         a2 = feval(amp_poly, X_arr(2)/Period);
         a3 = feval(amp_poly, X_arr(3)/Period);
         Lower = [Lower a1/10 a2/10 a3/10];
@@ -128,7 +130,7 @@ switch BG_type
     case "poly2"
         BG_str = TDFRA_fit_core.func_constructor(X_arr, 'c');
         bg_poly = fit(Est_time_norm', Est_bg', 'poly2');
-        c1 = feval(bg_poly, X_arr(1)/Period); % FIXME: use feval once for all
+        c1 = feval(bg_poly, X_arr(1)/Period); % FIXME: (3) use feval once for all
         c2 = feval(bg_poly, X_arr(2)/Period);
         c3 = feval(bg_poly, X_arr(3)/Period);
         Lower = [Lower -inf -inf -inf];
@@ -138,7 +140,7 @@ switch BG_type
         error('unreachable')
 end
 
-Phi_dev = 120; % FIXME: magic constant
+Phi_dev = 120; % FIXME: (2) magic constant
 switch Phi_type
     case "const"
         Phi_str = TDFRA_fit_core.func_constructor([], 'p');
@@ -158,7 +160,7 @@ switch Phi_type
     case "poly2"
         Phi_str = TDFRA_fit_core.func_constructor(X_arr, 'p');
         phi_poly = fit(Est_time_norm', Est_phi', 'poly2');
-        p1 = feval(phi_poly, X_arr(1)/Period); % FIXME: use feval once for all
+        p1 = feval(phi_poly, X_arr(1)/Period); % FIXME: (3) use feval once for all
         p2 = feval(phi_poly, X_arr(2)/Period);
         p3 = feval(phi_poly, X_arr(3)/Period);
         Lower = [Lower p1-Phi_dev p2-Phi_dev p3-Phi_dev];
@@ -169,11 +171,11 @@ switch Phi_type
 end
 
 
-Freq_dev_range = [-100 100]; % FIXME: debug
+Freq_dev_range = [-100 100]; % NOTE: maybe more?
 if Freq_dev_flag
-    F_dev_str = '*(1+q/1e6)'; % FIXME: add D (coeffname: q)
+    F_dev_str = '*(1+q/1e6)'; % NOTE: add freq dev (coeffname: q)
     Lower = [Lower Freq_dev_range(1)];
-    StartPoint = [StartPoint 0]; % FIXME: magic constant
+    StartPoint = [StartPoint 0];
     Upper = [Upper Freq_dev_range(2)];
 else
     F_dev_str = ['*(' num2str(1+Freq_dev_const/1e6) ')'];
@@ -190,7 +192,7 @@ if ~isempty(Harm_est)
             num2str(Hn*Freq) F_dev_str '*x + ' HPref num2str(Hn) 'p' '/180*pi)'];
         Eq = [Eq ' + ' HarmN_eq];
         if Status == "est_1"
-            %FIXME: phi limits?
+            % FIXME: (2) phi limits enougth?
             Lower = [Lower Harm_est(i).amp*0.05 Harm_est(i).phi-45];
             StartPoint = [StartPoint Harm_est(i).amp Harm_est(i).phi];
             Upper = [Upper Harm_est(i).amp*20 Harm_est(i).phi+45];
@@ -212,7 +214,7 @@ Upper(inds) = inf;
 
 ft = fittype(Eq, 'independent', 'x', 'dependent', 'y');
 opts = fitoptions('Method', 'NonlinearLeastSquares');
-opts.TolX = 1e-12; % FIXME: default
+opts.TolX = 1e-12; % NOTE: default
 opts.TolFun = 1e-12; % default
 opts.Display = 'off';
 
@@ -220,7 +222,7 @@ opts.Lower = Lower;
 opts.StartPoint = StartPoint;
 opts.Upper = Upper;
 
-% FIXME: debug section
+% FIXME: (2) delete debug section
 % NOTE: used in DEL_plot_fit_ST.m
 DEBUG.StartPoint = StartPoint;
 DEBUG.coeffnames = coeffnames(ft);
@@ -271,7 +273,7 @@ phi_poly_err.p3 = get_error(fitresult, 'p3')*Error_mult;
 phi_poly_err.x = X_arr;
 
 if ~isempty(Harm_est)
-    harm_out = struct('n', [], 'amp', [], 'phi', []);
+    harm_out = struct('n', [], 'amp', [], 'phi', []); % FIXME: (2) add class
     harm_err = struct('n', [], 'amp', [], 'phi', []);
     for i = 1:numel(Harm_est)
         hn = Harm_est(i).n;
@@ -285,7 +287,7 @@ if ~isempty(Harm_est)
         harm_err(i).status = Harm_est(i).status;
     end
 else
-    harm_out = [];
+    harm_out = []; % FIXME: use class.empty
     harm_err = [];
 end
 
@@ -305,23 +307,10 @@ Result.harm = harm_out;
 Result.harm_err = harm_err;
 Result.estimations = TDFRA_fit_core.Estimation_type.empty();
 
-
-% FIXME: debug
-% figure
-% plot(Time, Residuals)
 end
 
 
 
-
-
-
-function [Amp_type, BG_type, Phi_type] = prop_parser(Properties)
-    % FIXME: debug function
-    Amp_type = Properties.Amp_type;
-    BG_type = Properties.BG_type;
-    Phi_type = Properties.Phi_type;
-end
 
 
 function [Value, Err] = get_value(fitresult, Name)
@@ -359,7 +348,7 @@ function Err = get_error(fitresult, Name)
     end
 end
 
-% FIXME: unused function: use or delete or put in archive
+% FIXME: (2) unused function: use or delete or put in archive
 function [Str, Lower, StartPoint, Upper] = ...
     ploy_str(Time, Period, Phi_type, Pref, Est_time_norm, Est_v, Lower, StartPoint, Upper)
 
@@ -383,7 +372,7 @@ function [Str, Lower, StartPoint, Upper] = ...
         case "poly2"
             Str = TDFRA_fit_core.func_constructor(X_arr, Pref);
             phi_poly = fit(Est_time_norm', Est_v', 'poly2');
-            p1 = feval(phi_poly, X_arr(1)/Period); % FIXME: use feval once for all
+            p1 = feval(phi_poly, X_arr(1)/Period); % FIXME: (3) use feval once for all
             p2 = feval(phi_poly, X_arr(2)/Period);
             p3 = feval(phi_poly, X_arr(3)/Period);
             Lower = [Lower -inf -inf -inf];

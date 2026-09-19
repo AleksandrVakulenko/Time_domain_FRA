@@ -1,5 +1,5 @@
 
-% FIXME: bad for noise amp calc
+% FIXME: (2) bad for noise amp calc
 
 % NOTE: fine for finding noise floor on fft
 
@@ -95,7 +95,7 @@ Bad_harms = exclude_list;
 
 Diff = (Signal_f - Bad_harms')./repmat(Bad_harms, numel(Signal_f), 1)';
 
-Freq_max_dev = 0.03; % FIXME: get from settings
+Freq_max_dev = 0.03; % FIXME: (3) get from settings
 ind = find(abs(Diff) < Freq_max_dev);
 [~, j] = ind2sub(size(Diff), ind);
 

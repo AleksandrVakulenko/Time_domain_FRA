@@ -1,4 +1,5 @@
 
+% FIXME: (2) all this file is a one big problem
 
 function Estimations_1 = estimation_processing(Ch_data_1)
 
@@ -53,7 +54,7 @@ if Periods_counter >= 1
         if ~isnan(Result1.amp)
             Estimations = [Estimations Result1];
         else
-            error('err EF2'); % FIXME: undone // maybe unreachable
+            error('err EF2'); % FIXME: (2) maybe unreachable
         end
     end
 
@@ -66,17 +67,14 @@ if Periods_counter >= 1
         if ~isnan(Result2.amp)
             Estimations = [Estimations Result2];
         else
-            error('err EF4'); % FIXME: undone // maybe unreachable
+            error('err EF4'); % FIXME: (2) maybe unreachable
         end
     end
 
 else
-%     Freq = 1/Period;
-%     Init_values = TDFRA_fit_core.do_initial_estimation(T_arr, V_arr, Period);
-%     Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, Freq, Init_values);
 
     % FIXME: maybe there are some problems here
-
+    % FIXME: (1) why *1 and *end?
     Estimations(1).t_min = 0;
     Estimations(1).t_max = 0;
     Estimations(1).status = 'fixed';

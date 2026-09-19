@@ -3,7 +3,7 @@ function [Estimations] = do_estimations(Estimations, T_arr, V_arr, ...
 
 Period = 1/Freq;
 
-% FIXME: do we need this?
+% FIXME: (3) do we need this?
 if isempty(Estimations) && Periods_counter >= 1.0
     Init_values = TDFRA_fit_core.do_initial_estimation(T_arr, V_arr, Period);
     Result = TDFRA_fit_core.simple_sin_fit_f(T_arr, V_arr, ...
@@ -13,6 +13,9 @@ end
 
 switch signal_per_duration(Periods_counter)
     case "invalid" % 0 : 0.45
+        % FIXME: (2) good place to return some type of flag to 
+        %   use this time for any other side functions call
+
         % DO SOMETHING:
         % - noise analysis
         % pause(0.05*Period)
@@ -57,7 +60,7 @@ switch signal_per_duration(Periods_counter)
         end
 
 
-    case "long" % 2 : 10 FIXME: same as above?
+    case "long" % 2 : 10 FIXME: (3) same as above?
         [out_time, out_sig] = TDFRA_fit_core.get_one_period(T_arr, V_arr, Period, ...
             "last", 1.05);
         Result1 = TDFRA_fit_core.simple_sin_fit_f(out_time, out_sig, ...

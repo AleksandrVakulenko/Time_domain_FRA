@@ -9,7 +9,7 @@ V_arr
 Fs
 freq
 Harm_num
-do_not_disp = false % FIXME: delete
+do_not_disp = false % FIXME: (3) delete (why?)
 end
 
 Harm_num(Harm_num == 1) = [];
@@ -39,7 +39,6 @@ if ~isempty(Harm_num)
     k = 0;
     Harm_est = struct('n', [], 'amp', [], 'phi', []);
     for hn = Harm_num
-        % FIXME: TDFRA_fit_core.DFT_single_freq could return empty
         [Amp_DFT, Phi_DFT] = TDFRA_fit_core.DFT_single_freq(T_arr, V_arr, hn*freq);
         if Amp_DFT > 10^(HNR_min_dB/20)*nf_calc(hn*freq)
             k = k + 1;

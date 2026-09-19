@@ -1,4 +1,6 @@
 
+% FIXME: (2) need upgrade
+
 function [range, Outliers_volume, Limits, Residuals] = ...
     find_outliers(Ch_data, Result)
 
@@ -75,8 +77,8 @@ function [range, Top_limit, Bot_limit] = find_outliers_range(Residuals)
 Mean = mean(Residuals);
 Sigma = std(Residuals);
 
-% FIXME: need to analyze histogram
-Sigma_scale = 3; % FIXME: get_from_settings
+% FIXME: (2) need to analyze histogram
+Sigma_scale = 3; % FIXME: (3) get_from_settings
 Top_limit = Mean + Sigma_scale*Sigma;
 Bot_limit = Mean - Sigma_scale*Sigma;
 
@@ -89,7 +91,7 @@ function range = range_smooth(range, Freq, Fs)
 
 Period = 1/Freq;
 
-Kernel_length_time = 0.01 * Period; % FIXME: magic constant
+Kernel_length_time = 0.01 * Period; % FIXME: (2) magic constant
 Kernel_length_num = round(Kernel_length_time*Fs);
 
 Kernel = ones(1, Kernel_length_num)/Kernel_length_num;
@@ -102,10 +104,10 @@ end
 
 function [mu_start, sigma_start] = estimate_mu_sigma(Residuals)
 
-P10 = prctile(Residuals, 50 - 18); % Gauss settings
+P10 = prctile(Residuals, 50 - 18); % NOTE: Gauss dist settings (wrong)
 P90 = prctile(Residuals, 50 + 18);
 
-% FIXME: why? it looks good for gauss
+% FIXME: (3) why? it looks good for gauss now (wrong)
 mu_start = mean(Residuals);
 sigma_start = P90-P10;
 

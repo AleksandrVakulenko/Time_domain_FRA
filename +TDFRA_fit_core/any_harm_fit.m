@@ -7,9 +7,6 @@
 function [Result, Residuals, DEBUG] = ...
     any_harm_fit(Time, Signal, Freq, Harm_est, Freq_dev_const)
 
-Period = 1/Freq; % FIXME: unused
-
-
 Lower = [];
 StartPoint = [];
 Upper = [];
@@ -31,12 +28,12 @@ if ~isempty(Harm_est)
         Upper = [Upper Harm_est(i).amp*1000 Harm_est(i).phi+180];
     end
 else
-    % FIXME: what else?
+    error("No harm est is avilable")
 end
 
 ft = fittype(Eq, 'independent', 'x', 'dependent', 'y');
 opts = fitoptions('Method', 'NonlinearLeastSquares');
-opts.TolX = 1e-12; % FIXME: default
+opts.TolX = 1e-12; % NOTE: default
 opts.TolFun = 1e-12; % default
 opts.Display = 'off';
 
@@ -44,7 +41,7 @@ opts.Lower = Lower;
 opts.StartPoint = StartPoint;
 opts.Upper = Upper;
 
-% FIXME: debug section
+% FIXME: (2) delete debug section
 % NOTE: used in DEL_plot_fit_ST.m
 DEBUG.StartPoint = StartPoint;
 DEBUG.coeffnames = coeffnames(ft);
@@ -61,8 +58,8 @@ D_err = 0;
 
 
 if ~isempty(Harm_est)
-    harm_out = struct('n', [], 'amp', [], 'phi', []);
-    harm_err = struct('n', [], 'amp', [], 'phi', []);
+    harm_out = struct('n', [], 'amp', [], 'phi', []); % FIXME: (1) use class
+    harm_err = struct('n', [], 'amp', [], 'phi', []); % FIXME: (1) use class
     for i = 1:numel(Harm_est)
         hn = Harm_est(i).n;
         harm_out(i).n = hn;
@@ -71,7 +68,7 @@ if ~isempty(Harm_est)
         harm_out(i).status = Harm_est(i).status;
         harm_err(i).n = hn;
         harm_err(i).amp = get_error(fitresult, [HPref num2str(hn) 'a'])*Error_mult;
-        harm_err(i).phi = get_error(fitresult, [HPref num2str(hn) 'p'])*Error_mult;
+        hany_harm_fitarm_err(i).phi = get_error(fitresult, [HPref num2str(hn) 'p'])*Error_mult;
         harm_err(i).status = Harm_est(i).status;
     end
 else

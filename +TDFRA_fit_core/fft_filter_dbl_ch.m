@@ -23,7 +23,7 @@ if Ratio < 0
     Ratio = 0;
 end
 
-Min_Ratio = 0.8; % FIXME: get from settings
+Min_Ratio = 0.8; % FIXME: (3) get from settings
 
 if Ratio > Min_Ratio
     apply_filter = true;
@@ -43,8 +43,6 @@ if apply_filter
     T_arr_filt(range) = [];
     Signal_filt_1(range) = [];
     Signal_filt_2(range) = [];
-else
-    % FIXME: if we care about this then add output apply_filter flag
 end
 
 end

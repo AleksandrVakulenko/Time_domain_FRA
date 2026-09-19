@@ -19,7 +19,8 @@ end
 
 Estimations_1 = TDFRA_fit_core.estimation_processing(Ch_data);
 
-Fit_settings_1.freq_dev_flag = false; % FIXME: maybe put in input args
+% NOTE: disable f dev for fit
+Fit_settings_1.freq_dev_flag = false; % FIXME: (2) maybe put in input args
 Fit_settings_1.freq_dev_const = 0;
 Fit_settings_1.max_points = Max_points;
 

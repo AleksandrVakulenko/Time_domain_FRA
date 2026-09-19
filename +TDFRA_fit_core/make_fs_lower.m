@@ -1,5 +1,5 @@
 
-%FIXME: UNDONE function
+% FIXME: (1) UNDONE function
 
 function [T_arr_new, V1_arr_new, V2_arr_new, Fs_new] = make_fs_lower(T_arr, ...
     V1_arr, V2_arr, Fs, freq, Find_harms_num, Max_points)
@@ -7,9 +7,8 @@ function [T_arr_new, V1_arr_new, V2_arr_new, Fs_new] = make_fs_lower(T_arr, ...
 Num = numel(T_arr);
 
 if Num > Max_points
-%     Period = 1/freq; % FIXME: unused
+
     Time_length = T_arr(end) - T_arr(1);
-%     Period_counter = Time_length/Period; % FIXME: unused
     
     if ~isempty(Find_harms_num)
         Max_harm = max(Find_harms_num);

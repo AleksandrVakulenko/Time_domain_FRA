@@ -2,6 +2,7 @@
 % NOTE:
 % class for all fit functions result
 
+% FIXME: (3) maybe rename to fit_result_type?
 
 classdef Result_type
 

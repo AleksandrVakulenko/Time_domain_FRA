@@ -32,7 +32,7 @@ if Rej_span < 2*Freq_resolution
     Rej_span = 2*Freq_resolution;
 end
 
-Filter_tau = 0.2; % [s] FIXME: must be a function of filter props
+Filter_tau = 0.2; % [s] FIXME: (2) must be a function of filter props
 Cut_FOP_basic = Filter_tau/Period;
 
 Rej_freq_low = Rej_freq - Rej_span/2;

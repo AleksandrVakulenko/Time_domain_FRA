@@ -1,4 +1,6 @@
 
+% FIXME: (2) need refactor
+
 % NOTE: use this for DFT only measurments
 
 % NOTE: if you want to find exact freq in fft - use this to trim data
@@ -7,7 +9,6 @@ function [Time, Signal] = signal_cut_by_n_periods(Time, Signal, freq)
     Time_length = Time(end) - Time(1);
     Period_length = Time_length*freq;
     if Period_length < 1
-        % FIXME: maybe half period ?
         Time = [];
         Signal = [];
     else

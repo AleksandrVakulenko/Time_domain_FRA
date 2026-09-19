@@ -1,5 +1,6 @@
 
-% FIXME: need refactor
+% FIXME: (3) need refactor
+% FIXME: (2) this function is device dependent!
 
 function [Times_conf, printer, Accuracy_conf, Profile] = ...
     get_time_config(Period, Time_profile, Harm_profile)
@@ -61,7 +62,7 @@ if Max_fop <= Min_fop
     Max_fop = Min_fop*1.2; % NOTE: just to add some space
 end
 
-Absolute_max_FOP = 30; % FIXME: get from settings
+Absolute_max_FOP = 30; % FIXME: (3) get from settings
 
 if Max_fop > Absolute_max_FOP
     Max_fop = Absolute_max_FOP;
@@ -71,7 +72,7 @@ if Min_fop > Max_fop
     Min_fop = Max_fop*0.9; % NOTE: just to add some space
 end
 
-% FIXME: maybe add top limit on FOP (~50)
+% FIXME: (3) maybe add top limit on FOP (~50)
 
 Times_conf.min_fop = Min_fop;
 Times_conf.max_fop = Max_fop;
@@ -88,7 +89,7 @@ end
 
 
 
-% FIXME: add accuracy settings
+% FIXME: (2) add accuracy settings
 function Times_conf = get_time_conf_ultra_fast(Period, Harm_mult)
     if Harm_mult > 1
         Times_conf.period_for_harm_det = 0;

@@ -1,5 +1,5 @@
 
-% FIXME: may be unused
+% FIXME: (2) may be unused
 
 function [Res_to_noise, Residuals_rms, Noise_rms] = ...
     calc_res_to_noise(Ch_data, Result, Harm_num)

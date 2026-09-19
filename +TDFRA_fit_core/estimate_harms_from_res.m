@@ -1,7 +1,7 @@
 function Harm_est = estimate_harms_from_res(T_arr, Residuals, freq, ...
     Noise_rms, Harm_num)
 
-Sense_level_dB = +2; % [dB] FIXME: magic constant
+Sense_level_dB = +2; % [dB] FIXME: (3) magic constant
 
 Harm_num(Harm_num == 1) = [];
 
@@ -10,13 +10,10 @@ Harm_amp_arr_dB = zeros(size(Harm_num));
 Harm_phi_arr = zeros(size(Harm_num));
 for i = 1:numel(Harm_num)
     Harm_freq = freq*Harm_num(i);
-    % FIXME: TDFRA_fit_core.DFT_single_freq could return empty
     [Harm_amp, Phi_harm] = TDFRA_fit_core.DFT_single_freq(T_arr, Residuals, Harm_freq);
     Harm_amp_arr(i) = Harm_amp;
-    Value = Harm_amp;
-    Value = Value/Noise_rms;
-    Value = 20*log10(Value);
-    Harm_amp_arr_dB(i) = Value;
+    Harm_to_noise_ration = Harm_amp/Noise_rms;
+    Harm_amp_arr_dB(i) = 20*log10(Harm_to_noise_ration);
     Harm_phi_arr(i) = Phi_harm;
 end
 

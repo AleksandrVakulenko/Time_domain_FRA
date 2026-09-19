@@ -10,7 +10,7 @@ function Result = simple_sin_fit_f(Time, Signal, Freq, Estimations)
     if numel(Estimations) ~= 1
         Estimations = combining_estimations(Estimations);
     end
-    % FIXME: ??? wtf
+    
     Start_Amp = Estimations(1).amp;
     Start_Phi = Estimations(1).phi;
     Start_BG = Estimations(1).bg;
@@ -20,7 +20,7 @@ function Result = simple_sin_fit_f(Time, Signal, Freq, Estimations)
     ft = fittype(Eq, 'independent', 'x', 'dependent', 'y');
     opts = fitoptions('Method', 'NonlinearLeastSquares');
     opts.Display = 'Off';
-    opts.TolX = 1e-6; % FIXME: default
+    opts.TolX = 1e-6; % NOTE: default
     opts.TolFun = 1e-6; % default
     
     A = Start_Amp;
@@ -33,7 +33,7 @@ function Result = simple_sin_fit_f(Time, Signal, Freq, Estimations)
     
     [fitresult, gof] = fit(Time', Signal', ft, opts);
     
-    % FIXME: do we need to check quality? (use gof somehow)
+    % FIXME: (2) do we need to check quality? (use gof somehow)
     
     A = fitresult.A;
     P = fitresult.P;
@@ -49,7 +49,6 @@ function Result = simple_sin_fit_f(Time, Signal, Freq, Estimations)
     C_err = CI(2);
     P_err = CI(3);
 
-    % FIXME: maybe bad out name
     Result = TDFRA_fit_core.Estimation_type;
     Result.amp = A;
     Result.phi = P;
@@ -70,7 +69,7 @@ end
 
 function Result = combining_estimations(Estimations)
     N = numel(Estimations);
-    % FIXME: UNDONE
+    % FIXME: (2) UNDONE function
     Result.amp = mean([Estimations.amp]);
     Result.bg = mean([Estimations.bg]);
     Result.phi = mean([Estimations.phi]);
