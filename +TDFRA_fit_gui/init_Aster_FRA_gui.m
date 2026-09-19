@@ -6,8 +6,9 @@ Fig_name = 'FRA GUI';
 Screen_size = get(0, 'ScreenSize');
 Screen_size(1:2) = [];
 if isunix
-    % FIXME: use 'xrandr --query'
-    Screen_hor = Screen_size(1)/2; % FIXME: debug
+    % FIXME: (1) DEBUG section just to use in GNOME env with two monitors
+    % NOTE: use 'xrandr --query'
+    Screen_hor = Screen_size(1)/2;
     Screen_vert = Screen_size(2);
 else
     Screen_hor = Screen_size(1);
@@ -45,8 +46,8 @@ box(Ax2, 'on')
 hold(Ax2, 'on')
 cla(Ax2)
 
-
-CB = @(a, b) disp('Stop button is pressed'); % NOTE: default callback of button
+% FIXME: (3) default demo callback of button
+CB = @(a, b) disp('Stop button is pressed');
 
 Control_Frame = uipanel('parent', Fig, 'position', [0.0 0.5 0.3 0.5]);
 
@@ -55,7 +56,7 @@ Stop_button = uicontrol('parent', Control_Frame, ...
                    'units', 'normalized', ...
                    'position', [0.05 0.85 0.15 0.15/Aspect_ratio], ...
                    'string', 'Stop', ...
-                   'Callback', CB, ... % FIXME: why do we need this?
+                   'Callback', CB, ... % FIXME: (3) demo function?
                    'BackgroundColor', [0.95 0.73 0.73]);
 
 Underrange_ind_12 = uicontrol('parent', Control_Frame, ...

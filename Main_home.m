@@ -74,7 +74,7 @@ if LCR_avilable
    
     N = numel(Freq_arr_LCR);
     for i = 1:N
-        disp(['LCR freq list: ' num2str(i) '/' num2str(N)]); % FIXME: disp
+        disp([newline 'LCR freq list: ' num2str(i) '/' num2str(N)]); % FIXME: disp
 
         Gen_freq = Freq_arr_LCR(i);
         LCR_Result = Aster_FRA.LCR_measure(LCR_type, Gen_freq, Gen_Voltage_level, Time_profile);
@@ -106,7 +106,7 @@ Result_arr_Aster = Aster_FRA.LCR_result_type.empty;
 Extra_data_arr = Aster_FRA.LCR_extra_data_type.empty;
 N = numel(Freq_arr_Aster);
 for i = 1:N
-    disp(['Aster freq list: ' num2str(i) '/' num2str(N)]); % FIXME: disp
+    disp([newline 'Aster freq list: ' num2str(i) '/' num2str(N)]); % FIXME: disp
 
     Gen_freq = Freq_arr_Aster(i);
 %     Gen_Voltage_level = Voltage_amp_arr(i);

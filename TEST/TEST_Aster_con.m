@@ -168,8 +168,8 @@ end
 Zfull = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
 
 
-[C_par, R_par] = TDFRA_fit_viewer.RC_calc_parallel(Zfull, freq);
-[C_ser, R_ser] = TDFRA_fit_viewer.RC_calc_series(Zfull, freq);
+[C_par, R_par] = TDFRA_fit_viewer.RC_calc(Zfull, freq, "parallel");
+[C_ser, R_ser] = TDFRA_fit_viewer.RC_calc(Zfull, freq, "series");
 
 
 

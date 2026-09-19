@@ -4,7 +4,7 @@ Filename = fullfile([char(Path) '/../' 'Settings.json']);
 Data = TDFRA_fit_settings.read_json_file(Filename);
 fields = fieldnames(Data);
 if ~any(fields == Filed_name)
-    % FIXME: replace file by default
+    % FIXME: (3) replace file by default settings for this case
 end
 Value = Data.(Filed_name);
 end

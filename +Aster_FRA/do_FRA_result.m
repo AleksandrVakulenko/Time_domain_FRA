@@ -136,8 +136,8 @@ Harm_2_out_arr = Nan_harm_clear(Harm_2_out_arr);
 
 Zfull = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
 
-[C_par, R_par] = TDFRA_fit_viewer.RC_calc_parallel(Zfull, freq);
-[C_ser, R_ser] = TDFRA_fit_viewer.RC_calc_series(Zfull, freq);
+[C_par, R_par] = TDFRA_fit_viewer.RC_calc(Zfull, freq, "parallel");
+[C_ser, R_ser] = TDFRA_fit_viewer.RC_calc(Zfull, freq, "series");
 
 if numel(freq) > 1 || numel(Zfull) > 1
     % FIXME: (3) do something

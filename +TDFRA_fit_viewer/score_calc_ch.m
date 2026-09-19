@@ -3,8 +3,7 @@
 
 function [Score, max_score] = score_calc_ch(Result, Target)
 
-% FIXME: could be 29
-max_score = 23; % FIXME: magic constant
+max_score = 23; % FIXME: (2) magic constant (could be 29)
 
 if isempty(Result)
     Score = -inf;
@@ -16,7 +15,7 @@ end
 Amp_err_target = Target.amp_err_prc;
 Phi_err_target = Target.phi_err_deg;
 
-% FIXME: debug version of function
+% FIXME: (2) debug version of function
 Ratio = get_amp_to_range_ratio(Result);
 
 if Ratio < 0.01
@@ -80,7 +79,7 @@ end
 
 
 function Ratio = get_amp_to_range_ratio(Result)
-    % FIXME: get it from results
+    % FIXME: (1) get it from results
     MAX_VOLTAGE = 10;
 
     T_start = Result.amp_poly.x(1);
