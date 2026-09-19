@@ -6,7 +6,7 @@ Temp_diff = 12; % K
 
 % NOTE: 0.05 is too low
 % NOTE: maybe need 0.10
-Phi_err_abs_basic = 0.08; % [deg] % FIXME: magic constant
+Phi_err_abs_basic = 0.08; % [deg] % FIXME: (3) magic constant
 
 [Basic_amp_error, Temp_drift_error, Phi_err_mult] = ...
     get_instr_err_internal_new(range_num);

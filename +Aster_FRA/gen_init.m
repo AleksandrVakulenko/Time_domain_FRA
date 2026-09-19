@@ -1,4 +1,7 @@
 
+% NOTE: Aster specific function
+% FIXME: (2) maybe place into Aster class?
+
 function gen_init(Aster, Gen_Voltage_level, Gen_freq, DC_bias)
 arguments
     Aster
@@ -20,7 +23,7 @@ end
 
 function High_voltage_mode(Aster, Gen_Voltage_level, Gen_freq, DC_bias)
 
-if Gen_freq < 1 % FIXME: bust be = 2
+if Gen_freq < 1 % FIXME: (2) must be = 2 (why? see circuit)
     MUX_SETTING = 3;
 elseif Gen_freq < 25
     MUX_SETTING = 2;
@@ -31,7 +34,7 @@ else
 end
 
 Aster.Generator_waveform(Gen_Voltage_level, Gen_freq, "sin", DC_bias)
-Aster.Gen_direction("Internal"); % FIXME: no effect if Aster.set_connection_mode("I2V");
+Aster.Gen_direction("Internal"); % FIXME: (1) no effect if Aster.set_connection_mode("I2V");
 Aster.Generator_out_active(1);
 Aster.Generator_out_opamp("AD817");
 Aster.Generator_out_mux(MUX_SETTING);
@@ -55,7 +58,7 @@ else
 end
 
 Aster.Generator_waveform(Gen_Voltage_level, Gen_freq, "sin", DC_bias)
-Aster.Gen_direction("Internal"); % FIXME: no effect if Aster.set_connection_mode("I2V");
+Aster.Gen_direction("Internal"); % FIXME: (1) no effect if Aster.set_connection_mode("I2V");
 Aster.Generator_out_active(1);
 Aster.Generator_out_opamp("OPA182");
 Aster.Generator_out_mux(MUX_SETTING);

@@ -1,6 +1,7 @@
 
-
-function [Result] = LCR_measure(LCR_type, Gen_freq, Gen_Voltage_level, Time_profile)
+% FIXME: (3) add DC bias settings
+function [Result] = LCR_measure(LCR_type, Gen_freq, Gen_Voltage_level, ...
+    Time_profile)
 arguments
     LCR_type Aster_FRA_helper.LCR_device_name_type
     Gen_freq double
@@ -54,7 +55,7 @@ try
 
         Result.freq = Gen_freq;
         Result.gen_amp = Gen_Voltage_level;
-        Result.gen_dc = 0; % FIXME
+        Result.gen_dc = 0; % FIXME: (3) add DC bias settings
 
         Result.res_abs = R_abs;
         Result.res_abs_err = R_abs_err;
@@ -66,8 +67,11 @@ try
 
         Result.cap_par = C_par;
 
-        Result.r_scale = NaN;
-        Result.range_n = NaN;
+        Result.r_scale = NaN; % Only for Aster or some other I2V converter
+        Result.range_n = NaN; % -- same --
+
+        % NOTE: if you want to set this fields it must be queried 
+        % from LCR dev
         Result.current = NaN;
         Result.current_error = NaN;
         Result.voltage = NaN;

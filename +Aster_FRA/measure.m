@@ -13,22 +13,23 @@ end
 
 Gen_Voltage_level = Settings.amp;
 Gen_freq = Settings.freq;
-Gen_Offset_level = Settings.dc; % FIXME: unused
+Gen_Offset_level = Settings.dc;
 Harm_num = Settings.harm_num;
 Time_profile = Settings.time_profile;
 Harm_profile = Settings.harm_profile;
 Use_power_line_filter = Settings.use_power_line_filter;
 
-Full_main_time_counter = tic; % FIXME: debug
+Full_main_time_counter = tic; % NOTE: debug
 Freq = Gen_freq;
 Period = 1/Freq;
 Underrange_force_1 = true; % NOTE: for low input voltage level
 Underrange_force_2 = false;
-Overrange_tolerance = 0.2; % [%] // FIXME: debug value
+Overrange_tolerance = 0.2; % [%] // FIXME: (3) debug value
 MAX_CH1_LIMIT = 10;
-MAX_CH2_LIMIT = 5; % FIXME: maybe 6?
+MAX_CH2_LIMIT = 5; % FIXME: (2) maybe 6? Where it is selected?
 
-if ~isempty(Fixed_range) && any(Fixed_range == [1 2 3 4 5 6]) % FIXME: ranges list
+% FIXME: (2) fixed ranges list
+if ~isempty(Fixed_range) && any(Fixed_range == [1 2 3 4 5 6])
     Underrange_force_2 = true;
     Overrange_tolerance = 100; % [%]
     Auto_range = false;
@@ -42,15 +43,15 @@ end
 
 [Times_conf, Time_printer, ~, Profile] = TDFRA_fit_core.get_time_config(Period, ...
     Time_profile, Harm_profile);
-Time_printer(); % FIXME: disp
+Time_printer(); % FIXME: (3) disp
 
 %--------------------------------
 % FIXME: maybe this value should be placed inside gathering loop
-Time_to_underrange = 0.1*Period; % [s] / FIXME: why?
+Time_to_underrange = 0.1*Period; % [s] / FIXME: (3) why?
 
 % FIXME: debug
 if Time_to_underrange < 0.3
-    Time_to_underrange = 0.3; % FIXME: magic constant
+    Time_to_underrange = 0.3; % FIXME: (3) magic constant
 end
 %--------------------------------
 
@@ -81,7 +82,7 @@ try
 
     if Auto_range
         [Range_num_forecast, ~] = Aster_FRA.range_forecaster(Aster, Zest, ...
-            Gen_Voltage_level, Gen_freq); % FIXME: use DC bias here too
+            Gen_Voltage_level, Gen_freq); % FIXME: (1) use DC bias here too
 
         if ~isempty(Range_num_forecast)
             Range_init_num = Range_num_forecast;
@@ -100,8 +101,8 @@ try
     Aster.ADC_1_direction("internal"); % "internal", "external"
     Aster.ADC_2_direction("internal"); % "internal", "external"
 %     Aster.Gen_direction("Internal"); % "Internal", "Lock_in", "LCR", "External"
-    Aster.initiate(); % FIXME: updates current direction to internal I2V
-    % FIXME: Self_cal_mode is now in debug state (need refactor)
+    Aster.initiate(); % FIXME: (1) updates current direction to internal I2V
+    % FIXME: (1) Self_cal_mode is now in debug state (need refactor)
     if Self_cal_mode
         Aster.Self_calibration_select("CAP_200p"); % "none", "CAP_200p", "RES_10M", "BOTH"
         Aster.Current_direction("GND"); % "GND", "I2V", "LCR", "Redirection"
@@ -201,13 +202,13 @@ try
         end
     end
 catch ERR
-    Aster_FRA.disconnest_devices(Aster, Gen)
+    Aster_FRA.disconnect_devices(Aster, Gen)
     klog.disp('ERR finish // devices closed', 'common')
     rethrow(ERR)
 end
 
 
-Aster_FRA.disconnest_devices(Aster, Gen)
+Aster_FRA.disconnect_devices(Aster, Gen)
 Accuracy_conf = Profile.accuracy_conf;
 
 Full_main_time = toc(Full_main_time_counter);

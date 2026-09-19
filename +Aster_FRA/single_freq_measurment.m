@@ -28,7 +28,7 @@ try
     Settings, Fig_or_ax, Zest, Fixed_range, Self_cal_mode);
 catch ERR
     Fit_Result = Aster_FRA.LCR_result_type.empty;
-    Extra_data = Aster_FRA.LCR_extra_data_type.empty; % FIXME: add type
+    Extra_data = Aster_FRA.LCR_extra_data_type.empty;
     Aster_FRA_helper.print_error_msg(ERR);
     return
 end
@@ -36,7 +36,7 @@ end
 klog.warning(['>>>>>> Exit_flag: ' num2str(Exit_flag) ' >>>>>>>>'], 'debug_light');
 
 if Exit_flag == 40
-    % FIXME: debug way to finish by stop button
+    % FIXME: (2) debug way to finish by stop button
     error('The program has been terminated by the user.')
 end
 
@@ -45,7 +45,7 @@ Period_counter = Ch_data_1.period_counter;
 
 [Properties_1, Properties_2] = TDFRA_fit_core.get_fit_props(Period_counter);
 
-Max_points = 50e3; % FIXME: get from settings
+Max_points = 50e3; % FIXME: (3) get from settings
 
 [Result_1, Residuals_1, DEBUG_1, Result_2, Residuals_2, DEBUG_2] = ...
     TDFRA_fit_core.fit_two_channels(Ch_data_1, Ch_data_2, Properties_1, Properties_2, ...
@@ -82,10 +82,10 @@ end
 % FIXME: use debug function to show results
 if ~isempty(Result_1) && ~isempty(Result_2)
     Fit_Result = Aster_FRA.do_FRA_result(Result_1, Result_2, Freq, Aster_range);
-    Fit_Result.gen_amp = Gen_Voltage_level; % FIXME % Measurment voltage level
-    Fit_Result.gen_dc = DC_bias; % FIXME % Measurment DC bias level
+    Fit_Result.gen_amp = Gen_Voltage_level; % NOTE set values of voltage level
+    Fit_Result.gen_dc = DC_bias; % NOTE: set value of DC bias level
 else
-    Fit_Result = Aster_FRA.LCR_result_type.empty; % FIXME: use FRA type
+    Fit_Result = Aster_FRA.LCR_result_type.empty;
 end
 
 Extra_data = Aster_FRA.LCR_extra_data_type;
@@ -99,8 +99,8 @@ Extra_data.score.score_1 = Score_1;
 Extra_data.score.score_2 = Score_2;
 Extra_data.score.best_flag = Best_flag;
 Extra_data.score.max_score = Max_score;
-Extra_data.DEBUG.DEBUG_1 = DEBUG_1; % FIXME: delete
-Extra_data.DEBUG.DEBUG_2 = DEBUG_2; % FIXME: delete
+Extra_data.DEBUG.DEBUG_1 = DEBUG_1; % FIXME: (2) delete
+Extra_data.DEBUG.DEBUG_2 = DEBUG_2; % FIXME: (2) delete
 Extra_data.used_ranges = Used_ranges;
 Extra_data.aster_range = Aster_range;
 

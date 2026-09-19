@@ -1,6 +1,5 @@
 
-% FIXME: add info header
-% FIXME: add class constructor
+% FIXME: (3) add info header , add class constructor
 
 classdef LCR_result_type
 
@@ -24,12 +23,12 @@ classdef LCR_result_type
 
         harm Aster_FRA.LCR_harm_result_type ;% Resistance harmonics struct
 
-        cap_par double; % FIXME: delete this
+        cap_par double; % Cap value for result estimation
 
-        current double; % FIXME: debug; previously: Cur;
-        current_error double; % FIXME: debug; previously: Cur_err;
-        voltage double; % FIXME: debug; previously: Volt1;
-        voltage_error double;% FIXME: debug; previously: Volt1_err;
+        current double;
+        current_error double;
+        voltage double;
+        voltage_error double;
 
         r_scale double; % V to Amp scale coefficient
         range_n double; % The range number of FRA device used for this measurement

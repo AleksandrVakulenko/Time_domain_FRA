@@ -1,5 +1,5 @@
 
-
+% FIXME: (2) is it possible to call this for Result array?
 
 function Result = do_FRA_result(Result_1, Result_2, freq, Range_N, ...
     R_Scale, options)
@@ -14,7 +14,8 @@ arguments
     options.disp_flag {mustBeMember(options.disp_flag, ["on", "off"])} = "on"
     options.use_correction {mustBeMember(options.use_correction, ...
         ["on", "off", "none", "1st", "both"])} = "both"
-    % FIXME: "1st", "none", "both" is legacy, there is no 1st and 2nd anymore
+    % FIXME: (2) delete unused options
+    %  "1st", "none", "both" is legacy, there is no 1st and 2nd anymore
 end
 
 use_correction = options.use_correction;
@@ -37,10 +38,11 @@ Volt2_err = Output.amp_err;
 CH_2_P = Output.phi;
 CH_2_Pe = Output.phi_err;
 
+% FIXME: (1) rewrite this section
 % NOTE: try to add amplitude error inherited from low signal to range_max ratio
 % SECTION A00:
-Vmax_1 = 10; % FIXME: may be not
-Vmax_2 = 5; % FIXME: may be not
+Vmax_1 = 10; % FIXME: (1) load ch limit from the device
+Vmax_2 = 5; % FIXME: (1) load ch limit from the device
 Ratio = Volt1/Vmax_1;
 Err_eq_amp = @(Ratio) 0.00558./(Ratio*1000) - 0.00035; % NOTE: (experimentally selected)
 Err_new_1 = Err_eq_amp(Ratio);
@@ -110,7 +112,7 @@ else
 end
 
 % NOTE: CH1 harmonics should not be converted to resistance
-% FIXME: find a way to use voltage harmonics
+% FIXME: (3) find a way to use voltage harmonics
 % Harm_1_out_arr = Harm_calc_and_corr(Result_1, freq, Volt1, ...
 %     Volt1_err, P1, P1e, R_Scale, Range_N);
 
@@ -138,7 +140,7 @@ Zfull = Res*cos(Phase_diff/180*pi) + Res*1i*sin(Phase_diff/180*pi);
 [C_ser, R_ser] = TDFRA_fit_viewer.RC_calc_series(Zfull, freq);
 
 if numel(freq) > 1 || numel(Zfull) > 1
-    % FIXME: do something
+    % FIXME: (3) do something
     disp_flag = false;
     disp(['More than one result!'])
     disp(num2str(freq))
@@ -151,15 +153,6 @@ if disp_flag
 
     klog.disp(' ')
 
-    % FIXME: debug print
-%     disp('----------------')
-%     freq
-%     Res
-%     Res_err_full
-%     Phase_diff
-%     Phase_diff_error_full
-%     disp('----------------')
-    % ------------------
     
     TDFRA_fit_viewer.print_res(Res, Res_err_full)
     % Cap = 1/(6.28*freq*Res);
@@ -189,8 +182,8 @@ Cur_err = Volt2_err*R_Scale;
 Result = Aster_FRA.LCR_result_type;
 
 Result.freq = freq;
-Result.gen_amp = NaN; % FIXME % Measurment voltage level
-Result.gen_dc = NaN; % FIXME % Measurment DC bias level
+Result.gen_amp = NaN; % NOTE: add this value on caller side
+Result.gen_dc = NaN; % NOTE: add this value on caller side
 
 Result.res_abs = Res;
 Result.res_abs_err = Res_err_full;
@@ -227,8 +220,6 @@ end
 
 function [Res, Res_err, Phase_diff, Phase_diff_error] = calc_res_phi(Volt1, ...
     Volt1_err, Volt2, Volt2_err, R_Scale, P1, P1e, P2, P2e)
-
-% R_Scale = Aster_r_scale(Range_N);
 
 Cur = Volt2*R_Scale;
 Cur_err = Volt2_err*R_Scale;
@@ -282,7 +273,6 @@ for i = 1:numel(Harms_arr)
         calc_res_phi(Volt1, Volt1_err, Harm_amp, Harm_amp_err, R_Scale, ...
         P1, P1e, Harm_phi, Harm_phi_err);
 
-    % FIXME: add force flag to calibration to preserve harmonics
     [Harm_res, Harm_phase, Harm_amp_cal_err, Harm_phi_cal_err] = ...
         Aster_FRA.apply_calibration(Range_N, H_freq, Harm_res, Harm_phase, Calibration_set);
 
@@ -306,21 +296,20 @@ end
 
 
 function Harm_2_out_arr = Nan_harm_clear(Harm_2_out_arr)
-% FIXME: temp solution to delete empty harms
+arguments
+    Harm_2_out_arr Aster_FRA.LCR_harm_result_type
+end
 
 Delete_range = false(1, numel(Harm_2_out_arr));
 
 for i = 1:numel(Harm_2_out_arr)
     Res = Harm_2_out_arr(i).res;
-    %     if numel(Res) > 1
-    %         disp(Res) % FIXME: disp
-    %         error('Problem in Harm list'); % FIXME: disp
-    %     else
-    if isempty(Res) || isnan(Res)
-        Delete_range(i) = true;
-    end
-    %     end
+    Phi = Harm_2_out_arr(i).phi;
 
+    % NOTE: values must be non-empty and non-NaN, 
+    % errors could be empty or NaN
+    Delete_range(i) = ~isempty(Res) && ~isempty(Phi) && ...
+        ~isnan(Res) && ~isnan(Phi);
 end
 
 Harm_2_out_arr(Delete_range) = [];

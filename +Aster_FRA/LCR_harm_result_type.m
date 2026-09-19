@@ -1,6 +1,5 @@
 
-% FIXME: add info header
-% FIXME: add class constructor
+% FIXME: (3) add info header , add class constructor
 
 classdef LCR_harm_result_type
 
@@ -12,7 +11,7 @@ classdef LCR_harm_result_type
 
     properties (Access = public)
 
-        % FIXME: Maybe add basic freq
+        % FIXME: (3) Maybe add basic freq
         n double;
         res double;
         res_err double;

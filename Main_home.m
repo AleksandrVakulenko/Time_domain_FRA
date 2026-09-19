@@ -17,10 +17,13 @@ Harm_num = [3];
 Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
 
 Gen_Voltage_level = 1.0; % [V]
-DC_bias = 0.0;
-F_min = 0.1;
+DC_bias = 8.0;
+% F_min = 0.1;
+% F_max = 200;
+% F_num = 45;
+F_min = 0.2;
 F_max = 200;
-F_num = 45;
+F_num = 5;
 Noisy_env = true;
 
 Freq_arr = TDFRA_fit_other.gen_freq_arr(F_min, F_max, F_num, ...
@@ -39,8 +42,11 @@ Ax_arr = [Fig.UserData.axes_top Fig.UserData.axes_bot];
 Stop_button = Fig.UserData.stop_button;
 Resources.stop_button = Stop_button;
 Resources.underrange_ind = Fig.UserData.underrange_ind;
+% FIXME: (1) place Ax_arr to Resourses
 % Resources = [];
 
+% FIXME: make it static and abstract:
+% Limits = LCR_dev.get_max_amp_and_freq();
 Aster_highest_freq = 200; % FIXME: get from instrument
 LCR_lowest_freq = 20; % FIXME: get from instrument
 
@@ -135,7 +141,10 @@ disp(['Time prediction: ' num2str(Time_prediction_m, '%0.1f') ' min']);
 
 disp('Finish')
 
-%% Fit result recalc
+
+
+
+%% Fit result recalc (FIXME: create recalc function)
 
 Result_arr_Aster = [];
 for i = 1:numel(Extra_data_arr)

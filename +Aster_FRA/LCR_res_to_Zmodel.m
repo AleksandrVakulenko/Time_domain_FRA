@@ -35,7 +35,7 @@ N_pre = numel(Results_arr_PRE);
 
 if N_result == 0 && N_pre == 0
     Freq_out = [1 100];
-    Res_out = [1e6 1e6]; % FIXME: magic constant
+    Res_out = [1e6 1e6]; % NOTE: some random start value if noting is avilable
 
 elseif N_result == 0 && N_pre == 1
     Res_pre = [Results_arr_PRE.res_abs];
@@ -84,7 +84,8 @@ Res_log = log10(Res);
 % plot(Freq_log, Res_log, '.')
 
 if numel(Freq_log) ~= numel(Res_log)
-    % FIXME: ??
+    % NOTE: old debug sectioin
+    %   delete this if never used
     disp('--------------')
     Freq_log
     Res_log

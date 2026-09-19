@@ -1,7 +1,6 @@
 
-% FIXME: this function is also a part of FRA toolbox
 
-% FIXME: check ref to other devices
+% NOTE: Inits Aster AND maybe inits other Gen dev at Gen_addr if choosed
 
 function [Aster, Gen] = connect_to_devices(Aster_addr, Gen_type, Gen_addr)
 arguments

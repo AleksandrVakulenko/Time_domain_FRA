@@ -63,7 +63,9 @@ Fs_new = Aster.ADC_send_freq(Sampling_freq);
 % disp(num2str(ADC_filter_Fc)) % FIXME: debug!!!!!!
 % disp('------------------------')
 Aster.ADC_filter(ADC_filter_Fc);
-% Aster.set_ADC_2_range(12); % FIXME: check it
+
+% FIXME: (0) check ADC2 range
+% Aster.set_ADC_2_range(12);
 
 % FIXME: 
 klog.disp(['Fs = ' num2str(Fs_new) '; Fc = ' ...

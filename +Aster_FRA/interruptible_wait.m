@@ -1,4 +1,6 @@
 
+% FIXME: (2) move it to some Fern module
+
 function interruptible_wait(time_s, msg, Resources)
 arguments
     time_s (1,1) {mustBeNumeric(time_s), mustBeGreaterThanOrEqual(time_s, 0)}
@@ -6,7 +8,7 @@ arguments
     Resources
 end
 
-% FIXME: debug
+% FIXME: (2) currently it is a debug version settings
 disp_mode = "normal";
 Count_mode = "eco";
 
@@ -23,7 +25,8 @@ end
 
 if time_s < 0.3
     if disp_mode == "normal"
-        klog.disp(['Pause for ' num2str(round(time_s*100)/100) ' s' msg], "debug_light");
+        klog.disp(['Pause for ' num2str(round(time_s*100)/100) ' s' msg], ...
+            "debug_light");
     end
     pause(time_s)
 else

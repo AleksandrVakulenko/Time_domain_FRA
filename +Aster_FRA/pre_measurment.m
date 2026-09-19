@@ -2,9 +2,6 @@
 
 function Results_arr_PRE = pre_measurment(Resources, Aster_addr, Gen_Voltage_level, Ax_arr)
 
-% NOTE: bad version
-% FIXME: it is bad to estimate on single point
-
 Noisy_env = true;
 Self_cal = false;
 
@@ -23,12 +20,4 @@ Self_cal = false;
     
     Results_arr_PRE = [Fit_Result_1 Fit_Result_2];
     
-    
-    % --- FXIME: debug section ---
-%     Res = Fit_Result.res_abs;
-%     Cap = 1/(2*pi*Res*Gen_freq);
-%     Zest = struct('type', 'cap', 'value', Cap);
-    % --- NOTE: end of debug section ---
-
-%     Zest = struct('type', 'res', 'value', Fit_Result.res_abs);
 end

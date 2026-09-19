@@ -1,6 +1,5 @@
 
-% FIXME: add info header
-% FIXME: add class constructor
+% FIXME: (3) add info header / add class constructor
 
 classdef LCR_extra_data_type
 
@@ -27,7 +26,7 @@ classdef LCR_extra_data_type
         used_ranges double % all used ranges
         aster_range double % range for this results
 
-        % FIXME: delete this
+        % FIXME: (3) delete this
         DEBUG % legacy debug data
 
     end
