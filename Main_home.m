@@ -14,16 +14,22 @@ elseif isunix
 end
 
 Harm_num = [3];
-Time_profile = "common"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "most_accurate"; % "ultra_fast", "common", "fine", "most_accurate"
 
-Gen_Voltage_level = 1.0; % [V]
-DC_bias = 8.0;
+Gen_Voltage_level = 0.001; % [V]
+DC_bias = 0.0;
 % F_min = 0.1;
 % F_max = 200;
 % F_num = 45;
-F_min = 0.2;
-F_max = 200;
-F_num = 5;
+
+F_min = 0.02;
+F_max = 0.02;
+F_num = 1;
+
+% F_min = 0.005;
+% F_max = 200;
+% F_num = 80;
+
 Noisy_env = true;
 
 Freq_arr = TDFRA_fit_other.gen_freq_arr(F_min, F_max, F_num, ...
@@ -187,11 +193,11 @@ errorbar(Freq_arr_plot_Aster, Cap_arr*1e12, Cap_arr_err*1e12, '.r')
 % plot(Res./Res*100, '-b')
 % plot((Res+Res_err)./Res*100, '--b')
 % plot((Res-Res_err)./Res*100, '--b')
-% ylabel('|Cap|, pF')
+ylabel('|Cap|, pF')
 ylabel('|R|, Ohm')
 xlabel('f, Hz')
 set(gca, 'xscale', 'log')
-set(gca, 'yscale', 'log')
+% set(gca, 'yscale', 'log')
 grid on
 grid minor
 box on

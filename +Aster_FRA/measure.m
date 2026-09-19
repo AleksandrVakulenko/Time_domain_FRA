@@ -43,7 +43,7 @@ end
 
 [Times_conf, Time_printer, ~, Profile] = TDFRA_fit_core.get_time_config(Period, ...
     Time_profile, Harm_profile);
-Time_printer(); % FIXME: (3) disp
+% Time_printer(); % FIXME: (2) unused here and on line above
 
 %--------------------------------
 % FIXME: maybe this value should be placed inside gathering loop
@@ -66,8 +66,6 @@ try
 
     [Fs_new, Filter_wait] = Aster_FRA.ADC_init(Aster, Gen_freq, Harm_num, Times_conf);
 
-    klog.disp(['>>>>>>  Fs = ' num2str(Fs_new, "%0.3f") ' Hz <<<<<<'], "debug_light")
-
     Channel_settings_1.underrange_force = Underrange_force_1;
     Channel_settings_1.max_ch1_limit = MAX_CH1_LIMIT;
     Channel_settings_1.time_to_underrange = Time_to_underrange;
@@ -89,14 +87,21 @@ try
         else
             Range_init_num = 1;
         end
+
         if ~any(Range_init_num == Possible_ranges)
+            % FIXME: (2) why this IF possible?
             Range_init_num = max(Possible_ranges);
+            Channel_settings_2.underrange_force = true;
+        end
+
+        if Range_init_num == max(Possible_ranges)
             Channel_settings_2.underrange_force = true;
         end
     else
         Range_init_num = Fixed_range;
     end
 
+    % FIXME: (0) changing Aster connection
     Aster.set_connection_mode("I2V");
     Aster.ADC_1_direction("internal"); % "internal", "external"
     Aster.ADC_2_direction("internal"); % "internal", "external"
@@ -115,9 +120,13 @@ try
 
     [~, R_Scale, Aster_Range] = Aster_FRA.set_range(Aster, Range_init_num);
     % NOTE: update time and accuracy profiles
-    Time_profile_new = Aster_FRA.max_time_profile(Time_profile, Aster_Range);
-    [~, ~, ~, Profile] = TDFRA_fit_core.get_time_config(Period, Time_profile_new, ...
-        Harm_profile);
+    [Time_profile_new, is_changed] = ...
+        Aster_FRA.max_time_profile(Time_profile, Aster_Range);
+    if is_changed
+        [~, Time_printer, ~, Profile] = TDFRA_fit_core.get_time_config(Period, ...
+            Time_profile_new, Harm_profile);
+    end
+    Time_printer(); % FIXME: (2) disp
     
     Aster_FRA.interruptible_wait(Filter_wait, 'Apply filter', Resources);
     Used_ranges = Aster_Range;
@@ -125,7 +134,7 @@ try
 
     Try_num = 0;
     stop = false;
-    while ~stop
+    while ~stop % NOTE: main ranging loop
         if ~isempty(Resources)
             Stop_button = Resources.stop_button;
             stop_btn_flag = TDFRA_fit_gui.stop_check(Stop_button);
@@ -142,6 +151,7 @@ try
         Settings_g.use_power_line_filter = Use_power_line_filter;
         Settings_g.channel_settings_1 = Channel_settings_1;
         Settings_g.channel_settings_2 = Channel_settings_2;
+
         [Exit_flag, Ch_data_1, Ch_data_2] = data_gathering_loop(Resources, ...
             Aster, Freq, Harm_num, Profile, Settings_g, Fig);
 
@@ -153,14 +163,17 @@ try
             break;
         end
 
+
         if Auto_range
             need_to_switch_range = false;
             switch_range_force = false;
-            if Exit_flag == 0 || Exit_flag == 30
+            if Exit_flag == 0
+                stop = true;
+            elseif Exit_flag == 30
                 stop = true;
             elseif Exit_flag == 102
                 Aster_Range = Aster_Range + 1;
-                if ~any(Aster_Range == Possible_ranges)
+                if ~any(Aster_Range == Possible_ranges) % NOTE: ==max+1
                     Channel_settings_2.underrange_force = true;
                 else
                     need_to_switch_range = true;
@@ -183,10 +196,18 @@ try
                     stop = true;
                 else
                     [flag, R_Scale, Aster_Range] = Aster_FRA.set_range(Aster, Aster_Range);
+                    if Aster_Range == max(Possible_ranges)
+                        Channel_settings_2.underrange_force = true;
+                    end
                     % NOTE: update time and accuracy profiles
-                    Time_profile_new = Aster_FRA.max_time_profile(Time_profile, Aster_Range);
-                    [~, ~, ~, Profile] = TDFRA_fit_core.get_time_config(Period, ...
-                        Time_profile_new, Harm_profile);
+                    [Time_profile_new, is_changed] = ...
+                        Aster_FRA.max_time_profile(Time_profile, Aster_Range);
+                    if is_changed
+                        [~, time_printer, ~, Profile] = ...
+                            TDFRA_fit_core.get_time_config(Period, ...
+                            Time_profile_new, Harm_profile);
+                        time_printer(); % FIXME: (2) disp
+                    end
 
                     Aster_FRA.interruptible_wait(Filter_wait, 'Apply filter', Resources);
                     if ~flag

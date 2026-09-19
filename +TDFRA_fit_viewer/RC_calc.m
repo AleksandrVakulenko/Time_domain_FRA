@@ -3,7 +3,7 @@
 
 function [C, R] = RC_calc(Z, Freq, option)
 arguments
-    Z complex
+    Z double
     Freq double
     option {mustBeMember(option, ["series", "parallel"])}
 end

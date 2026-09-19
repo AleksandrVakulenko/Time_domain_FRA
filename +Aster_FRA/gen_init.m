@@ -1,6 +1,6 @@
 
 % NOTE: Aster specific function
-% FIXME: (2) maybe place into Aster class?
+% FIXME: (0) maybe place into Aster class?
 
 function gen_init(Aster, Gen_Voltage_level, Gen_freq, DC_bias)
 arguments

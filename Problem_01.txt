@@ -1,4 +1,25 @@
 
+2026/09/19 18.57
+Warning: NaN, Inf, or complex value detected in startpoint;
+choosing random starting point instead. 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 Add more tries in Connector_COM_RS232
 
 -------------------------

@@ -19,6 +19,8 @@ end
         Gen.initiate();
     elseif class(Gen) == "Aster_dev"
         Aster_FRA.gen_init(Gen, Gen_Voltage_level, Gen_freq, DC_bias);
+        % FIXME: place delay into Aster class
+%         pause(0.2); % FIXME: (0) debug pause
     else
         error('Wong gen class')
     end

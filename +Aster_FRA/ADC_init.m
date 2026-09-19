@@ -21,7 +21,7 @@ switch Times_conf.time_profile
         Sampling_freq = 2000*Gen_freq;
     case  "most_accurate"
         Number_of_periods = 5;
-        Min_filter_freq = 0.25; % [Hz]
+        Min_filter_freq = 0.20; % [Hz] % FIXME: (0) could be lower
         Sampling_freq = 2000*Gen_freq;
     otherwise
         error('unreachable code in ADC_init()')
@@ -59,10 +59,13 @@ Filter_wait = Number_of_periods/ADC_filter_Fc;
 
 
 Fs_new = Aster.ADC_send_freq(Sampling_freq);
+% pause(0.1); % FIXME: (0) debug pause
+
 % disp('------------------------')
 % disp(num2str(ADC_filter_Fc)) % FIXME: debug!!!!!!
 % disp('------------------------')
 Aster.ADC_filter(ADC_filter_Fc);
+% pause(0.02); % FIXME: (0) debug pause
 
 % FIXME: (0) check ADC2 range
 % Aster.set_ADC_2_range(12);
