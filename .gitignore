@@ -1,15 +1,7 @@
 *.asv
 untitled*
-*hide.mat
-DEBUG_INFO/
-hide/*
-Read/
-Calibration*/
-_inbox/
+
 Settings.json
 
-Results*/
-!Results_01/
-!Calibration_matfiles
 
 .MAT_saves/
