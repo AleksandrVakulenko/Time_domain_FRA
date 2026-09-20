@@ -14,17 +14,17 @@ elseif isunix
 end
 
 Harm_num = [3];
-Time_profile = "most_accurate"; % "ultra_fast", "common", "fine", "most_accurate"
+Time_profile = "fine"; % "ultra_fast", "common", "fine", "most_accurate"
 
-Gen_Voltage_level = 0.001; % [V]
+Gen_Voltage_level = 1; % [V]
 DC_bias = 0.0;
-% F_min = 0.1;
-% F_max = 200;
-% F_num = 45;
+F_min = 0.1;
+F_max = 200;
+F_num = 45;
 
-F_min = 0.02;
-F_max = 0.02;
-F_num = 1;
+% F_min = 0.02;
+% F_max = 0.02;
+% F_num = 1;
 
 % F_min = 0.005;
 % F_max = 200;
@@ -48,6 +48,7 @@ Ax_arr = [Fig.UserData.axes_top Fig.UserData.axes_bot];
 Stop_button = Fig.UserData.stop_button;
 Resources.stop_button = Stop_button;
 Resources.underrange_ind = Fig.UserData.underrange_ind;
+Resources.range_ind = Fig.UserData.range_ind;
 % FIXME: (1) place Ax_arr to Resourses
 % Resources = [];
 

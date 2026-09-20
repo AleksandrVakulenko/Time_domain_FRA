@@ -11,6 +11,8 @@ arguments
     Self_cal_mode = false
 end
 
+GUI_range_ind = Resources.range_ind;
+
 Gen_Voltage_level = Settings.amp;
 Gen_freq = Settings.freq;
 Gen_Offset_level = Settings.dc;
@@ -119,6 +121,7 @@ try
     end
 
     [~, R_Scale, Aster_Range] = Aster_FRA.set_range(Aster, Range_init_num);
+    GUI_range_ind.set_range(Aster_Range, Possible_ranges);
     % NOTE: update time and accuracy profiles
     [Time_profile_new, is_changed] = ...
         Aster_FRA.max_time_profile(Time_profile, Aster_Range);
@@ -196,6 +199,7 @@ try
                     stop = true;
                 else
                     [flag, R_Scale, Aster_Range] = Aster_FRA.set_range(Aster, Aster_Range);
+                    GUI_range_ind.set_range(Aster_Range, Possible_ranges);
                     if Aster_Range == max(Possible_ranges)
                         Channel_settings_2.underrange_force = true;
                     end

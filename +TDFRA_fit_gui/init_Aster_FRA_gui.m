@@ -46,6 +46,10 @@ box(Ax2, 'on')
 hold(Ax2, 'on')
 cla(Ax2)
 
+
+
+
+
 % FIXME: (3) default demo callback of button
 CB = @(a, b) disp('Stop button is pressed');
 
@@ -59,6 +63,10 @@ Stop_button = uicontrol('parent', Control_Frame, ...
                    'Callback', CB, ... % FIXME: (3) demo function?
                    'BackgroundColor', [0.95 0.73 0.73]);
 
+Stop_button.UserData = struct('stop', false);
+Stop_button.Callback = @TDFRA_fit_gui.stop_callback;
+
+
 Underrange_ind_12 = uicontrol('parent', Control_Frame, ...
                    'Style', 'pushbutton', ...
                    'units', 'normalized', ...
@@ -70,12 +78,24 @@ Underrange_ind_12 = uicontrol('parent', Control_Frame, ...
 Underrange_ind_12.UserData = @(x) set_underrange(x, Underrange_ind_12);
 
 
-Stop_button.UserData = struct('stop', false);
-Stop_button.Callback = @TDFRA_fit_gui.stop_callback;
+% --- RANGING FRAME ---
+
+% FIXME: (1) Aster specific code
+Number_of_ranges = 6; % FIXME: (3) magic constant
+
+Ranges_Frame = uipanel('parent', Control_Frame, 'position', ...
+    [0.85, 0.025, 0.1 Number_of_ranges*0.1/Aspect_ratio]);
+
+Ranges_ind = TDFRA_fit_gui.Ranges_indicator_type(Control_Frame, ...
+    Aspect_ratio, Number_of_ranges);
+% ---------------------
+
+
 
 Data = struct('axes_top', Ax1, 'axes_bot', Ax2, ...
               'stop_button', Stop_button, ...
-              'underrange_ind', Underrange_ind_12);
+              'underrange_ind', Underrange_ind_12, ...
+              'range_ind', Ranges_ind);
 
 Fig.UserData = Data;
 
