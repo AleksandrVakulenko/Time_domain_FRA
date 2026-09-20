@@ -6,7 +6,7 @@ Fig_name = 'FRA GUI';
 Screen_size = get(0, 'ScreenSize');
 Screen_size(1:2) = [];
 if isunix
-    % FIXME: (1) DEBUG section just to use in GNOME env with two monitors
+    % FIXME: (2) DEBUG section just to use in GNOME env with two monitors
     % NOTE: use 'xrandr --query'
     Screen_hor = Screen_size(1)/2;
     Screen_vert = Screen_size(2);
@@ -80,8 +80,9 @@ Underrange_ind_12.UserData = @(x) set_underrange(x, Underrange_ind_12);
 
 % --- RANGING FRAME ---
 
-% FIXME: (1) Aster specific code
-Number_of_ranges = 6; % FIXME: (3) magic constant
+% FIXME: (2) add empty Control_Frame and get its content from actual devices
+
+Number_of_ranges = 6; % FIXME: (2) magic constant (Aster specific code)
 
 Ranges_Frame = uipanel('parent', Control_Frame, 'position', ...
     [0.85, 0.025, 0.1 Number_of_ranges*0.1/Aspect_ratio]);

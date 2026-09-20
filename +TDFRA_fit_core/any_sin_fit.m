@@ -73,10 +73,6 @@ Est_phi = Phase_array_align(Est_phi);
 
 Est_time_norm = Est_time/Period;
 
-% D = 0; % FIXME: freq dev start value
-% Lower = [-300];
-% StartPoint = [D];
-% Upper = [+300];
 Lower = [];
 StartPoint = [];
 Upper = [];
@@ -216,9 +212,9 @@ ft = fittype(Eq, 'independent', 'x', 'dependent', 'y');
 opts = fitoptions('Method', 'NonlinearLeastSquares');
 opts.TolX = 1e-12; % NOTE: default
 opts.TolFun = 1e-12; % default
-opts.DiffMaxChange = 1e-6; % FIXME: (0) non-default
-opts.MaxIter     = 1000; % FIXME: (0) non-default
-opts.MaxFunEvals = 10e3; % FIXME: (0) non-default
+opts.DiffMaxChange = 1e-6; % FIXME: (2) non-default
+opts.MaxIter     = 1000; % FIXME: (2) non-default
+opts.MaxFunEvals = 10e3; % FIXME: (2) non-default
 opts.Display = 'off';
 
 opts.Lower = Lower;
@@ -290,7 +286,7 @@ if ~isempty(Harm_est)
         harm_err(i).status = Harm_est(i).status;
     end
 else
-    harm_out = []; % FIXME: use class.empty
+    harm_out = []; % FIXME: (2) use class.empty
     harm_err = [];
 end
 

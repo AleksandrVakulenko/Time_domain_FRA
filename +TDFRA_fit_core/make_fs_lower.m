@@ -1,5 +1,5 @@
 
-% FIXME: (1) UNDONE function
+% FIXME: (2) UNDONE function
 
 function [T_arr_new, V1_arr_new, V2_arr_new, Fs_new] = make_fs_lower(T_arr, ...
     V1_arr, V2_arr, Fs, freq, Find_harms_num, Max_points)

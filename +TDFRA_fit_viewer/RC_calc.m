@@ -1,5 +1,5 @@
 
-% FIXME: (1) add errors
+% FIXME: (2) add new fuunction with errors calc
 
 function [C, R] = RC_calc(Z, Freq, option)
 arguments

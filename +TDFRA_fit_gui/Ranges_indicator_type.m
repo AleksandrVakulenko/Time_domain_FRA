@@ -1,5 +1,5 @@
 
-% FIXME: (1) add visible on/off method
+% FIXME: (2) add visible on/off method
 
 classdef Ranges_indicator_type < handle
 

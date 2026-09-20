@@ -5,7 +5,7 @@ function Result = do_FRA_result(Result_1, Result_2, freq, Range_N, ...
     R_Scale, options)
 
 arguments
-    Result_1
+    Result_1 % NOTE: it is a different type
     Result_2
     freq
     Range_N
@@ -252,7 +252,7 @@ arguments
     Calibration_set = []
 end
 
-Harms_arr = Result.harm;
+Harms_arr = Result.harm; % FIXME: (2) type could change in future
 Harms_err_arr = Result.harm_err;
 
 [Amp_err_rel, Phi_err_abs] = Aster_FRA.get_instr_errors(Range_N);

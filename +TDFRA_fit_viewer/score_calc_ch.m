@@ -1,5 +1,5 @@
 
-% FIXME: This whole function is one big magic constant.
+% FIXME: (2) This whole function is one big magic constant.
 
 function [Score, max_score] = score_calc_ch(Result, Target)
 
@@ -79,7 +79,7 @@ end
 
 
 function Ratio = get_amp_to_range_ratio(Result)
-    % FIXME: (1) get it from results
+    % FIXME: (2) get it from results
     MAX_VOLTAGE = 10;
 
     T_start = Result.amp_poly.x(1);

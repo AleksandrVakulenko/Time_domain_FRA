@@ -58,8 +58,8 @@ D_err = 0;
 
 
 if ~isempty(Harm_est)
-    harm_out = struct('n', [], 'amp', [], 'phi', []); % FIXME: (1) use class
-    harm_err = struct('n', [], 'amp', [], 'phi', []); % FIXME: (1) use class
+    harm_out = struct('n', [], 'amp', [], 'phi', []); % FIXME: (2) use class
+    harm_err = struct('n', [], 'amp', [], 'phi', []); % FIXME: (2) use class
     for i = 1:numel(Harm_est)
         hn = Harm_est(i).n;
         harm_out(i).n = hn;

@@ -1,7 +1,6 @@
 
 % FIXME: (3) need refactor
 % FIXME: (2) this function is device dependent!
-% FIXME: (0) place it in Aster_FRA part
 
 function [Times_conf, printer, Accuracy_conf, Profile] = ...
     get_time_config(Period, Time_profile, Harm_profile)

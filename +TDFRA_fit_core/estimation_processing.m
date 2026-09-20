@@ -73,8 +73,8 @@ if Periods_counter >= 1
 
 else
 
-    % FIXME: maybe there are some problems here
-    % FIXME: (1) why *1 and *end?
+    % FIXME: (2) maybe there are some problems here
+    % NOTE: just move first end last est to time limits
     Estimations(1).t_min = 0;
     Estimations(1).t_max = 0;
     Estimations(1).status = 'fixed';
