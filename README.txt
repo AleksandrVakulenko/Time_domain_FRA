@@ -1,3 +1,9 @@
+DEBUG VERSION 1.1.0
+
+Real time frequency response analysis by sin fit of two channel voltage data.
+
+
+
 FIXME: UNDODE
 FIXME: add README.md with proj info
 
