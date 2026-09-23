@@ -188,27 +188,27 @@ while ~stop
     if Time_passed > Min_time && Ready_to_stop
         klog.disp(['Time passed = ' num2str(Time_passed, '%0.1f') ' s ' ...
               'Min time = ' num2str(Min_time, '%0.1f') ' s ' ...
-              'GATHERING STOPPED'], "debug_full", "red");
+              'GATHERING STOPPED'], "debug_full", "orange");
         stop = true;
     end
 
     % NOTE: try to make low freq measurements faster
     if Time_profile == "ultra_fast" || Time_profile ==  "common"
         if Early_finish_possible
-            klog.disp("Ealy finish!", "debug_full", "red");
+            klog.disp("Ealy finish!", "debug_full", "orange");
             stop = true;
         end
     elseif Time_profile == "fine"
         if (isempty(Harm_num) || max(Harm_num) <= 2) && Period >= 10
             if Early_finish_possible
-                klog.disp("Ealy finish!", "debug_full", "red");
+                klog.disp("Ealy finish!", "debug_full", "orange");
                 stop = true;
             end
         end
     elseif Time_profile == "most_accurate"
         if (isempty(Harm_num) || max(Harm_num) <= 2) && Period >= 500
             if Early_finish_possible
-                klog.disp("Ealy finish!", "debug_full", "red");
+                klog.disp("Ealy finish!", "debug_full", "orange");
                 stop = true;
             end
         end
@@ -406,7 +406,7 @@ while ~stop
                     end
                     if Score_1 > Max_score/2 && Score_2 > Max_score/2
                         Early_finish_possible = true;
-                        klog.disp("Ealy finish possible", "debug_full", "red");
+                        klog.disp("Ealy finish possible", "debug_full", "orange");
                     end
                 end
             end
