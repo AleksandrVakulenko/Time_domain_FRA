@@ -41,7 +41,10 @@ classdef Ranges_indicator_type < handle
 
         function reinit(obj)
             for i = 1:obj.NR
-                obj.Range_ind_arr(i).BackgroundColor = obj.Range_ind_color_gray;
+                Indicator = obj.Range_ind_arr(i);
+                if ~isempty(Indicator) && isvalid(Indicator)
+                    Indicator.BackgroundColor = obj.Range_ind_color_gray;
+                end
             end
         end
 
@@ -66,9 +69,17 @@ classdef Ranges_indicator_type < handle
 
             obj.reinit();
             for i = possible
-                obj.Range_ind_arr(i).BackgroundColor = obj.Range_ind_color_white;
+                Indicator = obj.Range_ind_arr(i);
+                if ~isempty(Indicator) && isvalid(Indicator)
+                    Indicator.BackgroundColor = obj.Range_ind_color_white;
+                end
             end
-            obj.Range_ind_arr(num).BackgroundColor = obj.Range_ind_color_green;
+ 
+            Indicator = obj.Range_ind_arr(num);
+            if ~isempty(Indicator) && isvalid(Indicator)
+                Indicator.BackgroundColor = obj.Range_ind_color_green;
+            end
+            
             drawnow
 
         end

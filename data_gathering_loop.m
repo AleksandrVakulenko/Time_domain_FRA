@@ -14,7 +14,11 @@ end
 if ~isempty(Resources)
     Stop_button = Resources.stop_button;
     Underrange_ind = Resources.underrange_ind;
-    Underrange_ind_set_f = Underrange_ind.UserData;
+    if ~isempty(Underrange_ind) && isvalid(Underrange_ind)
+        Underrange_ind_set_f = Underrange_ind.UserData;
+    else
+        Underrange_ind_set_f = [];
+    end
 else
     Stop_button = [];
     Underrange_ind_set_f = [];

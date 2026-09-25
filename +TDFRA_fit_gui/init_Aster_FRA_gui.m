@@ -1,5 +1,5 @@
 
-function [Fig] = init_FRA_gui()
+function [Fig] = init_Aster_FRA_gui()
 
 Fig_name = 'FRA GUI';
 

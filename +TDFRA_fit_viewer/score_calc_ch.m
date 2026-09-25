@@ -74,6 +74,10 @@ end
 
 Score = Score + Score_add;
 
+if Score > max_score
+    Score = max_score;
+end
+
 end
 
 
