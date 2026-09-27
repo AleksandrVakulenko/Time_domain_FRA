@@ -41,17 +41,17 @@ Channel_settings_2 = Settings.channel_settings_2;
 Underrange_force_1 = Channel_settings_1.underrange_force;
 MAX_CH1_LIMIT = Channel_settings_1.max_ch1_limit;
 Time_to_underrange_1 = Channel_settings_1.time_to_underrange;
+Time_to_overrange_1 = Channel_settings_1.time_to_overrange;
 Overrange_tolerance_1 = Channel_settings_1.overrange_tolerance;
-Overrange_FAST_tolerance_1 = 0.05; % FIXME: from settings
-Time_to_overrange_1 = 2; % [s] FIXME: move to Channel_settings_1 or delete
+Overrange_FAST_tolerance_1 = 0.05; % FIXME: move to Channel_settings_1
 Fs = Channel_settings_1.fs; % NOTE: ch2 fs same as ch1
 
 Underrange_force_2 = Channel_settings_2.underrange_force;
 MAX_CH2_LIMIT = Channel_settings_2.max_ch1_limit;
 Time_to_underrange_2 = Channel_settings_2.time_to_underrange;
+Time_to_overrange_2 = Channel_settings_2.time_to_overrange;
 Overrange_tolerance_2 = Channel_settings_2.overrange_tolerance;
-Overrange_FAST_tolerance_2 = 0.05; % FIXME: from settings
-Time_to_overrange_2 = 2; % [s] FIXME: move to Channel_settings_2 or delete
+Overrange_FAST_tolerance_2 = 0.05; % FIXME: move to Channel_settings_2
 
 Times_conf = Profile.times_conf;
 Accuracy_conf = Profile.accuracy_conf;
@@ -68,6 +68,17 @@ Min_time = Min_FOP*Period;
 if Min_time < 0.1
     % NOTE: paranoid programming
     Min_time = 0.1;
+end
+
+Time_to_overrange_max = max([Time_to_overrange_1 Time_to_overrange_2]);
+Time_to_underrange_max = max([Time_to_underrange_1 Time_to_underrange_2]);
+
+if Max_time <= Time_to_overrange_max
+    Max_time = Time_to_overrange_max*1.05;
+end
+
+if Max_time <= Time_to_underrange_max
+    Max_time = Time_to_underrange_max*1.05;
 end
 
 if Max_time < 0.25 % [s]
