@@ -1,9 +1,10 @@
-name:
-Time_domain_FRA
-
-dependencies:
-FRA_tools
-Common
-klog
-
-info:
+{
+  "name": "Time_domain_FRA",
+  "dependecies": [
+    "FRA_tools",
+    "Common",
+    "klog"
+  ],
+  "info": "Core functinons for real-time low freq FRA",
+  "Tegs": "FRA; frequency response analysis; Time domain"
+}
