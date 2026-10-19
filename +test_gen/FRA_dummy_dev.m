@@ -62,8 +62,8 @@ classdef FRA_dummy_dev < handle
             [T, V1, ~] = obj.get_CV();
         end
 
-
-        function [T, V1, V2] = get_VV(obj)
+        % [T, V1, V2, Scale, Overrange]
+        function [T, V1, V2, Scale, Overrange] = get_VV(obj)
             if ~isnan(obj.init_time)
                 Time_passed = toc(obj.init_time);
                 if ~isempty(obj.T_arr)
@@ -82,10 +82,16 @@ classdef FRA_dummy_dev < handle
                     else
                         V2 = [];
                     end
+                    Scale = 1; % FIXME: unused now
+                    Overrange.adc_1 = false; % FIXME: unused now
+                    Overrange.adc_2 = false; % FIXME: unused now
                 else
                     T = [];
                     V1 = [];
                     V2 = [];
+                    Scale = [];
+                    Overrange.adc_1 = false; % FIXME: unused now
+                    Overrange.adc_2 = false; % FIXME: unused now
                 end
 
             else
